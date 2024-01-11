@@ -1,0 +1,20 @@
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Poppins', san-serif;
+}
+.container{
+    width: 100%;
+    min-height:100vh;
+    padding: 5%;
+}
+/* Add some basic styling to the button */
+button {
+    background-color: black;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
