@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function() {
         };
         
         // Make a POST request to your API
-        fetch("http://ec2-18-191-212-44.us-east-2.compute.amazonaws.com:5001/ouroboros", {
+        fetch("http://ec2-18-220-129-40.us-east-2.compute.amazonaws.com:5001/ouroboros", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -35,7 +35,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             // Handle the API response data here
             console.log("API Response:", data);
-            document.getElementById("result").innerText = "API Result: " + JSON.stringify(data);
+            document.getElementById("result").innerText = "API Result: " + JSON.stringify(data);      
+            console.log(data[0]['gender']['Female']);
+            draw('gender',data[0]['gender']);
         })
         .catch(error => {
             console.error("API Error:", error);
@@ -43,3 +45,35 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+function draw(att,dist) {
+    const canvas = document.getElementById("display");
+    if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        if (att == 'gender'){
+            var colors = ['#E5604B','#FDBB84'];
+            var firstCat = dist['Female'] * 225;
+        }
+        var x = 0;
+        var y = 0;
+        for (let i = 0; i < 15; i++) {
+            y = i * 31;
+            x = 0;
+            for (let j = 0; j < 15; j++) {
+                x = j * 31;
+                if (i*15+j < firstCat){
+                    var fill = colors[1];
+                } 
+                else {
+                    var fill = colors[0];
+                }
+                ctx.fillStyle = fill;
+                ctx.fillRect(x, y, 30, 30);
+            }
+        }
+        ctx.fillText('WOMEN',200+firstCat/15,150);
+    }
+    else {
+        alert('Browser not supported')
+    }
+}
