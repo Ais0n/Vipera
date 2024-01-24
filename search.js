@@ -1,5 +1,4 @@
-// script.js
-
+let isGenerating = false; 
 document.addEventListener("DOMContentLoaded", function() {
     console.log("DOMContentLoaded event fired");
 
@@ -17,14 +16,21 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         console.log("User Input:", userInput);
-
+        // Setting isGenerating logic
+        if (isGenerating){
+            console.log("Generation in progress. API call not made.");
+            return;
+        }
         // Define the data structure for the API request
         var requestData = {
             promptStr: userInput
         };
         
+        
+        isGenerating = true;
+        console.log("isGenerating set to true on", userInput);
         // Make a POST request to your API
-        fetch("http://ec2-18-191-212-44.us-east-2.compute.amazonaws.com:5001/ouroboros", {
+        fetch("http://ec2-18-220-129-40.us-east-2.compute.amazonaws.com:5001/ouroboros", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -36,10 +42,17 @@ document.addEventListener("DOMContentLoaded", function() {
             // Handle the API response data here
             console.log("API Response:", data);
             document.getElementById("result").innerText = "API Result: " + JSON.stringify(data);
+            isGenerating = false;
+            console.log("isGenerating set to false on", userInput);
         })
         .catch(error => {
             console.error("API Error:", error);
             document.getElementById("result").innerText = "Error: " + error.message;
+            isGenerating = false;
+            console.log("isGenerating set to false on", userInput);
         });
+        
+
+
     });
 });
