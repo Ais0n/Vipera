@@ -44,6 +44,8 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("result").innerText = "API Result: " + JSON.stringify(data);
             isGenerating = false;
             console.log("isGenerating set to false on", userInput);
+            console.log(data[0]['gender']['Female']);
+            draw('gender',data[0]['gender']);
         })
         .catch(error => {
             console.error("API Error:", error);
@@ -56,3 +58,35 @@ document.addEventListener("DOMContentLoaded", function() {
 
     });
 });
+
+function draw(att,dist) {
+    const canvas = document.getElementById("display");
+    if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        if (att == 'gender'){
+            var colors = ['#E5604B','#FDBB84'];
+            var firstCat = dist['Female'] * 225;
+        }
+        var x = 0;
+        var y = 0;
+        for (let i = 0; i < 15; i++) {
+            y = i * 31;
+            x = 0;
+            for (let j = 0; j < 15; j++) {
+                x = j * 31;
+                if (i*15+j < firstCat){
+                    var fill = colors[1];
+                } 
+                else {
+                    var fill = colors[0];
+                }
+                ctx.fillStyle = fill;
+                ctx.fillRect(x, y, 30, 30);
+            }
+        }
+        ctx.fillText('WOMEN',200+firstCat/15,150);
+    }
+    else {
+        alert('Browser not supported')
+    }
+}

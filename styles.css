@@ -18,3 +18,8 @@ button {
     border-radius: 5px;
     cursor: pointer;
 }
+canvas{
+    border: 0px solid black;
+    position: absolute;
+    top: 400px; left: 40px;
+}
