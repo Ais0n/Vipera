@@ -9,4 +9,6 @@ Instructions:
 
 NextJS Tutorial: [Learn Next.js](https://nextjs.org/learn).
 
-testing
+---
+
+Made with love in Pttsburgh.
