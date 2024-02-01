@@ -1,0 +1,19 @@
+.image_grid {
+  display: grid;
+  width: 762px;
+  height: 763px;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns with 1/3 grid width */
+  grid-template-rows: repeat(3, 1fr); /* 3 rows with 1/3 grid height */
+  grid-gap: 0; /* no gap between images */
+  justify-content: center; /* center the grid horizontally */
+  align-items: center; /* center the grid vertically */
+  position: relative;
+  top: 928px;
+  left: 129px;
+}
+
+.image_cell {
+  width: 100%; /* image with full width of its grid cell */
+  height: 100%; /* image with full height of its grid cell */
+  object-fit: cover; /* images cover the cell without distortion */
+}
