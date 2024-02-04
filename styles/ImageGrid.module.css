@@ -1,4 +1,24 @@
-.image_grid {
+.analyzeSection {
+  width: 100%;
+  height: 1322px; /* Match the height of greyBg */
+  background: #F8F8F8; /* Same background color as greyBg */
+  position: relative; /* Assuming you want to position content inside analyzeSection absolutely */
+  top: 544px;
+}
+
+.analyzeText {
+  color: var(--black, #000);
+  font-family: Roboto;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 40px; /* 125% */
+  position: relative;
+  top: 32px;
+  left: 128px;
+}
+
+.imageGrid {
   display: grid;
   width: 762px;
   height: 763px;
@@ -8,12 +28,20 @@
   justify-content: center; /* center the grid horizontally */
   align-items: center; /* center the grid vertically */
   position: relative;
-  top: 928px;
+  top: 330px;
   left: 129px;
 }
 
-.image_cell {
+.imageCell {
   width: 100%; /* image with full width of its grid cell */
   height: 100%; /* image with full height of its grid cell */
   object-fit: cover; /* images cover the cell without distortion */
+}
+
+.greyBg {
+  width: 100%;
+  height: 1322px;
+  flex-shrink: 0;
+  background: #F8F8F8;
+  position: relative;
 }

@@ -1,4 +1,5 @@
 import styles from '../styles/ImageGrid.module.css';
+import SearchBar from '../components/SearchBar';
 
 const imageList = [
   {
@@ -40,18 +41,23 @@ const imageList = [
 ];
 
 function ImageCell({ src, alt }) {
-    return <img className={styles.image_cell} src={src} alt={alt} />;
+    return <img className={styles.imageCell} src={src} alt={alt} />;
 }
 
 export default function ImageGrid() {
     return (
-      <section>
-        <h1>Images</h1>
-        <div className={styles.image_grid}>
-          {imageList.map((image, index) => (
-            <ImageCell key={index} src={image.src} alt={image.alt} />
-          ))}
+        <div>
+            <SearchBar />
+            <section className={styles.analyzeSection}>
+                <div className={styles.greyBg}>
+                    <div className={styles.analyzeText}>Analyze</div>
+                    <div className={styles.imageGrid}>
+                        {imageList.map((image, index) => (
+                            <ImageCell key={index} src={image.src} alt={image.alt} />
+                        ))}
+                    </div>
+                </div>
+            </section>
         </div>
-      </section>
     );
-  }
+}
