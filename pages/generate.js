@@ -4,12 +4,16 @@ import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 import ImageGrid from '../components/ImageGrid';
 import ImageStyle from '../styles/ImageGrid.module.css';
+import DistributionStyle from '../styles/Distribution.module.css';
+import Distributions from '../components/Distributions';
+import Category from '../components/Category'; // Import the Category component
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
-  // const [distribution, setDistribution] = useState({ age: {}, gender: {} });
+  const [distribution, setDistribution] = useState({ age: {}, gender: {} });
+  const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
 
   const handleGenerateClick = async (userInput) => {
     if (isGenerating || userInput.trim() === "") {
@@ -26,7 +30,7 @@ const Generate = () => {
     };
 
     try {
-      const response = await fetch("http://ec2-18-220-129-40.us-east-2.compute.amazonaws.com:5001/ouroboros", {
+      const response = await fetch("http://18.224.86.65:5001/ouroboros", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -45,10 +49,11 @@ const Generate = () => {
 
       setImages(result.imgs); // Update the img data
       
-      // setDistribution({ // Update the distribution data
-      //   age: result.age,
-      //   gender: result.gender
-      // });
+      setDistribution({ // Update the distribution data
+        age: result.age,
+        gender: result.gender,
+        skinTone: result.skinTone
+      });
 
     } catch (error) {
       console.error("API Error:", error);
@@ -72,8 +77,14 @@ const Generate = () => {
         images.length > 0 && (
           <section className={ImageStyle.analyzeSection}>
             <div className={ImageStyle.greyBg}>
-              <div className={ImageStyle.analyzeText}>Analyze</div>
+              <div className={ImageStyle.analyzeText}>Analyze
+              <Category onSelectCategory={setSelectedCategory} />
+              </div>
+              {selectedCategory === 'images' ? (
               <ImageGrid images={images} />
+            ) : (
+              <Distributions distribution={distribution} category={selectedCategory}/>
+            )}
             </div>
           </section>
         )
