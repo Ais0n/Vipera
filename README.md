@@ -6,6 +6,7 @@ Instructions:
 1. Install latest NodeJS (any v18+)
 2. run `npm install` to install the dependencies.
 3. In terminal, navigate to project directory and type:  `npm run dev`  -> then view site in browser at: http://localhost:3000
+4. For different pages, view site in browser at: http://localhost:3000/pagename (pagename is in page folder)
 
 NextJS Tutorial: [Learn Next.js](https://nextjs.org/learn).
 

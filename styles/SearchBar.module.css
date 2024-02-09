@@ -66,6 +66,10 @@
   line-height: 26px;
 }
 
+.searchButton:hover {
+  background-color: #333333; /* Darker background on hover */
+}
+
 /* Stable Diffusion button */
 .sdButtonContainer {
   position: absolute;
@@ -94,4 +98,8 @@
   font-style: normal;
   font-weight: 600;
   line-height: 22px;
+}
+
+.sdButton:hover {
+  background-color: #333333; /* Darker background on hover */
 }

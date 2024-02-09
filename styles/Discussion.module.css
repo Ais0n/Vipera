@@ -1,0 +1,57 @@
+
+/* Discussion.module.css */
+
+.discussionContainer {
+    width: 340px;
+    height: 261px;
+    padding: 25px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start; /* Align items to the left */
+    gap: 23px;
+    background: #E2E2E2;
+    position: relative;
+    margin-top: 32px; /* Space from the top of the parent */
+    margin-left: 200px; /* To align the container to the right side within a flex or grid parent */
+    margin-right: auto; /* To align the container to the right side within a flex or grid parent */
+}
+
+.discussionTitle {
+    font-family: 'Roboto', sans-serif;
+    color: #000000;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    margin: 0; /* Reset margins for consistent spacing */
+}
+
+.discussionSubtitle {
+    font-family: 'Roboto', sans-serif;
+    color: #7B7B7B;
+    width: 296px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    margin: 0; /* Reset margins for consistent spacing */
+}
+
+.discussionButton {
+    width: 100%; /* Button width matches the container width */
+    height: 65px;
+    padding: 10px;
+    margin-top: 10px; /* Space above the button */
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center; /* Center the text inside the button */
+    color: #FFFFFF;
+    background-color: #000000;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.discussionButton:hover {
+    background-color: #333333;
+}

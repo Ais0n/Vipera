@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 import ImageGrid from '../components/ImageGrid';
 import ImageStyle from '../styles/ImageGrid.module.css';
-import DistributionStyle from '../styles/Distribution.module.css';
 import Distributions from '../components/Distributions';
-import Category from '../components/Category'; // Import the Category component
+import Category from '../components/CategoryButton';
+import Discussion from '../components/Discussion';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
-  const [distribution, setDistribution] = useState({ age: {}, gender: {} });
+  const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
 
   const handleGenerateClick = async (userInput) => {
@@ -76,15 +76,17 @@ const Generate = () => {
       ) : (
         images.length > 0 && (
           <section className={ImageStyle.analyzeSection}>
-            <div className={ImageStyle.greyBg}>
-              <div className={ImageStyle.analyzeText}>Analyze
-              <Category onSelectCategory={setSelectedCategory} />
+            <div className={ImageStyle.greyBg} style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+                <div className={ImageStyle.analyzeText}>Analyze</div>
+                <Category onSelectCategory={setSelectedCategory} selectedCategory={selectedCategory} />
+                {selectedCategory === 'images' ? (
+                  <ImageGrid images={images} />
+                ) : (
+                  <Distributions distribution={distribution} category={selectedCategory}/>
+                )}
               </div>
-              {selectedCategory === 'images' ? (
-              <ImageGrid images={images} />
-            ) : (
-              <Distributions distribution={distribution} category={selectedCategory}/>
-            )}
+              <Discussion />
             </div>
           </section>
         )

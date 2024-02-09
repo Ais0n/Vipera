@@ -27,7 +27,33 @@
   position: relative;
   top: 32px;
   left: 128px;
-} 
+}
+
+.imageBox {
+  display: flex; /* Use flexbox to layout children */
+  align-items: center; /* Center items vertically */
+  width: 768px;
+  height: 64px;
+  background: #EDEDED;
+  position: relative;
+  top: 182px;
+  left: 128px;
+  margin-top: 48px;
+  padding-left: 10px; /* padding with icon */
+}
+
+.imageBoxText {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 700; /* Bold text */
+  line-height: 22px;
+  color: #676767;
+  margin-left: 16px; /* Spacing between icon and text */
+}
+
+.lightBulb {
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
 
 .imageGrid {
   display: grid;
@@ -39,7 +65,8 @@
   justify-content: center; /* center the grid horizontally */
   align-items: center; /* center the grid vertically */
   position: relative;
-  top: 330px;
+  margin-top: 235px;
+  /* top: 330px; */
   left: 129px;
 }
 
