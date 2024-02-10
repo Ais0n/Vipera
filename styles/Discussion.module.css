@@ -3,18 +3,13 @@
 
 .discussionContainer {
     width: 340px;
-    height: 261px;
-    padding: 25px 25px;
+    padding: 25px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: flex-start; /* Align items to the left */
-    gap: 23px;
     background: #E2E2E2;
-    position: relative;
-    margin-top: 32px; /* Space from the top of the parent */
-    margin-left: 200px; /* To align the container to the right side within a flex or grid parent */
-    margin-right: auto; /* To align the container to the right side within a flex or grid parent */
+    margin-left: 70px;
+    gap: 15px; /* gap between text sections */
 }
 
 .discussionTitle {

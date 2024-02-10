@@ -1,12 +1,7 @@
 /* Distribution.module.css */
 
 .canvas {
-  display: flex;
   width: 762px;
   height: 765px;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  position: relative; /* position same as imageGrid */
-  top: 330px;
-  left: 129px;
+  margin-top: 200px; /* space from category button */
 }

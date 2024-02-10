@@ -1,45 +1,14 @@
 /* imageGrid.module.css */
 
-.loadingContainer {
-  display: flex;
-  justify-content: center; /* Center orizontally */
-  align-items: center; /* Center vertically */
-  height: 100vh;
-  position: relative;
-  top: 400px;
-}
-
-.analyzeSection {
-  width: 100%;
-  height: 1322px; /* Match the height of greyBg */
-  background: #F8F8F8; /* Same background color as greyBg */
-  position: relative;
-  top: 544px;
-}
-
-.analyzeText {
-  color: var(--black, #000);
-  font-family: Roboto;
-  font-size: 32px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 40px; /* 125% */
-  position: relative;
-  top: 32px;
-  left: 128px;
-}
-
 .imageBox {
-  display: flex; /* Use flexbox to layout children */
-  align-items: center; /* Center items vertically */
+  display: flex;
+  align-items: center;
   width: 768px;
   height: 64px;
   background: #EDEDED;
-  position: relative;
-  top: 182px;
-  left: 128px;
-  margin-top: 48px;
-  padding-left: 10px; /* padding with icon */
+  /* Adjusted positioning with margins */
+  margin-top: 48px; /* space from category button */
+  padding-left: 10px;
 }
 
 .imageBoxText {
@@ -59,27 +28,14 @@
   display: grid;
   width: 762px;
   height: 763px;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns with 1/3 grid width */
-  grid-template-rows: repeat(3, 1fr); /* 3 rows with 1/3 grid height */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   grid-gap: 0; /* no gap between images */
-  justify-content: center; /* center the grid horizontally */
-  align-items: center; /* center the grid vertically */
-  position: relative;
-  margin-top: 235px;
-  /* top: 330px; */
-  left: 129px;
+  margin-top: 48px; /* space from imageBox */
 }
 
 .imageCell {
   width: 100%; /* image with full width of its grid cell */
   height: 100%; /* image with full height of its grid cell */
   object-fit: cover; /* images cover the cell without distortion */
-}
-
-.greyBg {
-  width: 100%;
-  height: 1322px;
-  flex-shrink: 0;
-  background: #F8F8F8;
-  position: relative;
 }

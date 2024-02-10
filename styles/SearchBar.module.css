@@ -2,34 +2,35 @@
 
 .searchContainer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 128px; /* Adjusted to apply padding equally on both sides */
+  flex-direction: column; /* Stack children vertically */
+  align-items: flex-start; /* Align children to the start of the flex container */
+  position: relative;
+  margin-top: 317px; /* Space from the top of the page or previous content */
+  margin-left: 100px;
 }
 
 .generateLabel {
   color: var(--black, #000);
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 32px;
-  font-style: normal;
   font-weight: 600;
   line-height: 40px;
-  margin-bottom: 16px; /* Adjusted to ensure space between label and search bar */
-  position: absolute;
-  top: 317px;
-  left: 128px;
+}
+
+.inputAndButtonsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .searchBar {
-  width: 973px;
+  flex-grow: 0.895; /* Allow search bar to grow and fill 0.895 of container */
   height: 64px;
-  flex-shrink: 0;
   border: 1px solid #A4ACA8;
   background: #FFF;
-  padding-left: 20px; /* for starting position of the placeholder text */
-  position: absolute;
-  top: 415.67px;
-  left: 128px;
+  margin-top: 58.67px;
+  padding-left: 30px; /* For starting position of the placeholder text */
 }
 
 .searchBar::placeholder {
@@ -41,16 +42,18 @@
   line-height: 20px;
 }
 
-.searchButtonContainer {
-  position: absolute;
-  top: 415.67px;
-  left: 1133px;
+.buttonsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .searchButton {
   width: 179px;
   height: 65px;
-  padding: 10px;
+  margin-left: 13px; /* Space between search bar and button */
+  margin-top: 16px;
+  display: flex;
   justify-content: center;
   align-items: center;
   background: #000;
@@ -70,16 +73,8 @@
   background-color: #333333; /* Darker background on hover */
 }
 
-/* Stable Diffusion button */
-.sdButtonContainer {
-  position: absolute;
-  top: 357px;
-  left: 1176.87px;
-}
-
 .sdButton {
   display: flex;
-  padding: 10px;
   justify-content: center;
   align-items: center;
   gap: 10px;
@@ -94,7 +89,7 @@
   transform: rotate(0.333deg);
   color: var(--Gray-2, #797B7B);
   font-family: Roboto;
-  font-size: 15px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 600;
   line-height: 22px;
