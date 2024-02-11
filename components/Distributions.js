@@ -1,4 +1,4 @@
-// Distributions.js
+// components/Distributions.js
 
 import React, { useEffect, useRef } from 'react';
 import styles from '../styles/Distribution.module.css';
@@ -14,17 +14,6 @@ const Distributions = ({distribution, category}) => {
       if (canvas.getContext) {
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const genderDist = distribution["gender"];
-        const ageDist = distribution["age"];
-        const skinDist = distribution["skinTone"];
-
-        // const dist = distribution[category];
-        // const colors = {
-        //   gender: [['Female','#FDBB84'],['Male','#E5604B']],
-        //   age: [['70+','#08519C'],['60-69','#08519C'], /* Add other age ranges */ ],
-        //   skinTone: [['VI','#27190F'],['V','#58402E'], /* Add other skin tones */ ]
-        // };
 
         const display = (att, dist) => {
             if (att == 'gender'){
@@ -42,7 +31,7 @@ const Distributions = ({distribution, category}) => {
                 var cat = colors[i][0];
                 var amount = dist[colors[i][0]] * 225;
                 if (i != 0){
-                   amount += catamts[i-1];
+                    amount += catamts[i-1];
                 }
                 catamts.push(amount);
                 displayratios.push(cat + ': ' + (Math.round(dist[cat] * 100) / 100).toString())
@@ -71,10 +60,7 @@ const Distributions = ({distribution, category}) => {
                 }
             }
         } 
-        display(category,distribution[category]);
-        // display("age",ageDist);
-        // display("gender",genderDist);
-        // display("skinTone",skinDist);
+        display(category, distribution[category]);
       } else {
         alert('Browser not supported');
       }
@@ -84,9 +70,7 @@ const Distributions = ({distribution, category}) => {
   }, [distribution, category]);
 
   return (
-    <div className={styles.canvasContainer}> {/* Apply container styles */}
-            <canvas ref={canvasRef} className={styles.canvas} width={610} height={610}></canvas> {/* Apply canvas styles */}
-        </div>
+    <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
   );
 };
 
