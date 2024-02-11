@@ -1,0 +1,9 @@
+.CenterNav {
+    min-height: 100vh;
+    padding: 0 0.5rem;
+    margin-left: 6vw;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: -.5vw;
+}

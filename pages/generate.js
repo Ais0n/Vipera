@@ -7,6 +7,8 @@ import ImageStyle from '../styles/ImageGrid.module.css';
 import DistributionStyle from '../styles/Distribution.module.css';
 import Distributions from '../components/Distributions';
 import Category from '../components/Category'; // Import the Category component
+import NavBar from '../components/NavBar';
+import NavStyles from '../styles/NavStyles.module.css'
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,6 +69,9 @@ const Generate = () => {
 
   return (
     <div>
+      <div className={NavStyles.CenterNav}>
+        <NavBar />
+      </div>
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
       {isGenerating ? (
