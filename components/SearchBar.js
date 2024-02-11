@@ -13,30 +13,30 @@ function SearchBar({ onGenerateClick, isGenerating }) {
 
   return (
     <div className={styles.searchContainer}>
-        <form onSubmit={handleSubmit}>
-            <label className={styles.generateLabel}>Generate</label>
-            <input
-                type="text"
-                className={styles.searchBar}
-                placeholder="Write prompt here"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                disabled={isGenerating}
-            />
-            <div className={styles.searchButtonContainer}>
-                <button type="submit" className={styles.searchButton} disabled={isGenerating}>
-                    <span className={styles.searchButtonText}>Generate</span>
-                </button>
-            </div>
-        </form>
-        <div className={styles.sdButtonContainer}>
+      <label className={styles.generateLabel}>Generate</label>
+      <div className={styles.inputAndButtonsContainer}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', width: '100%' }}>
+          <input
+            type="text"
+            className={styles.searchBar}
+            placeholder="Write prompt here"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={isGenerating}
+          />
+          <div className={styles.buttonsContainer}>
+            {/* sdButton can also be sued to search, need fix it */}
             <button className={styles.sdButton}>
-            <span className={styles.sdButtonText}>Stable Diffusion</span>
+              <span className={styles.sdButtonText}>Stable Diffusion</span>
             </button>
-        </div>
+            <button type="submit" className={styles.searchButton} disabled={isGenerating}>
+              <span className={styles.searchButtonText}>Generate</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
 
 export default SearchBar;
-

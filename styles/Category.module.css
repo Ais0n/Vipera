@@ -1,0 +1,31 @@
+/* Category.module.css */
+
+.buttonContainer {
+    display: flex;
+    margin-top: 100px; /* Space from the top of the parent container */
+}
+
+.buttonContainer button {
+    width: 192px;
+    height: 48px;
+    padding: 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid #A4ACA8; /* Added border style */
+    background-color: #F8F8F8; /* Normal state background */
+    color: black; /* Normal state text color */
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Added color transition */
+}
+
+.buttonContainer button:hover {
+    background-color: #f0f0f0;
+}
+
+.buttonContainer button.selected {
+    background-color: #FB9600;
+    color: white;
+    border-color: #FB9600;
+}

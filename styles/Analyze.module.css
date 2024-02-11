@@ -1,0 +1,36 @@
+/* Analyze.module.css */
+
+.loadingContainer {
+    display: flex;
+    justify-content: center; /* Center orizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh;
+    margin-top: 100px;
+}
+
+.analyzeSection {
+    display: flex;
+    flex-direction: row; /* Organize children in a row */
+    justify-content: center; /* center children vertically (no need for padding-left) */
+    align-items: center;
+    width: 100%; /* to cover discussion board when page shrink */
+    background: #F8F8F8;
+    margin-top: 64.33px;
+    padding-top: 32px; /* padding for top and Analyze text */
+}
+
+.greyBg {
+    display: flex;
+    background: #F8F8F8;
+    justify-content: space-between;
+}
+
+.analyzeText {
+    color: var(--black, #000);
+    font-family: 'Roboto', sans-serif;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 40px; /* 125% */
+    margin: 0; /* Reset any default margins */
+}

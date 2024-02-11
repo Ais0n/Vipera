@@ -1,19 +1,7 @@
 /* Distribution.module.css */
 
-.canvasContainer {
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  height: 100vh;
-  position: relative;
-  top: 40px; /* Adjust as needed */
-  left: 0px
-}
 .canvas {
-  width: 1000; /* Adjust width as needed */
-  height: 1000; /* Adjust height as needed */
-  border: 0px solid black; /* Border styles */
-  position: relative;
-  top: 0px; /* Adjust as needed */
-  left: 0px; /* Adjust as needed */
+  width: 762px;
+  height: 765px;
+  margin-top: 200px; /* space from category button */
 }

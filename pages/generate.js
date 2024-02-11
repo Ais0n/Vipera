@@ -2,17 +2,15 @@
 
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
-import ImageGrid from '../components/ImageGrid';
-import ImageStyle from '../styles/ImageGrid.module.css';
-import DistributionStyle from '../styles/Distribution.module.css';
-import Distributions from '../components/Distributions';
-import Category from '../components/Category'; // Import the Category component
+import Analyze from '../components/Analyze';
+
+import AnalyzeStyle from '../styles/Analyze.module.css';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
-  const [distribution, setDistribution] = useState({ age: {}, gender: {} });
+  const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
 
   const handleGenerateClick = async (userInput) => {
@@ -63,30 +61,24 @@ const Generate = () => {
     }
   };
 
-  const loadingGifPath = '/loading_image1.gif';
-
   return (
     <div>
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
       {isGenerating ? (
-        <div className={ImageStyle.loadingContainer}>
-          <img src={loadingGifPath} alt="LoadingGIF" />
+        <div className={AnalyzeStyle.loadingContainer}>
+          <img src={'/loading_image1.gif'} alt="LoadingGIF" />
         </div>
       ) : (
         images.length > 0 && (
-          <section className={ImageStyle.analyzeSection}>
-            <div className={ImageStyle.greyBg}>
-              <div className={ImageStyle.analyzeText}>Analyze
-              <Category onSelectCategory={setSelectedCategory} />
-              </div>
-              {selectedCategory === 'images' ? (
-              <ImageGrid images={images} />
-            ) : (
-              <Distributions distribution={distribution} category={selectedCategory}/>
-            )}
-            </div>
-          </section>
+          <>
+            <Analyze
+              images={images}
+              distribution={distribution}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+          </>
         )
       )}
     </div>
