@@ -1,0 +1,39 @@
+.navbar {
+    color: #FFFFFF;
+    display: flex;
+    padding: 10px;
+}
+
+.leftTabs {
+    display: flex;
+    align-items: center;
+    margin-right: 10vw;
+}
+
+.rightTabs {
+    display: flex;
+    align-items: center;
+    margin-left: 35vw;
+}
+
+.navItem {
+    color: #7B7B7B;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    margin-top: 2vw;
+    text-decoration: none;
+}
+
+.selectedNavItem {
+    color: black;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    margin-top: 2vw;
+    text-decoration: none;
+}

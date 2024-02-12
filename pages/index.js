@@ -1,5 +1,7 @@
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+import NavBar from '../components/NavBar';
+
 // test
 export default function Home() {
   return (
@@ -8,7 +10,7 @@ export default function Home() {
         <title>Ouroboros</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      <NavBar />
       <main>
         <h1 className={styles.title}>Ouroboros</h1>
 
@@ -17,7 +19,7 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
-          <a href="" className={styles.card}>
+          <a href="generate" className={styles.card}>
             <h3>Generate &rarr;</h3>
             <p>example text.</p>
           </a>
