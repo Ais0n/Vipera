@@ -1,3 +1,5 @@
+// components/Analyze.js
+
 import React from 'react';
 import Category from './CategoryButton';
 import ImageGrid from './ImageGrid';

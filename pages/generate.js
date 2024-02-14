@@ -3,15 +3,9 @@
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
-import ImageGrid from '../components/ImageGrid';
-import ImageStyle from '../styles/ImageGrid.module.css';
-import DistributionStyle from '../styles/Distribution.module.css';
-import Distributions from '../components/Distributions';
-import Category from '../components/Category'; // Import the Category component
 import NavBar from '../components/NavBar';
 import NavStyles from '../styles/NavStyles.module.css'
 import Analyze from '../components/Analyze';
-
 import AnalyzeStyle from '../styles/Analyze.module.css';
 
 const Generate = () => {

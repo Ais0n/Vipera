@@ -1,12 +1,10 @@
-// components/SearchBar.js
+// components/NavBar.js
 
-import React from 'react';
 import styles from '../styles/NavBar.module.css';
-import searchLogo from '../public/ico-search.svg';
 
 const NavBar = () => {
     return (
-        <nav className={styles.navbar}>
+        <nav className={styles.navBar}>
             <div className={styles.leftTabs}>
                 <a href="" className={styles.selectedNavItem}>WeAudit</a>
                 <a href="" className={styles.navItem}>Ouroboros</a>
@@ -17,7 +15,7 @@ const NavBar = () => {
                 <a href="" className={styles.selectedNavItem}>Ouroboros</a>
                 <a href="" className={styles.navItem}>Discussions</a>
                 <a href="" className={styles.navItem}>
-                    <img src={searchLogo}/>
+                    <img src={'/ico-search.svg'} alt="search-icon" />
                 </a>
             </div>
         </nav>

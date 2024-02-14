@@ -1,4 +1,6 @@
-.navbar {
+/* NavBar.module.css */
+
+.navBar {
     color: #FFFFFF;
     display: flex;
     padding: 10px;
