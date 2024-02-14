@@ -1,6 +1,6 @@
 // components/NavBar.js
 
-import styles from '../styles/NavBar.module.css';
+import styles from '../styles/navBar.module.css';
 
 const NavBar = () => {
     return (
