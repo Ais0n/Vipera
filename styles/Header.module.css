@@ -1,9 +1,15 @@
-/* NavBar.module.css */
+/* Header.module.css */
+
+.centerNav {
+    align-items: center;
+    justify-content: center;
+    margin-top: -.5vw;
+}
 
 .navBar {
     color: #FFFFFF;
     display: flex;
-    padding: 10px;
+    padding-left: 100px;
 }
 
 .leftTabs {
