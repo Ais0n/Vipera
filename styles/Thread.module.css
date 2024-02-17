@@ -100,58 +100,6 @@
     box-sizing: border-box; /* Include padding and border in the element's width and height */
 }
 
-
-/* Style the select control to match the input */
-threadContainer .select__control {
-    padding: 13px 11px 14px 23px; /* Match the padding with the input */
-    border: 1px solid #ACACAC;
-    border-radius: 4px;
-    font-family: 'Roboto', sans-serif;
-    font-size: 14px;
-    line-height: 20px;
-    box-shadow: none; /* Remove any box-shadow if present */
-}
-
-/* Style the value container within the select */
-threadContainer .select__value-container {
-    padding: 0; /* Remove padding if any */
-}
-
-/* Style the single value within the select */
-threadContainer .select__single-value {
-    color: #000; /* Match the text color with the input */
-}
-
-/* Style the placeholder within the select */
-threadContainer .select__placeholder {
-    color: #000; /* Match the placeholder color with the input */
-}
-
-/* Hide the indicator separator */
-threadContainer .select__indicator-separator {
-    display: none; /* Hide separator if you want to */
-}
-
-/* Style the dropdown arrow to match the input's arrow */
-threadContainer .select__indicator svg {
-    display: block;
-    width: 16px;
-    height: 16px;
-    background-image: url('/chevron-down.svg'); /* Use the same image */
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-/* Style the dropdown menu to fit the full width */
-.select__menu {
-    width: calc(100% - 48px); /* Account for padding */
-}
-
-/* Optional: Style the option in the dropdown menu */
-.select__option {
-    padding: 10px 20px; /* Match the padding to suit your design */
-}
-
 .select:focus {
     outline: none;
     border-color: #5b9dd9;
