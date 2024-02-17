@@ -49,6 +49,13 @@
     color: #7B7B7B;
 }
 
+/* include all forms and circles */
+.formContainer {
+    display: flex;
+    flex-direction: row; /* Stack children horizontally */
+    margin-top: 41px; /* space from thread subTitle */
+}
+
 .formGroup {
     margin-left: 14px; /* space from status circles */
     margin-right: 48px;
@@ -235,7 +242,6 @@
     display: flex;
     align-items: center; /* Center items vertically */
     justify-content: center; /* Center items horizontally */
-    
     padding-left: 74px; /* Original padding-left plus the width of the icon */
     background-image: url('/discussionforum.svg');
     background-repeat: no-repeat;
@@ -255,13 +261,7 @@
     right: 20px;
 }
 
-/* include all forms and circles */
-.formContainer {
-    display: flex;
-    flex-direction: row; /* Stack children horizontally */
-    margin-top: 41px; /* space from thread subTitle */
-}
-
+/* status circles */
 .statusCircleContainer {
     display: flex;
     flex-direction: column; /* Stack children vertically */
@@ -269,16 +269,25 @@
     margin-left: 48px;
 }
 
-.statusCircle {
+.statusCircle,
+.statusCircleActive {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background-color: #000000; /* Black for active */
     margin-bottom: 96px;
-    position: relative; /* for positioning pseudo-elements */
+    position: relative;
 }
 
-.statusCircle::after {
+.statusCircle { /* for inactive state */
+    background-color: #D9D9D9; /* Grey color for inactive */
+}
+
+.statusCircleActive { /*for active state */
+    background-color: #000000; /* Black color for active */
+}
+
+.statusCircle::after,
+.statusCircleActive::after {
     content: '';
     position: absolute;
     left: 50%;
@@ -290,20 +299,7 @@
     z-index: -1;
 }
 
-.statusCircle:last-child::after {
+.statusCircle:last-child::after,
+.statusCircleActive:last-child::after {
     display: none; /* remove line after the last circle */
-}
-
-#statusOne {
-    background-color: #000000; /* Black for active */
-}
-
-#statusTwo {
-    background-color: #D9D9D9; /* Light grey for inactive */
-    border: 1px solid #7B7B7B; /* Grey border */
-}
-
-#statusThree {
-    background-color: #D9D9D9; /* Light grey for inactive */
-    border: 1px solid #000000; /* Black border */
 }

@@ -18,11 +18,26 @@ const Thread = ({ onCloseThread }) => {
     { value: 'age', label: 'Age' },
   ];
 
-  const isFormFilled = reportDetails.prompt && reportDetails.visualization.length > 0 && reportDetails.harms.length > 0;
+  const harmsOptions = [
+    "Stereotyping",
+    "Demeaning social groups",
+    "Erasing social groups",
+    "Alienating social groups",
+    "Cultural harm",
+    "Other"
+  ];
   
-  // Handle changes for checkboxes and other inputs
+  const descriptions = [
+    "Oversimplified and undesirable representations",
+    "Differential representation or oppressing social groups",
+    "Absence or unequal visibility of social groups",
+    "Failure to acknowledge social groups",
+    "Predominantly harming a particular culture",
+    ""
+  ];
+  
   const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target;
+    const { name, value, type } = event.target;
   
     if (type === 'checkbox') {
       const newHarms = reportDetails.harms.includes(value)
@@ -41,6 +56,7 @@ const Thread = ({ onCloseThread }) => {
     }));
   };
 
+  const isFormFilled = reportDetails.prompt && reportDetails.visualization.length > 0 && reportDetails.harms.length > 0;
   const [isSubmitted, setIsSubmitted] = useState(false); // track submission
 
   const handleSubmit = (event) => {
@@ -57,23 +73,19 @@ const Thread = ({ onCloseThread }) => {
     console.log(reportDetails);
   };
 
-  const harmsOptions = [
-    "Stereotyping",
-    "Demeaning social groups",
-    "Erasing social groups",
-    "Alienating social groups",
-    "Cultural harm",
-    "Other"
-  ];
-  
-  const descriptions = [
-    "Oversimplified and undesirable representations",
-    "Differential representation or oppressing social groups",
-    "Absence or unequal visibility of social groups",
-    "Failure to acknowledge social groups",
-    "Predominantly harming a particular culture",
-    ""
-  ];
+  // Function to determine the circle style
+  const getCircleStyle = (section) => {
+    switch (section) {
+      case 'prompt':
+        return reportDetails.prompt ? styles.statusCircleActive : styles.statusCircle;
+      case 'visualization':
+        return reportDetails.visualization.length > 0 ? styles.statusCircleActive : styles.statusCircle;
+      case 'harms':
+        return reportDetails.harms.length > 0 ? styles.statusCircleActive : styles.statusCircle;
+      default:
+        return styles.statusCircle;
+    }
+  };
 
   return (
     <>
@@ -100,9 +112,9 @@ const Thread = ({ onCloseThread }) => {
         <div className={styles.formContainer}>
           {/* Status Circles */}
           <div className={styles.statusCircleContainer}>
-            <div className={styles.statusCircle} id="statusOne"></div>
-            <div className={styles.statusCircle} id="statusTwo"></div>
-            <div className={styles.statusCircle} id="statusThree"></div>
+            <div className={getCircleStyle('prompt')}></div>
+            <div className={getCircleStyle('visualization')}></div>
+            <div className={getCircleStyle('harms')}></div>
           </div>
 
           {/* Prompt */}
