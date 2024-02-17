@@ -5,7 +5,7 @@ import styles from '../styles/Discussion.module.css';
 
 const Discussion = () => {
   const handleButtonClick = () => {
-    console.log('Button clicked to start a discussion.');
+    debug.log('Button clicked to start a discussion.');
   };
 
   return (

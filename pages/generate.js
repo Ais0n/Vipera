@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
-import NavBar from '../components/NavBar';
-import NavStyles from '../styles/NavStyles.module.css'
+import Header from '../components/Header';
 import Analyze from '../components/Analyze';
 import AnalyzeStyle from '../styles/Analyze.module.css';
 
@@ -65,9 +64,7 @@ const Generate = () => {
 
   return (
     <div>
-      <div className={NavStyles.CenterNav}>
-        <NavBar />
-      </div>
+      <Header />
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
       {isGenerating ? (
