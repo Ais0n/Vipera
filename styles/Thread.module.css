@@ -1,0 +1,245 @@
+/* Thread.module.css */
+
+.threadContainer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 40%; /* Set the width for the thread */
+    height: 100%; /* Full height */
+    background: #FFFFFF;
+    z-index: 10;
+    overflow-y: auto; /* Allow scrolling inside the thread */
+    padding: 20px;
+    box-sizing: border-box; /* Include padding in the width and height */
+}
+
+.overlay { /* grays out the rest of parts */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9; /* Below threadContainer but above other content */
+}
+
+.threadTitle {
+    margin-top: 45px;
+    margin-left: 48px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 40px;
+    text-align: left;
+    color: #000000;
+}
+
+.threadDescription {
+    margin-top: 27px; /* space from thread title */
+    margin-left: 48px;
+    margin-right: 50px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #7B7B7B;
+    margin-bottom: 41px; /* space from first label */
+}
+
+.label {
+    margin-left: 78px;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #000000;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.input,
+.select {
+    width: calc(100% - 128px); /* 100% of the parent's width minus the total horizontal padding */
+    padding: 13px 11px 14px 23px; /* top, right, bottom, left padding with input text */
+    border: 1px solid #ACACAC;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    margin-left: 80px;
+    margin-bottom: 32px; /* Adjust the space between the form elements */
+    box-sizing: border-box; /* Include padding and border in the element's width and height */
+}
+
+.select {
+    -webkit-appearance: none;  /* Chrome, Safari */
+    -moz-appearance: none;     /* Firefox */
+    appearance: none;          /* Standard syntax */
+    background-image: url('/chevron-down.svg');
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+    background-size: 16px;
+    border: 1px solid #ACACAC;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    box-sizing: border-box; /* Include padding and border in the element's width and height */
+}
+
+.select:focus {
+    outline: none;
+    border-color: #5b9dd9;
+    box-shadow: 0 0 0 1px #5b9dd9;
+}
+
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    margin-left: 82px;
+}
+
+.checkboxContainer input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin-right: 19px; /* Space between the checkbox and the label */
+    margin-top: -32px; /* Move up the checkbox */
+}
+
+.checkboxTextContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkboxLabel {
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #000000;
+    cursor: pointer;
+    margin-bottom: 0px;
+}
+
+.checkboxDescriptionText {
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #A4ACA8;
+    margin-top: 2px;
+}
+
+/* cancel and submit buttons */
+.buttonsContainer {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 10px; /* Space between buttons */
+    margin-top: 50px; /* Space above the button group */
+}
+
+.buttonCancel {
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    letter-spacing: 0em;
+    text-align: left;
+    border: none;
+    color: #000000;
+    background-color: #FFFFFF;
+    margin-right: 31px; /* Space between buttons */
+}
+
+.buttonSubmit {
+    color: #FFFFFF;
+    background-color: #CCCCCC; /* Default grey color when not active */
+    border: none;
+    padding: 10px 20px;
+    gap: 10px;
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    letter-spacing: 0em;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 48px;
+}
+  
+.buttonSubmit.buttonActive {
+    background-color: #000000; /* Black color when form is all filled */
+}
+
+/* confirmation message */
+.confirmationContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center children vertically */
+    align-items: center; /* Center children horizontally */
+    position: fixed; /* position relative to the viewport */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    min-height: 35%; /* ensure the container can grow if content is larger */
+    background: #FFF;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 11; /* Ensure it's above the rest of the thread content */
+    padding: 20px; /* Add padding to avoid content touching the edges */
+}
+
+.confirmationTitle {
+    font-family: 'Roboto';
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    margin-bottom: 18px; /* Spacing between the title and body text */
+}
+
+.confirmationBody {
+    font-family: 'Roboto';
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #7B7B7B;
+    text-align: center;
+    padding: 0 50px; /* Horizontal padding for text body */
+}
+
+.goToDiscussionsButton {
+    font-family: 'Roboto';
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    padding: 20px 49px;
+    margin-top: 34px; /* Spacing between the body text and the button */
+    cursor: pointer;
+    display: flex;
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    
+    padding-left: 74px; /* Original padding-left plus the width of the icon */
+    background-image: url('/discussionforum.svg');
+    background-repeat: no-repeat;
+    background-position: 24px center; /* Position the icon 20px from the left */
+    background-size: 28px; /* The size of the icon */
+}
+
+.closeButton {
+    font-family: 'Roboto';
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    color: #000;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}

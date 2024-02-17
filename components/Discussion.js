@@ -3,16 +3,12 @@
 import React from 'react';
 import styles from '../styles/Discussion.module.css';
 
-const Discussion = () => {
-  const handleButtonClick = () => {
-    debug.log('Button clicked to start a discussion.');
-  };
-
+const Discussion = ({ onStartDiscussion }) => {
   return (
     <div className={styles.discussionContainer}>
       <h3 className={styles.discussionTitle}>Do you find the generated image skewed in any way?</h3>
       <p className={styles.discussionSubtitle}>Images generated may contain algorithmic bias. Discussions help bring awareness.</p>
-      <button className={styles.discussionButton} onClick={handleButtonClick}>
+      <button className={styles.discussionButton} onClick={onStartDiscussion}>
         Start a discussion
       </button>
     </div>
