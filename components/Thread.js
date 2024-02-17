@@ -8,8 +8,7 @@ const Thread = ({ onCloseThread }) => {
 
   const [reportDetails, setReportDetails] = useState({
     prompt: '',
-    // visualization: [],
-    visualization: '',
+    visualization: [],
     harms: []
   });
 
@@ -19,14 +18,7 @@ const Thread = ({ onCloseThread }) => {
     { value: 'age', label: 'Age' },
   ];
 
-  const handleSelectChange = selectedOption => {
-    setReportDetails(prev => ({
-      ...prev,
-      visualization: selectedOption ? selectedOption.value : '' // Store the single value
-    }));
-  };
-
-  const isFormFilled = reportDetails.prompt && reportDetails.visualization && reportDetails.harms.length > 0;
+  const isFormFilled = reportDetails.prompt && reportDetails.visualization.length > 0 && reportDetails.harms.length > 0;
   
   // Handle changes for checkboxes and other inputs
   const handleInputChange = (event) => {
@@ -40,6 +32,13 @@ const Thread = ({ onCloseThread }) => {
     } else {
       setReportDetails(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleSelectChange = selectedOptions => {
+    setReportDetails(prev => ({
+      ...prev,
+      visualization: selectedOptions.map(option => option.value) // Store an array of values
+    }));
   };
 
   const [isSubmitted, setIsSubmitted] = useState(false); // track submission
@@ -80,9 +79,10 @@ const Thread = ({ onCloseThread }) => {
     <>
       <div className={styles.overlay} onClick={onCloseThread} />
       <div className={styles.threadContainer}>
+
         {isSubmitted && (
           <>
-            <div className={styles.overlay}></div>
+            <div className={styles.overlay} onClick={() => setIsSubmitted(false)} />
             <div className={styles.confirmationContainer}>
               <span className={styles.closeButton} onClick={() => setIsSubmitted(false)}>x</span>
               <h2 className={styles.confirmationTitle}>Posted!</h2>
@@ -96,64 +96,80 @@ const Thread = ({ onCloseThread }) => {
         <p className={styles.threadDescription}>
           Threads created are part of WeAudit discussion forum and are used to bring a change in text-to-image algorithms.
         </p>
-
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="prompt">What prompt to report?</label>
-            <input
-              className={styles.input}
-              type="text"
-              id="prompt"
-              name="prompt"
-              value={reportDetails.prompt}
-              onChange={handleInputChange}
-            />
+        
+        <div className={styles.formContainer}>
+          {/* Status Circles */}
+          <div className={styles.statusCircleContainer}>
+            <div className={styles.statusCircle} id="statusOne"></div>
+            <div className={styles.statusCircle} id="statusTwo"></div>
+            <div className={styles.statusCircle} id="statusThree"></div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="visualization">What are you reporting?</label>
-            <Select
-              name="visualization"
-              options={visualizationOptions}
-              className={styles.select}
-              classNamePrefix="select"
-              onChange={handleSelectChange}
-              value={visualizationOptions.find(option => option.value === reportDetails.visualization)}
-            />
-          </div>
-
-          <label className={styles.label} htmlFor="harms">What harms did you notice?</label>
-          {reportDetails.prompt && reportDetails.visualization && (
+          {/* Prompt */}
+          <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              {harmsOptions.map((harm, index) => (
-                <div key={index} className={styles.checkboxContainer}>
-                  <input
-                    id={harm}
-                    type="checkbox"
-                    name="harms"
-                    value={harm}
-                    checked={reportDetails.harms.includes(harm)}
-                    onChange={handleInputChange}
-                  />
-                  <div className={styles.checkboxTextContainer}>
-                    <label htmlFor={harm} className={styles.checkboxLabel}>{harm}</label>
-                    <p className={styles.checkboxDescriptionText}>{descriptions[index]}</p>
-                  </div>
-                </div>
-              ))}
+              <label className={styles.label} htmlFor="prompt">What prompt to report?</label>
+              <input
+                className={styles.input}
+                type="text"
+                id="prompt"
+                name="prompt"
+                value={reportDetails.prompt}
+                onChange={handleInputChange}
+              />
             </div>
-          )}
-          <div className={styles.buttonsContainer}>
-            <button className={styles.buttonCancel} onClick={onCloseThread}>Cancel</button>
-            <button
-              className={`${styles.buttonSubmit} ${isFormFilled ? styles.buttonActive : ''}`}
-              type="submit"
-              disabled={!isFormFilled} // Optionally disable the button when the form is not fully filled
-            >
-              Report
-            </button>
-          </div>
-        </form>
+
+            {/* Visualizatinos */}
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="visualization">What are you reporting?</label>
+              <Select
+                name="visualization"
+                options={visualizationOptions}
+                className={styles.select}
+                classNamePrefix="select"
+                onChange={handleSelectChange}
+                value={visualizationOptions.filter(option => reportDetails.visualization.includes(option.value))}
+                isMulti // This enables multiple selections
+                closeMenuOnSelect={false} // Keeps the dropdown open after selection
+              />
+            </div>
+
+            {/* Harm options */}
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="harms">What harms did you notice?</label>
+              {reportDetails.prompt && reportDetails.visualization.length > 0 && (
+                harmsOptions.map((harm, index) => (
+                  <div key={index} className={styles.checkboxContainer}>
+                    <input
+                      id={harm}
+                      type="checkbox"
+                      name="harms"
+                      value={harm}
+                      checked={reportDetails.harms.includes(harm)}
+                      onChange={handleInputChange}
+                    />
+                    <div className={styles.checkboxTextContainer}>
+                      <label htmlFor={harm} className={styles.checkboxLabel}>{harm}</label>
+                      <p className={styles.checkboxDescriptionText}>{descriptions[index]}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Submit and cancel buttons */}
+            <div className={styles.buttonsContainer}>
+              <button className={styles.buttonCancel} onClick={onCloseThread}>Cancel</button>
+              <button
+                className={`${styles.buttonSubmit} ${isFormFilled ? styles.buttonActive : ''}`}
+                type="submit"
+                disabled={!isFormFilled} // Optionally disable the button when the form is not fully filled
+              >
+                Report
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </>
   );

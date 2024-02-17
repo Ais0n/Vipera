@@ -1,5 +1,15 @@
 /* Thread.module.css */
 
+.overlay { /* grays out the rest of parts */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9; /* Below threadContainer but above other content */
+}
+
 .threadContainer {
     position: fixed;
     top: 0;
@@ -9,18 +19,10 @@
     background: #FFFFFF;
     z-index: 10;
     overflow-y: auto; /* Allow scrolling inside the thread */
-    padding: 20px;
     box-sizing: border-box; /* Include padding in the width and height */
-}
-
-.overlay { /* grays out the rest of parts */
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9; /* Below threadContainer but above other content */
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    padding: 20px; /* Add padding to avoid content touching the edges */
 }
 
 .threadTitle {
@@ -45,11 +47,20 @@
     letter-spacing: 0em;
     text-align: left;
     color: #7B7B7B;
-    margin-bottom: 41px; /* space from first label */
+}
+
+.formGroup {
+    margin-left: 14px; /* space from status circles */
+    margin-right: 48px;
+    display: flex; /* Use flex to allow children to fill the space */
+    flex-direction: column; /* Stack children vertically */
+    flex-grow: 1; /* Make sure the container fills the height */
+    padding-right: 20px; /* Adjust padding to create space on the right side */
+    padding-left: 20px; /* Adjust padding to create space on the left side */
 }
 
 .label {
-    margin-left: 78px;
+    min-width: 420px;
     font-family: Roboto, sans-serif;
     font-weight: 400;
     font-size: 14px;
@@ -59,21 +70,21 @@
     margin-bottom: 12px;
 }
 
-.input,
-.select {
-    width: calc(100% - 128px); /* 100% of the parent's width minus the total horizontal padding */
-    padding: 13px 11px 14px 23px; /* top, right, bottom, left padding with input text */
+.input {
+    min-width: 420px;
+    width: 100%;
+    padding: 13px 23px 14px 23px; /* top, right, bottom, left padding with input text */
     border: 1px solid #ACACAC;
     border-radius: 4px;
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
     line-height: 20px;
-    margin-left: 80px;
-    margin-bottom: 32px; /* Adjust the space between the form elements */
+    margin-bottom: 32px; /* space between the form elements */
     box-sizing: border-box; /* Include padding and border in the element's width and height */
 }
 
 .select {
+    width: 100%;
     -webkit-appearance: none;  /* Chrome, Safari */
     -moz-appearance: none;     /* Firefox */
     appearance: none;          /* Standard syntax */
@@ -81,12 +92,64 @@
     background-repeat: no-repeat;
     background-position: right 11px center;
     background-size: 16px;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 32px; /* space between the form elements */
+    box-sizing: border-box; /* Include padding and border in the element's width and height */
+}
+
+
+/* Style the select control to match the input */
+threadContainer .select__control {
+    padding: 13px 11px 14px 23px; /* Match the padding with the input */
     border: 1px solid #ACACAC;
     border-radius: 4px;
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
     line-height: 20px;
-    box-sizing: border-box; /* Include padding and border in the element's width and height */
+    box-shadow: none; /* Remove any box-shadow if present */
+}
+
+/* Style the value container within the select */
+threadContainer .select__value-container {
+    padding: 0; /* Remove padding if any */
+}
+
+/* Style the single value within the select */
+threadContainer .select__single-value {
+    color: #000; /* Match the text color with the input */
+}
+
+/* Style the placeholder within the select */
+threadContainer .select__placeholder {
+    color: #000; /* Match the placeholder color with the input */
+}
+
+/* Hide the indicator separator */
+threadContainer .select__indicator-separator {
+    display: none; /* Hide separator if you want to */
+}
+
+/* Style the dropdown arrow to match the input's arrow */
+threadContainer .select__indicator svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-image: url('/chevron-down.svg'); /* Use the same image */
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Style the dropdown menu to fit the full width */
+.select__menu {
+    width: calc(100% - 48px); /* Account for padding */
+}
+
+/* Optional: Style the option in the dropdown menu */
+.select__option {
+    padding: 10px 20px; /* Match the padding to suit your design */
 }
 
 .select:focus {
@@ -98,7 +161,6 @@
 .checkboxContainer {
     display: flex;
     align-items: center;
-    margin-left: 82px;
 }
 
 .checkboxContainer input[type="checkbox"] {
@@ -138,7 +200,8 @@
     display: flex;
     justify-content: flex-end; /* Align buttons to the right */
     gap: 10px; /* Space between buttons */
-    margin-top: 50px; /* Space above the button group */
+    width: 100%;
+    margin-top: 100px;
 }
 
 .buttonCancel {
@@ -169,7 +232,7 @@
     cursor: pointer;
     margin-right: 48px;
 }
-  
+
 .buttonSubmit.buttonActive {
     background-color: #000000; /* Black color when form is all filled */
 }
@@ -242,4 +305,57 @@
     position: absolute;
     top: 10px;
     right: 20px;
+}
+
+/* include all forms and circles */
+.formContainer {
+    display: flex;
+    flex-direction: row; /* Stack children horizontally */
+    margin-top: 41px; /* space from thread subTitle */
+}
+
+.statusCircleContainer {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: flex-start; /* Align circles to the start of the flex container */
+    margin-left: 48px;
+}
+
+.statusCircle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #000000; /* Black for active */
+    margin-bottom: 96px;
+    position: relative; /* for positioning pseudo-elements */
+}
+
+.statusCircle::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -97px; /* same as the margin-bottom of .statusCircle */
+    transform: translateX(-50%);
+    width: 1px; /* line thickness */
+    height: calc(100% + 96px); /* height of the connecting line */
+    background-color: #000000; /* color of the line */
+    z-index: -1;
+}
+
+.statusCircle:last-child::after {
+    display: none; /* remove line after the last circle */
+}
+
+#statusOne {
+    background-color: #000000; /* Black for active */
+}
+
+#statusTwo {
+    background-color: #D9D9D9; /* Light grey for inactive */
+    border: 1px solid #7B7B7B; /* Grey border */
+}
+
+#statusThree {
+    background-color: #D9D9D9; /* Light grey for inactive */
+    border: 1px solid #000000; /* Black border */
 }
