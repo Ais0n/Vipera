@@ -69,8 +69,13 @@ const Generate = () => {
       {error && <p>{error}</p>}
       {isGenerating ? (
         <div className={AnalyzeStyle.loadingContainer}>
-          <img src={'/loading_image1.gif'} alt="LoadingGIF" />
-        </div>
+          <div className={AnalyzeStyle.loadingGIF}>
+            <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+          </div>
+          <div className={AnalyzeStyle.loadingText}>
+              Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+          </div>
+      </div>
       ) : (
         images.length > 0 && (
           <>

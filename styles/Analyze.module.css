@@ -4,8 +4,23 @@
     display: flex;
     justify-content: center; /* Center orizontally */
     align-items: center; /* Center vertically */
+    flex-direction: column;
+}
+
+.loadingGIF {
     height: 100vh;
-    margin-top: 100px;
+    margin-top: -100px;
+}
+
+.loadingText {
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: #838383;
+    margin-top: -450px;
 }
 
 .analyzeSection {
@@ -13,7 +28,7 @@
     flex-direction: row; /* Organize children in a row */
     justify-content: center; /* center children vertically (no need for padding-left) */
     align-items: center;
-    width: 100%; /* to cover discussion board when page shrink */
+    width: 1500px;
     background: #F8F8F8;
     margin-top: 64.33px;
     padding-top: 32px; /* padding for top and Analyze text */
