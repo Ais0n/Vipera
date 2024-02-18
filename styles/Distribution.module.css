@@ -3,5 +3,29 @@
 .canvas {
   width: 762px;
   height: 765px;
-  margin-top: 200px; /* space from category button */
+  margin-top: 50px;
+}
+
+.distributionBox {
+  display: flex;
+  align-items: center;
+  width: 768px;
+  background: #EDEDED;
+  margin-top: 48px; /* space from category button */
+  padding-left: 8px;
+}
+
+.distributionBoxText {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #000000;
+  margin-left: 19px; /* Spacing between icon and text */
+}
+
+.lightBulb {
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  width: 40px;
+  height: 40px;
 }

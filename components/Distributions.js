@@ -95,8 +95,24 @@ const Distributions = ({distribution, category}) => {
     draw();
   }, [distribution, category]);
 
+  const categoryTexts = {
+    gender: "Gender Scale: Computer Vision models being used can only classify images as men, women or ambiguous. This can be inaccurate and misleading. Learn more about AI bias",
+    skinTone: "Fitzpatrick Skin Scale is a classification system based on the amount of melanin present in the skin and has 6 shades. Monk Skin Tone scale has 10 shades. Learn more about AI bias.",
+    age: "Age Scale: Computer Vision models being used can only classify images in ranges of age. This can be inaccurate and misleading. Learn more about AI bias"
+  };
+
   return (
-    <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
+    <>
+        <div class={styles.distributionBox}>
+            <div className={styles.lightBulb}>
+                <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
+            </div>
+            <p className={styles.distributionBoxText}>
+                {categoryTexts[category]}
+            </p>
+        </div>
+        <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
+    </>
   );
 };
 

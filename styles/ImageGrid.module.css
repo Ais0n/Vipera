@@ -6,7 +6,6 @@
   width: 768px;
   height: 64px;
   background: #EDEDED;
-  /* Adjusted positioning with margins */
   margin-top: 48px; /* space from category button */
   padding-left: 10px;
 }
@@ -14,7 +13,7 @@
 .imageBoxText {
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
-  font-weight: 700; /* Bold text */
+  font-weight: 600; /* Bold text */
   line-height: 22px;
   color: #676767;
   margin-left: 16px; /* Spacing between icon and text */
