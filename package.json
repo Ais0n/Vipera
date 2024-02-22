@@ -2,9 +2,9 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
-    "start": "next start"
-  },
+    "dev": "next dev -p 80",
+    "start": "next start -p 80"
+},
   "dependencies": {
     "next": "latest",
     "react": "18.2.0",
@@ -12,7 +12,7 @@
     "react-select": "^5.8.0"
   },
   "engines": {
-    "node": "~20.11.0"
+    "node": "^20.11.0"
   },
   "rules": {
     "@next/next/no-document-import-in-page": "off"
