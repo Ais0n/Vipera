@@ -13,6 +13,7 @@ const Generate = () => {
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
+  const [promptStr, setPromptStr] = useState('');
 
   const handleGenerateClick = async (userInput) => {
     if (isGenerating || userInput.trim() === "") {
@@ -27,6 +28,8 @@ const Generate = () => {
     const requestData = {
       promptStr: userInput
     };
+
+    setPromptStr(userInput); // Set the prompt string when generation is initiated
 
     try {
       const response = await fetch("http://18.224.86.65:5001/ouroboros", {
@@ -69,8 +72,13 @@ const Generate = () => {
       {error && <p>{error}</p>}
       {isGenerating ? (
         <div className={AnalyzeStyle.loadingContainer}>
-          <img src={'/loading_image1.gif'} alt="LoadingGIF" />
-        </div>
+          <div className={AnalyzeStyle.loadingGIF}>
+            <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+          </div>
+          <div className={AnalyzeStyle.loadingText}>
+              Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+          </div>
+      </div>
       ) : (
         images.length > 0 && (
           <>
@@ -79,6 +87,7 @@ const Generate = () => {
               distribution={distribution}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
+              resultPrompt={promptStr}
             />
           </>
         )

@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import NavBar from '../components/Header';
+import Header from '../components/Header';
 
 // test
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
         <title>Ouroboros</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <NavBar />
+      <Header />
       <main>
         <h1 className={styles.title}>Ouroboros</h1>
 

@@ -2,7 +2,7 @@
 
 .buttonContainer {
     display: flex;
-    margin-top: 100px; /* Space from the top of the parent container */
+    margin-top: 39px; /* Space from the top of the parent container */
 }
 
 .buttonContainer button {

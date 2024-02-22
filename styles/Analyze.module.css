@@ -4,8 +4,23 @@
     display: flex;
     justify-content: center; /* Center orizontally */
     align-items: center; /* Center vertically */
+    flex-direction: column;
+}
+
+.loadingGIF {
     height: 100vh;
-    margin-top: 100px;
+    margin-top: -100px;
+}
+
+.loadingText {
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: #838383;
+    margin-top: -300px;
 }
 
 .analyzeSection {
@@ -13,7 +28,7 @@
     flex-direction: row; /* Organize children in a row */
     justify-content: center; /* center children vertically (no need for padding-left) */
     align-items: center;
-    width: 100%; /* to cover discussion board when page shrink */
+    width: 1500px;
     background: #F8F8F8;
     margin-top: 64.33px;
     padding-top: 32px; /* padding for top and Analyze text */
@@ -33,4 +48,41 @@
     font-weight: 600;
     line-height: 40px; /* 125% */
     margin: 0; /* Reset any default margins */
+}
+
+.promptIconContainer {
+    display: flex;
+    justify-content: space-between; /* separate the left and right */
+    margin-top: 39px;
+}
+
+.analyzePrompt, .analyzeIconContainer {
+    display: flex;
+    align-items: center; /* Align items in the center vertically */
+}
+
+.analyzePrompt {
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #7B7B7B;
+}
+
+.promptResult {
+    color: #000;
+}
+
+.analyzeIconContainer {
+    margin-right: 5px;
+}
+
+.analyzeIcon {
+    margin-left: 19px; /* Add some space between the icons */
+}
+
+.analyzeIcon:hover {
+    cursor: pointer;
 }
