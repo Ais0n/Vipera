@@ -31,8 +31,8 @@ const Generate = () => {
       apiService.subscribeToModel(prompt), 
       apiService.subscribeToModel(prompt)
     ]);
-    const result = resultA + resultB; // 16 images expected
-    
+    const result = resultA.concat(resultB); // 16 images expected
+
     // Note: result is an array of objects, where each object contains the image URL and its dimensions
     /* ex: [
       {
