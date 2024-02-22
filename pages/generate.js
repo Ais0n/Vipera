@@ -1,5 +1,5 @@
 // pages/generate.js
-
+import APIService from '../api/APIService';
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
@@ -24,6 +24,24 @@ const Generate = () => {
     setIsGenerating(true);
     setError('');
 
+    // @Chloe: Here's the code to fetch images from another model that is much faster with higher quality results as opposed to the ouroboros API
+    console.debug("Generating images for prompt:", userInput);
+    const apiService = new APIService();
+    const result = await apiService.subscribeToModel(prompt);
+    // Note: result is an array of objects, where each object contains the image URL and its dimensions
+    /* ex: [
+      {
+        url: "https://fal-cdn.batuhan-941.workers.dev/files/panda/ia1VUJaMbSoqYjGXRfZwt.jpeg", 
+        width: 1024, height: 1024, 
+        content_type: "image/jpeg"
+      }
+    ]
+      */
+    console.debug("Getting images from model:", result.images, result.images[0].url);
+    // --- EMD ---- //
+
+
+    // ----- Original Images API Logic ----- //
     // Define the data structure for the API request
     const requestData = {
       promptStr: userInput
