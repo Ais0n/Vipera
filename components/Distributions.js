@@ -34,7 +34,13 @@ const Distributions = ({distribution, category}) => {
                     amount += catamts[i-1];
                 }
                 catamts.push(amount);
-                displayratios.push(cat + ': ' + (Math.round(dist[cat] * 100) / 100).toString())
+                var ratio = Math.round(dist[cat] * 100)
+                if (ratio != 0) {
+                    displayratios.push(cat + ': ' + ratio.toString() + '%')
+                }
+                else { // not want to display 0%
+                    displayratios.push('0')
+                }
             }
             var x = 0;
             var y = 0;
@@ -52,13 +58,33 @@ const Distributions = ({distribution, category}) => {
                     ctx.fillRect(x, y, 50, 50);
                 }
             }
+            ctx.font = "14px 'Inter'";
             ctx.fillStyle = "black";
-            for (let i = 0; i < displayratios.length; i++) {
-                var cat = displayratios[i];
-                if (dist[colors[i][0]] != 0) {
-                    ctx.fillText(cat, 200, catamts[i]*2.5);
+            for (let i = 0; i < colors.length; i++) {
+                var cat = colors[i][0];
+                var catValue = dist[cat];
+                var amount = catValue * 225; // 225 is the scaling factor
+                var displayRatio = displayratios[i];
+
+                if (displayRatio != '0') {
+                     // Measure the text
+                     var textMetrics = ctx.measureText(displayRatio);
+                     var textWidth = textMetrics.width + 25; // 25px padding on each side
+                     var textHeight = parseInt(ctx.font, 10) + 10; // Extract the font size
+ 
+                     // Calculate the position where the category amount ends
+                     var textX = canvas.width / 2; // Center textX in the canvas
+                     var textY = i * (canvas.height / colors.length) + (canvas.height / (2 * colors.length));
+ 
+                     // Draw the white background for the text
+                     ctx.fillStyle = "white";
+                     ctx.fillRect(textX, textY, textWidth, textHeight);
+ 
+                     // Draw the text over the background
+                     ctx.fillStyle = "black";
+                     ctx.fillText(displayRatio, textX + textWidth*0.2, textY + textHeight*0.8); // Adjust textY to account for the height of the text
                 }
-            }
+            }   
         } 
         display(category, distribution[category]);
       } else {
@@ -69,8 +95,24 @@ const Distributions = ({distribution, category}) => {
     draw();
   }, [distribution, category]);
 
+  const categoryTexts = {
+    gender: "Gender Scale: Computer Vision models being used can only classify images as men, women or ambiguous. This can be inaccurate and misleading. Learn more about AI bias",
+    skinTone: "Fitzpatrick Skin Scale is a classification system based on the amount of melanin present in the skin and has 6 shades. Monk Skin Tone scale has 10 shades. Learn more about AI bias.",
+    age: "Age Scale: Computer Vision models being used can only classify images in ranges of age. This can be inaccurate and misleading. Learn more about AI bias"
+  };
+
   return (
-    <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
+    <>
+        <div class={styles.distributionBox}>
+            <div className={styles.lightBulb}>
+                <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
+            </div>
+            <p className={styles.distributionBoxText}>
+                {categoryTexts[category]}
+            </p>
+        </div>
+        <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
+    </>
   );
 };
 

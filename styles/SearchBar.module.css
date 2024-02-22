@@ -6,7 +6,7 @@
   align-items: flex-start; /* Align children to the start of the flex container */
   position: relative;
   margin-top: 253px; /* Space from the header */
-  margin-left: 100px;
+  margin-left: 128px;
 }
 
 .generateLabel {
@@ -21,7 +21,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: 1350px;
 }
 
 .searchBar {
