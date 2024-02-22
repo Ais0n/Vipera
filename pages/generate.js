@@ -27,11 +27,9 @@ const Generate = () => {
     // @Chloe: Here's the code to fetch images from another model that is much faster with higher quality results as opposed to the ouroboros API
     console.debug("Generating images for prompt:", userInput);
     const apiService = new APIService();
-    let [resultA, resultB] = await Promise.all([
-      apiService.subscribeToModel(prompt), 
-      apiService.subscribeToModel(prompt)
-    ]);
-    const result = resultA.concat(resultB); // 16 images expected
+    const resultA = await apiService.subscribeToModel(prompt);
+    const resultB = await apiService.subscribeToModel(prompt);
+    const result = [].concat(resultA.images, resultB.images); // 16 images expected
 
     // Note: result is an array of objects, where each object contains the image URL and its dimensions
     /* ex: [
@@ -42,7 +40,7 @@ const Generate = () => {
       }
     ]
       */
-    console.debug("Getting images from model:", result.images, result.images[0].url);
+    console.debug("Getting images from model:", result, result[0].url); // , result[0].url
     // --- EMD ---- //
 
 
