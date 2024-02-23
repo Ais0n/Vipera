@@ -29,7 +29,12 @@ const Generate = () => {
     const apiService = new APIService();
     const resultA = await apiService.subscribeToModel(prompt);
     const resultB = await apiService.subscribeToModel(prompt);
-    const result = [].concat(resultA.images, resultB.images); // 16 images expected
+    const new_result = [].concat(resultA.images, resultB.images); // 16 images expected
+    
+    const imageLinks = [];
+    new_result.forEach(item => {
+      imageLinks.push(item.url); // Add the new image URL to the array
+    });
 
     // Note: result is an array of objects, where each object contains the image URL and its dimensions
     /* ex: [
@@ -40,7 +45,7 @@ const Generate = () => {
       }
     ]
       */
-    console.debug("Getting images from model:", result, result[0].url); // , result[0].url
+    console.debug("Getting images from model:", new_result, new_result[0].url); // , result[0].url
     // --- EMD ---- //
 
 
@@ -70,7 +75,10 @@ const Generate = () => {
 
       const result = data[0];
 
-      setImages(result.imgs); // Update the img data
+      const allImages = [].concat(result.imgs, imageLinks);
+      // setImages(result.imgs); // Update the img data
+      // setImages(imageLinks);
+      setImages(allImages);
       
       setDistribution({ // Update the distribution data
         age: result.age,
