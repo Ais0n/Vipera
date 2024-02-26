@@ -1,4 +1,4 @@
-// pages/generate.js
+// pages/decoupled.js
 import APIService from '../api/APIService';
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
