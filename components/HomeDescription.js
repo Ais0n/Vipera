@@ -8,7 +8,7 @@ const HomeDescription = () => {
       <>
         <div class={styles.imageBox}>
             <div className={styles.lightBulb}>
-            <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
+              <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
             </div>
             <p className={styles.imageBoxText}>
                 Stable Diffusion is a way to use AI to generate realistic images from text prompts. Ouroboros is a tool that <br></br>

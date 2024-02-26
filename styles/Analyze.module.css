@@ -4,14 +4,14 @@
     margin-top: 29px;
     width: 189px;
     height: 52px;
-    font-family: Roboto;
+    font-family: Roboto, sans-serif;
     font-size: 40px;
     font-weight: 600;
     line-height: 52px;
     letter-spacing: 0em;
     text-align: center;
     /* margin-left: calc(50% - 95px - 10px); */
-    margin-left: 627px;
+    margin-left: 605px;
     margin-right: auto;
 }
 

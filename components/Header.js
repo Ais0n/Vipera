@@ -6,12 +6,12 @@ const Header = () => {
     return (
         <nav className={style.navBar}>
             <div className={style.leftTabs}>
-                <a href="" className={style.navWeaudit}>WeAudit</a>
+                <a href="https://forum.weaudit.org/" className={style.navWeaudit}>WeAudit</a>
                 <a href="" className={style.navItem}>Ouroboros</a>
             </div>
             <div className={style.rightTabs}>
-                <a href="" className={style.navItem}>About</a>
-                <a href="" className={style.navItem}>TAIGA</a>
+                <a href="https://forum.weaudit.org/about" className={style.navItem}>About</a>
+                <a href="https://taiga.weaudit.org/" className={style.navItem}>TAIGA</a>
                 <a href="" className={style.navOuro}>Ouroboros</a>
                 <a href="" className={style.navItem}>Discussions</a>
                 <a href="" className={style.navIcon}>

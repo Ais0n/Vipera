@@ -2,6 +2,8 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Header from '../components/Header';
 import HomeDescription from '../components/HomeDescription';
+import GoToOuroboros from '../components/GoToOuroboros';
+import GoToDiscussionForum from '../components/GoToDiscussionForum';
 
 // test
 export default function Home() {
@@ -23,55 +25,17 @@ export default function Home() {
           <div className={styles.descriptionContainer}>
               <HomeDescription />
           </div>
-          {/* <div className={styles.card}>
-            Go to Ouroboros
-          </div> */}
+          <div className={styles.navButtons}>
+            <div className={styles.genPageButton1}>
+              <GoToOuroboros />
+            </div>
+            <div className={styles.genPageButton2}>
+              <GoToDiscussionForum />
+            </div>
+          </div>
+
         </div>
 
-      </main>
-
-
-
-
-
-
-
-      {/* <main>
-        <h1 className={styles.title}>Ouroboros</h1>
-
-        <p className={styles.description}>
-          Fighting harmful Bias in AI using Data.
-        </p>
-
-        <div className={styles.grid}>
-          <a href="generate" className={styles.card}>
-            <h3>Generate &rarr;</h3>
-            <p>example text.</p>
-          </a>
-
-          <a href="" className={styles.card}>
-            <h3>Analyze &rarr;</h3>
-            <p>example text.</p>
-          </a>
-
-          <a
-            href=""
-            className={styles.card}
-          >
-            <h3>Post &rarr;</h3>
-            <p>example text.</p>
-          </a>
-
-          <a
-            href=""
-            className={styles.card}
-          >
-            <h3>Discuss &rarr;</h3>
-            <p>
-              example text.
-            </p>
-          </a>
-        </div>
       </main>
 
       <footer>
@@ -83,7 +47,7 @@ export default function Home() {
           Powered by{' '}
           <img src="" alt="logo" className={styles.logo} />
         </a>
-      </footer> */}
+      </footer> 
 
       <style jsx>{`
         main {

@@ -102,7 +102,7 @@ const Generate = () => {
   return (
     <div>
       <Header />
-      <div className={AnalyzeStyle.mainTitle}>Ouroboros</div>
+      <h1 className={AnalyzeStyle.mainTitle}>Ouroboros</h1>
       <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
