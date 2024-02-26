@@ -19,8 +19,7 @@ class APIService {
 
   constructor() {
     fal.config({
-        // credentials: process.env.MODEL_API_KEY
-        credentials: "f21c4374-290a-4fbe-948a-f2c2a49ed366:070e9e82438f44cc2bd96021f043a7c1"
+        credentials: process.env.MODEL_API_KEY
     });
 }
 
