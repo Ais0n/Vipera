@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Header from '../components/Header';
+import HomeDescription from '../components/HomeDescription';
 
 // test
 export default function Home() {
@@ -12,6 +13,30 @@ export default function Home() {
       </Head>
       <Header />
       <main>
+        <div className={styles.mainContainer}>
+          <div className={styles.titleContainer}>
+            <h1 className={styles.title}>
+              Fight harmful bias in AI,<br></br>
+              with data.
+            </h1>
+          </div>
+          <div className={styles.descriptionContainer}>
+              <HomeDescription />
+          </div>
+          {/* <div className={styles.card}>
+            Go to Ouroboros
+          </div> */}
+        </div>
+
+      </main>
+
+
+
+
+
+
+
+      {/* <main>
         <h1 className={styles.title}>Ouroboros</h1>
 
         <p className={styles.description}>
@@ -58,7 +83,7 @@ export default function Home() {
           Powered by{' '}
           <img src="" alt="logo" className={styles.logo} />
         </a>
-      </footer>
+      </footer> */}
 
       <style jsx>{`
         main {

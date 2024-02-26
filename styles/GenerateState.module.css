@@ -1,0 +1,52 @@
+/* GenerateState.module.css */
+
+.stateContainer {
+    display: flex;
+    margin-top: 4%;
+    margin-left: 32%;
+    margin-right: 32%;
+}
+
+.stateContainerChild {
+    align-content: center;
+}
+
+.label {
+    min-width: 420px;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #000000;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.hidden-status {
+    display: none;
+}
+
+.stateLabels {
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0em;
+    text-align: center;
+    position: relative;
+}
+
+.item1 {
+    position: absolute;
+    left: -3%;
+}
+
+.item2 {
+    position: absolute;
+    left: 45%;
+}
+
+.item3 {
+    position: absolute;
+    right: 0;
+}
