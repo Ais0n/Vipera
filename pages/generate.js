@@ -43,78 +43,8 @@ const Generate = () => {
     // console.debug("Getting images from model:", result, result[0].url); // , result[0].url
     // --- EMD ---- //
     
-    // ----- Decoupled Images API Logic ----- //
-    //Getting the list of images - would be replaced by the new model later on
-    const predict_lambda_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/predict"
-    const ouroboros_api_new_url = "http://18.224.86.65:5002/ouroborosp" 
-    //"http://18.224.86.65:5002/ouroborosnp" for non parallelized
-
-    const predictRequestData = {
-      prompt: userInput,
-      num: 9
-    };
-    setPromptStr(userInput);
-    try {
-      const predictResponse = await fetch(predict_lambda_url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(predictRequestData)
-      });
-
-      if (!predictResponse.ok) {
-        throw new Error(`HTTP predict error! status: ${predictResponse.status}`);
-      }
-
-      const predictData = await predictResponse.json();
-      console.log("Predict API Response:", predictData); // Print the entire API response
-
-      const predictResult = predictData[0];
-      setImages(predictResult); // Update the img data
-      
-      /*testing*/
-      // const imgs = ["https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/D2PNBXYCDE52.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/JOB1MELWFN9O.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/OZMBL5KNA0KC.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/B7R70L1P2L43.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/ID437Y9727LA.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/8BDXCVXYY24B.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/EZPJM7ZHPRQM.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/F27MQHRSYVAH.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/NW0MNSFEYV3K.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/IVFFFOYIW9DL.png"]
-      // setImages(imgs);
-      
-      //start of ouroboros api 
-      //currently, both api calls are in the same try catch statment but could be separated in the future
-      const oroRequestData = {
-        imgs: predictResult //wrong type - object right now
-      };
-      console.log("OuroborosAPI Input:", oroRequestData); // Print the entire API response
-      const oroResponse = await fetch(ouroboros_api_new_url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(oroRequestData)
-      });
-
-      if (!oroResponse.ok) {
-        throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
-      }
-
-      const oroData = await oroResponse.json();
-      console.debug("Oro API Response:", oroData); // Print the entire API response
-
-      const oroResult = oroData[0];
-
-      setDistribution({ 
-        age: oroResult.age,
-        gender: oroResult.gender,
-        skinTone: oroResult.skinTone
-      });
-
-    } catch (error) {
-      console.error("API Error:", error);
-      setError('Failed to generate images. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-    // ----- END Decoupled Images API Logic ----- //
   
-    /*
+    
     // ----- Original Images API Logic ----- //
     // Define the data structure for the API request
     const requestData = {
@@ -140,7 +70,8 @@ const Generate = () => {
       console.log("API Response:", data); // Print the entire API response
 
       const result = data[0];
-
+      console.log("typeof result.imgs");
+      console.log(typeof result.imgs);
       setImages(result.imgs); // Update the img data
       
       setDistribution({ // Update the distribution data
@@ -157,7 +88,7 @@ const Generate = () => {
     }
 
     // ----- END Original Images API Logic ----- //
-    */
+    
   };
 
   return (

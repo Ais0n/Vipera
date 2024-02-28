@@ -23,25 +23,6 @@ const Generate = () => {
 
     setIsGenerating(true);
     setError('');
-
-    // @Chloe: Here's the code to fetch images from another model that is much faster with higher quality results as opposed to the ouroboros API
-    // console.debug("Generating images for prompt:", userInput);
-    // const apiService = new APIService();
-    // const resultA = await apiService.subscribeToModel(prompt);
-    // const resultB = await apiService.subscribeToModel(prompt);
-    // const result = [].concat(resultA.images, resultB.images); // 16 images expected
-
-    // Note: result is an array of objects, where each object contains the image URL and its dimensions
-    /* ex: [
-      {
-        url: "https://fal-cdn.batuhan-941.workers.dev/files/panda/ia1VUJaMbSoqYjGXRfZwt.jpeg", 
-        width: 1024, height: 1024, 
-        content_type: "image/jpeg"
-      }
-    ]
-      */
-    // console.debug("Getting images from model:", result, result[0].url); // , result[0].url
-    // --- EMD ---- //
     
     // ----- Decoupled Images API Logic ----- //
     //Getting the list of images - would be replaced by the new model later on
@@ -69,9 +50,8 @@ const Generate = () => {
 
       const predictData = await predictResponse.json();
       console.log("Predict API Response:", predictData); // Print the entire API response
-
-      const predictResult = predictData[0];
-      setImages(predictResult); // Update the img data
+      //predict data is a list of strings (urls of images)
+      setImages(predictData); // Update the img data
       
       /*testing*/
       // const imgs = ["https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/D2PNBXYCDE52.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/JOB1MELWFN9O.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/OZMBL5KNA0KC.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/B7R70L1P2L43.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/ID437Y9727LA.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/8BDXCVXYY24B.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/EZPJM7ZHPRQM.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/F27MQHRSYVAH.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/NW0MNSFEYV3K.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/IVFFFOYIW9DL.png"]
@@ -80,9 +60,9 @@ const Generate = () => {
       //start of ouroboros api 
       //currently, both api calls are in the same try catch statment but could be separated in the future
       const oroRequestData = {
-        imgs: predictResult //wrong type - object right now
+        imgs: predictData
       };
-      console.log("OuroborosAPI Input:", oroRequestData); // Print the entire API response
+      console.log("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
       const oroResponse = await fetch(ouroboros_api_new_url, {
         method: "POST",
         headers: {
@@ -94,9 +74,10 @@ const Generate = () => {
       if (!oroResponse.ok) {
         throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
       }
+      console.log("success in oro response");
 
       const oroData = await oroResponse.json();
-      console.debug("Oro API Response:", oroData); // Print the entire API response
+      console.log("Oro API Response:", oroData); // Print the entire API response
 
       const oroResult = oroData[0];
 
