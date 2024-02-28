@@ -51,9 +51,8 @@ const Generate = () => {
       */
     console.debug("Getting images from model:", new_result, new_result[0].url); // , result[0].url
     // --- EMD ---- //
-    
-  
-    
+
+
     // ----- Original Images API Logic ----- //
     // Define the data structure for the API request
     const requestData = {
@@ -98,9 +97,6 @@ const Generate = () => {
     } finally {
       setIsGenerating(false);
     }
-
-    // ----- END Original Images API Logic ----- //
-    
   };
 
   return (
