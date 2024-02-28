@@ -5,10 +5,12 @@ import SearchBar from '../components/SearchBar';
 
 import Header from '../components/Header';
 import Analyze from '../components/Analyze';
+import GenerateState from '../components/GenerateState';
 import AnalyzeStyle from '../styles/Analyze.module.css';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDoneGenerating, setIsDoneGenerating] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
@@ -22,6 +24,7 @@ const Generate = () => {
     }
 
     setIsGenerating(true);
+    setIsDoneGenerating(false);
     setError('');
 
     // @Chloe: Here's the code to fetch images from another model that is much faster with higher quality results as opposed to the ouroboros API
@@ -35,6 +38,7 @@ const Generate = () => {
     new_result.forEach(item => {
       imageLinks.push(item.url); // Add the new image URL to the array
     });
+
 
     // Note: result is an array of objects, where each object contains the image URL and its dimensions
     /* ex: [
@@ -79,6 +83,7 @@ const Generate = () => {
       // setImages(result.imgs); // Update the img data
       // setImages(imageLinks);
       setImages(allImages);
+      setIsDoneGenerating(true);
       
       setDistribution({ // Update the distribution data
         age: result.age,
@@ -97,18 +102,21 @@ const Generate = () => {
   return (
     <div>
       <Header />
-      <div className={AnalyzeStyle.mainTitle}>Ouroborous</div>
+      <h1 className={AnalyzeStyle.mainTitle}>Ouroboros</h1>
+      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
       {isGenerating ? (
-        <div className={AnalyzeStyle.loadingContainer}>
-          <div className={AnalyzeStyle.loadingGIF}>
-            <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+        <>
+          <div className={AnalyzeStyle.loadingContainer}>
+            <div className={AnalyzeStyle.loadingGIF}>
+              <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+            </div>
+            <div className={AnalyzeStyle.loadingText}>
+                Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+            </div>
           </div>
-          <div className={AnalyzeStyle.loadingText}>
-              Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
-          </div>
-      </div>
+        </>
       ) : (
         images.length > 0 && (
           <>

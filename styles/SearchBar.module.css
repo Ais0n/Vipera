@@ -5,7 +5,7 @@
   flex-direction: column; /* Stack children vertically */
   align-items: flex-start; /* Align children to the start of the flex container */
   position: relative;
-  margin-top: 253px; /* Space from the header */
+  margin-top: 53px; /* Space from the header */
   margin-left: 128px;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .searchButtonText {
-  font-family: Roboto;
+  font-family: Roboto, sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 600;

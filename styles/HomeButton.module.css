@@ -1,0 +1,56 @@
+/* HomeButton.module.css */
+
+.container_ouroboros {
+   width: 321px;
+   height: 80px; 
+   background-color: black;
+   position: relative;
+}
+
+.container_discussion {
+    width: 321px;
+    height: 80px; 
+    background-color: white;
+    border-color: black;
+    border-style: solid;
+    position: relative;
+ }
+  
+.text_ouroboros {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    color: white;
+    margin-left: 95px; /* Spacing between icon and text */
+    margin-top: 23px;
+    position: absolute;
+  }
+
+.text_df {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    color: black;
+    margin-left: 95px; /* Spacing between icon and text */
+    margin-top: 23px;
+    position: absolute;
+  }
+  
+.icon {
+    margin-left: 48px;
+    margin-top: 21px;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+    position: absolute;
+  }
+
+.icon_df {
+    margin-left: 46px;
+    margin-top: 26px;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+    position: absolute;
+  }
+  
+
+  
