@@ -5,10 +5,12 @@ import SearchBar from '../components/SearchBar';
 
 import Header from '../components/Header';
 import Analyze from '../components/Analyze';
+import GenerateState from '../components/GenerateState';
 import AnalyzeStyle from '../styles/Analyze.module.css';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDoneGenerating, setIsDoneGenerating] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
@@ -22,14 +24,21 @@ const Generate = () => {
     }
 
     setIsGenerating(true);
+    setIsDoneGenerating(false);
     setError('');
 
     // @Chloe: Here's the code to fetch images from another model that is much faster with higher quality results as opposed to the ouroboros API
-    // console.debug("Generating images for prompt:", userInput);
-    // const apiService = new APIService();
-    // const resultA = await apiService.subscribeToModel(prompt);
-    // const resultB = await apiService.subscribeToModel(prompt);
-    // const result = [].concat(resultA.images, resultB.images); // 16 images expected
+    console.debug("Generating images for prompt:", userInput);
+    const apiService = new APIService();
+    const resultA = await apiService.subscribeToModel(prompt);
+    const resultB = await apiService.subscribeToModel(prompt);
+    const new_result = [].concat(resultA.images, resultB.images); // 16 images expected
+    
+    const imageLinks = [];
+    new_result.forEach(item => {
+      imageLinks.push(item.url); // Add the new image URL to the array
+    });
+
 
     // Note: result is an array of objects, where each object contains the image URL and its dimensions
     /* ex: [
@@ -40,7 +49,7 @@ const Generate = () => {
       }
     ]
       */
-    // console.debug("Getting images from model:", result, result[0].url); // , result[0].url
+    console.debug("Getting images from model:", new_result, new_result[0].url); // , result[0].url
     // --- EMD ---- //
     
   
@@ -70,9 +79,12 @@ const Generate = () => {
       console.log("API Response:", data); // Print the entire API response
 
       const result = data[0];
-      console.log("typeof result.imgs");
-      console.log(typeof result.imgs);
-      setImages(result.imgs); // Update the img data
+
+      const allImages = [].concat(result.imgs, imageLinks);
+      // setImages(result.imgs); // Update the img data
+      // setImages(imageLinks);
+      setImages(allImages);
+      setIsDoneGenerating(true);
       
       setDistribution({ // Update the distribution data
         age: result.age,
@@ -94,17 +106,21 @@ const Generate = () => {
   return (
     <div>
       <Header />
+      <h1 className={AnalyzeStyle.mainTitle}>Ouroboros</h1>
+      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
       {isGenerating ? (
-        <div className={AnalyzeStyle.loadingContainer}>
-          <div className={AnalyzeStyle.loadingGIF}>
-            <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+        <>
+          <div className={AnalyzeStyle.loadingContainer}>
+            <div className={AnalyzeStyle.loadingGIF}>
+              <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+            </div>
+            <div className={AnalyzeStyle.loadingText}>
+                Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+            </div>
           </div>
-          <div className={AnalyzeStyle.loadingText}>
-              Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
-          </div>
-      </div>
+        </>
       ) : (
         images.length > 0 && (
           <>
