@@ -8,11 +8,11 @@ const GoToDiscussionForum = () => {
       <>
         <div class={styles.container_discussion}>
             <div className={styles.icon_df}>
-            <img src={'/discussionforumbutton.svg'} alt="discussionforum" />
+              <img src={'/discussionforumbutton.svg'} alt="discussionforum" />
             </div>
-            <p className={styles.text_df}>
-                Discussion Forum
-            </p>
+            <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={styles.text_df}>
+              Discussion Forum
+            </a>
         </div>
       </>
     );

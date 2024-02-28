@@ -1,0 +1,56 @@
+/* GeneratePage.module.css */
+
+.mainTitle {
+  margin-top: 29px;
+  width: 189px;
+  height: 52px;
+  font-family: Roboto;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 52px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center; /* Center orizontally */
+  align-items: center; /* Center vertically */
+  flex-direction: column;
+  width: 100%; /* Take the full width of the parent element */
+}
+
+.loadingText {
+  font-family: Roboto;
+  font-size: 20px; /* Consider using 'vw' or 'em' for scalable text */
+  font-weight: 600;
+  line-height: 26px;
+  letter-spacing: 0em;
+  text-align: center;
+  color: #838383;
+  margin-top: 10px;
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
+  padding: 0 10px; /* Add padding to maintain spacing on smaller screens */
+}
+
+@keyframes rotate-animation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg); /* anticlockwise */
+  }
+}
+
+.loadingSnake {
+  width: 180px;
+  height: 180px;
+  background-image: url('/Obby1.svg'); /* Keep only the initial frame */
+  background-size: cover; /* Ensure the SVG covers the element */
+  animation: rotate-animation 2s infinite linear; /* Apply rotation animation */
+  margin-top: 60px;
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
+}

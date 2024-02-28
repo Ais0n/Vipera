@@ -8,10 +8,11 @@ const ImageGrid = ({ images }) => {
       <>
         <div class={styles.imageBox}>
           <div className={styles.lightBulb}>
-            <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
+            <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
           </div>
           <p className={styles.imageBoxText}>
-              Images are generated with text-to-image Stable diffusion model. Results may slightly vary on regeneration. Learn more about AI bias
+              Images are generated with text-to-image Stable diffusion model. Results may slightly vary on regeneration.
+              {' '}<a href="https://forum.weaudit.org/t/learn-about-algorithmic-bias-categories-with-real-life-examples/307" className={styles.learnMoreLink}>Learn more about AI bias</a>
           </p>
         </div>
         <div className={styles.imageGrid}>

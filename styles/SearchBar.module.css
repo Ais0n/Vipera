@@ -3,10 +3,13 @@
 .searchContainer {
   display: flex;
   flex-direction: column; /* Stack children vertically */
-  align-items: flex-start; /* Align children to the start of the flex container */
+  align-items: center; /* Align children to the center for smaller screens */
   position: relative;
   margin-top: 53px; /* Space from the header */
-  margin-left: 128px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%; /* Use 100% of parent container */
+  max-width: 1350px; /* Keep the max-width to prevent it from getting too wide */
 }
 
 .generateLabel {
@@ -15,22 +18,34 @@
   font-size: 32px;
   font-weight: 600;
   line-height: 40px;
+  align-self: flex-start;
+  padding-left: 15px; /* aligns with the start of searchBar */
 }
 
 .inputAndButtonsContainer {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* This might need to change to 'flex-start' with gaps to ensure proper alignment */
   align-items: center;
-  width: 1350px;
+  width: 100%; /* Make width responsive */
+  max-width: 1350px; /* Optional: Set a max-width for large screens */
+  padding-left: 15px; /* Adjust this value to ensure alignment with the label above */
+  padding-right: 15px; /* Adjust this value to maintain symmetry */
+  box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
 .searchBar {
-  flex-grow: 0.895; /* Allow search bar to grow and fill 0.895 of container */
+  flex-grow: 1; /* Allow search bar to grow */
   height: 64px;
   border: 1px solid #A4ACA8;
   background: #FFF;
   margin-top: 58.67px;
-  padding-left: 30px; /* For starting position of the placeholder text */
+  margin-right: 13px; /* Ensure this margin matches the gap you want between searchBar and searchButton */
+  padding-left: 30px;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .searchBar::placeholder {
@@ -83,6 +98,7 @@
   width: 135.13px;
   height: 42.67px;
   border: none;
+  text-decoration: none;
 }
 
 .sdButtonText {
@@ -97,4 +113,14 @@
 
 .sdButton:hover {
   background-color: #333333; /* Darker background on hover */
+}
+
+@media screen and (max-width: 670px) {
+  .sdButton {
+    width: 80px;
+  }
+
+  .searchButton {
+    width: 120px;
+  }
 }

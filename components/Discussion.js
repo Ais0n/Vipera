@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Thread from './Thread';
 import styles from '../styles/Discussion.module.css';
 
-const Discussion = () => {
+const Discussion = ({ resultPrompt }) => {
   const [isThreadVisible, setThreadVisible] = useState(false);
 
   const handleStartDiscussion = () => setThreadVisible(true);
@@ -18,7 +18,7 @@ const Discussion = () => {
         Start a discussion
       </button>
       {isThreadVisible && (
-        <Thread onCloseThread={handleCloseThread} />
+        <Thread onCloseThread={handleCloseThread} resultPrompt={resultPrompt} />
       )}
     </div>
   );

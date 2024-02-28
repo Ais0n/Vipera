@@ -3,20 +3,30 @@
 .imageBox {
   display: flex;
   align-items: center;
-  width: 768px;
+  width: 100%; /* Full width to be responsive */
+  max-width: 768px; /* Maximum width */
   height: 64px;
   background: #EDEDED;
-  margin-top: 48px; /* space from category button */
+  margin: 48px auto 0 auto; /* Top margin and auto for left and right */
   padding-left: 10px;
+  box-sizing: border-box; /* Include padding in width */
+}
+
+.imageBoxText,
+.learnMoreLink {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #676767;
 }
 
 .imageBoxText {
-  font-family: 'Roboto', sans-serif;
-  font-size: 16px;
-  font-weight: 600; /* Bold text */
-  line-height: 22px;
-  color: #676767;
-  margin-left: 16px; /* Spacing between icon and text */
+  margin-left: 16px;
+}
+
+.learnMoreLink {
+  text-decoration: underline;
 }
 
 .lightBulb {
@@ -25,18 +35,31 @@
 
 .imageGrid {
   display: grid;
-  width: 762px;
-  height: 763px;
-  /* grid-template-columns: repeat(3, 1fr); */
-  /* grid-template-rows: repeat(3, 1fr); */
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  grid-gap: 0; /* no gap between images */
-  margin-top: 48px; /* space from imageBox */
+  width: 100%; /* Full width to be responsive */
+  max-width: 762px; /* Maximum width */
+  height: auto; /* Height should be auto to maintain aspect ratio */
+  grid-template-columns: repeat(3, minmax(240px, 1fr)); /* Responsive grid */
+  grid-gap: 0;
+  margin: 48px auto 0 auto; /* Top margin and auto for left and right */
 }
 
 .imageCell {
-  width: 100%; /* image with full width of its grid cell */
-  height: 100%; /* image with full height of its grid cell */
-  object-fit: cover; /* images cover the cell without distortion */
+  width: 100%;
+  height: auto; /* Adjust height automatically */
+  object-fit: cover;
+}
+
+@media screen and (max-width: 768px) {
+  .imageBox, .imageGrid {
+    max-width: 80%; /* Allow the box to fill the container on smaller screens */
+    padding: 0 10px; /* Add padding on the sides */
+  }
+
+  .imageBoxText {
+    font-size: 13px;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr)); /* Responsive grid */
+  }
 }

@@ -25,10 +25,9 @@ function SearchBar({ onGenerateClick, isGenerating }) {
             disabled={isGenerating}
           />
           <div className={styles.buttonsContainer}>
-            {/* sdButton can also be sued to search, need fix it */}
-            <button className={styles.sdButton}>
+            <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={styles.sdButton}>
               <span className={styles.sdButtonText}>Stable Diffusion</span>
-            </button>
+            </a>
             <button type="submit" className={styles.searchButton} disabled={isGenerating}>
               <span className={styles.searchButtonText}>Generate</span>
             </button>
