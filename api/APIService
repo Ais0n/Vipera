@@ -22,7 +22,6 @@ class APIService {
         credentials: process.env.MODEL_API_KEY
     });
 }
-
     // Generate a random seed within the specified range
     generateRandomSeed() {
       return Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000;

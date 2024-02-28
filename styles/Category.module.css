@@ -2,22 +2,26 @@
 
 .buttonContainer {
     display: flex;
-    margin-top: 39px; /* Space from the top of the parent container */
+    justify-content: center; /* horizontally centered */
+    margin-top: 2.5vh; /* Use viewport height units for relative spacing */
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
 
 .buttonContainer button {
-    width: 192px;
+    min-width: 150px; /* Set a minimum width to ensure readability */
+    width: 100%; 
+    max-width: 192px; /* Maximum width */
     height: 48px;
-    padding: 10px;
     font-family: 'Roboto', sans-serif;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     text-align: center;
-    border: 1px solid #A4ACA8; /* Added border style */
-    background-color: #F8F8F8; /* Normal state background */
-    color: black; /* Normal state text color */
+    border: 1px solid #A4ACA8;
+    background-color: #F8F8F8;
+    color: black;
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease; /* Added color transition */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .buttonContainer button:hover {
@@ -28,4 +32,16 @@
     background-color: #FB9600;
     color: white;
     border-color: #FB9600;
+}
+
+@media screen and (max-width: 768px) {
+    .buttonContainer {
+        flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+    }
+
+    .buttonContainer button {
+        width: 200px; /* Allow buttons to adjust their width automatically */
+        padding: 10px; /* Adjust padding */
+        font-size: 0.9rem; /* Adjust font size */
+    }
 }

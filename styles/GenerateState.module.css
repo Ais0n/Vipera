@@ -3,12 +3,14 @@
 .stateContainer {
     display: flex;
     margin-top: 4%;
-    margin-left: 32%;
-    margin-right: 32%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .stateContainerChild {
     align-content: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .label {

@@ -14,8 +14,8 @@
     position: fixed;
     top: 0;
     right: 0;
-    width: 40%; /* Set the width for the thread */
-    height: 100%; /* Full height */
+    width: 40%;
+    height: 100%;
     background: #FFFFFF;
     z-index: 10;
     overflow-y: auto; /* Allow scrolling inside the thread */
@@ -23,6 +23,13 @@
     display: flex;
     flex-direction: column; /* Stack children vertically */
     padding: 20px; /* Add padding to avoid content touching the edges */
+}
+
+.threadTitle,
+.threadDescription {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 90%; /* Prevent the text from stretching too wide */
 }
 
 .threadTitle {
@@ -198,11 +205,11 @@
     flex-direction: column;
     justify-content: center; /* Center children vertically */
     align-items: center; /* Center children horizontally */
-    position: fixed; /* position relative to the viewport */
+    position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30%;
+    transform: translate(-50%, -50%); /* Center the element */
+    width: 75%;
     min-height: 35%; /* ensure the container can grow if content is larger */
     background: #FFF;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -247,6 +254,7 @@
     background-repeat: no-repeat;
     background-position: 24px center; /* Position the icon 20px from the left */
     background-size: 28px; /* The size of the icon */
+    text-decoration: none;
 }
 
 .closeButton {
@@ -302,4 +310,22 @@
 .statusCircle:last-child::after,
 .statusCircleActive:last-child::after {
     display: none; /* remove line after the last circle */
+}
+
+@media (max-width: 768px) {
+    .formContainer {
+        flex-direction: column; /* Stack children vertically on smaller screens */
+    }
+    .formGroup {
+        margin-left: 0;
+        margin-right: 0;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+    .input,
+    .select,
+    .label {
+        min-width: 0; /* Override the min-width for smaller screens */
+        width: 100%; /* Make inputs full width on smaller screens */
+    }
 }

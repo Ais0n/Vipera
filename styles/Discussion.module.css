@@ -23,7 +23,8 @@
 .discussionSubtitle {
     font-family: 'Roboto', sans-serif;
     color: #7B7B7B;
-    width: 296px;
+    width: 100%; /* Make subtitle take full width */
+    max-width: 296px; /* Limit width for larger screens */
     font-size: 16px;
     font-weight: 600;
     line-height: 22px;
@@ -48,4 +49,19 @@
 
 .discussionButton:hover {
     background-color: #333333;
+}
+
+@media screen and (max-width: 1270px) {
+    .discussionContainer {
+        width: 200px;
+    }
+}
+
+@media screen and (max-width: 1090px) {
+    .discussionContainer {
+        margin-top: 30px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 367px;
+    }
 }

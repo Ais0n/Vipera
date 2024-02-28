@@ -1,58 +1,25 @@
 /* Analyze.module.css */
 
-.mainTitle {
-    margin-top: 29px;
-    width: 189px;
-    height: 52px;
-    font-family: Roboto, sans-serif;
-    font-size: 40px;
-    font-weight: 600;
-    line-height: 52px;
-    letter-spacing: 0em;
-    text-align: center;
-    /* margin-left: calc(50% - 95px - 10px); */
-    margin-left: 605px;
-    margin-right: auto;
-}
-
-.loadingContainer {
-    display: flex;
-    justify-content: center; /* Center orizontally */
-    align-items: center; /* Center vertically */
-    flex-direction: column;
-}
-
-.loadingGIF {
-    height: 100vh;
-    margin-top: -100px;
-}
-
-.loadingText {
-    font-family: Roboto;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 26px;
-    letter-spacing: 0em;
-    text-align: center;
-    color: #838383;
-    margin-top: -300px;
-}
-
 .analyzeSection {
     display: flex;
-    flex-direction: row; /* Organize children in a row */
-    justify-content: center; /* center children vertically (no need for padding-left) */
+    justify-content: center; /* Center children horizontally */
     align-items: center;
-    width: 1500px;
+    width: 100%; /* Allow the section to be responsive */
+    max-width: 1500px; /* Limit the maximum width */
     background: #F8F8F8;
     margin-top: 64.33px;
-    padding-top: 32px; /* padding for top and Analyze text */
+    margin-left: auto; /* Center the section horizontally */
+    margin-right: auto; /* Center the section horizontally */
+    padding-top: 32px; /* Padding for top */
 }
 
-.greyBg {
+.greyBgContent {
     display: flex;
-    background: #F8F8F8;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: center; /* Center children horizontally */
+    width: 100%;
+    max-width: 1500px; /* Max-width for content, not background */
+    margin: auto; /* Center the content container */
 }
 
 .analyzeText {
@@ -61,9 +28,7 @@
     font-size: 32px;
     font-style: normal;
     font-weight: 600;
-    line-height: 40px; /* 125% */
-    margin: 0; /* Reset any default margins */
-}
+    line-height: 40px; /* 125% */}
 
 .promptIconContainer {
     display: flex;
@@ -100,4 +65,10 @@
 
 .analyzeIcon:hover {
     cursor: pointer;
+}
+
+@media screen and (max-width: 1090px) {
+    .greyBgContent {
+        flex-direction: column; /* Stack children vertically */
+    }
 }

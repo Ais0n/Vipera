@@ -3,12 +3,13 @@
 .navBar {
     color: #FFFFFF;
     display: flex;
-    justify-content: space-between; /* separate the left and right tabs */
-    padding-left: 128px;
-    padding-right: 140px;
+    justify-content: space-between; /* Keep the left and right tabs separated */
+    padding-left: 10vw; /* Use viewport width for relative padding */
+    padding-right: 10vw; /* Use viewport width for relative padding */
     border-bottom: 1px solid #DEE4E1;
     height: 64px;
-    width: 1235px;
+    width: 100%; /* Allow the navbar to stretch and fill the width */
+    box-sizing: border-box; /* Include padding in the width calculation */
 }
 
 .leftTabs, .rightTabs {
@@ -41,4 +42,15 @@
 
 .navIcon {
     margin-left: 127px;
+}
+
+@media screen and (max-width: 670px) {
+    .navBar {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .navIcon {
+        margin-left: 0;
+    }
 }

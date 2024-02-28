@@ -15,17 +15,36 @@
   padding-left: 8px;
 }
 
-.distributionBoxText {
+.distributionBoxText,
+.learnMoreLink {
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
   font-weight: 600;
   line-height: 22px;
   color: #000000;
+}
+
+.distributionBoxText {
   margin-left: 19px; /* Spacing between icon and text */
+}
+
+.learnMoreLink {
+  text-decoration: underline;
 }
 
 .lightBulb {
   flex-shrink: 0; /* Prevent icon from shrinking */
   width: 40px;
   height: 40px;
+}
+
+@media screen and (max-width: 768px) {
+  .distributionBox {
+    max-width: 80%; /* Allow the box to fill the container on smaller screens */
+    padding: 0 10px; /* Add padding on the sides */
+  }
+
+  .distributionBoxText {
+    font-size: 13px;
+  }
 }

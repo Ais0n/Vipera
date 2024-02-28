@@ -4,10 +4,10 @@ import React, { useState, useRef } from 'react';
 import Select from 'react-select';
 import styles from '../styles/Thread.module.css';
 
-const Thread = ({ onCloseThread }) => {
+const Thread = ({ onCloseThread, resultPrompt }) => {
 
   const [reportDetails, setReportDetails] = useState({
-    prompt: '',
+    prompt: resultPrompt,
     visualization: [],
     harms: []
   });
@@ -91,7 +91,7 @@ const Thread = ({ onCloseThread }) => {
     <>
       <div className={styles.overlay} onClick={onCloseThread} />
       <div className={styles.threadContainer}>
-
+        {/* confirmed message */}
         {isSubmitted && (
           <>
             <div className={styles.overlay} onClick={() => setIsSubmitted(false)} />
@@ -99,7 +99,7 @@ const Thread = ({ onCloseThread }) => {
               <span className={styles.closeButton} onClick={() => setIsSubmitted(false)}>x</span>
               <h2 className={styles.confirmationTitle}>Posted!</h2>
               <p className={styles.confirmationBody}>Your thread has been posted to the discussion forum.</p>
-              <button className={styles.goToDiscussionsButton}>Go to discussions</button>
+              <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={styles.goToDiscussionsButton}>Go to discussions</a>
             </div>
           </>
         )}
@@ -128,6 +128,7 @@ const Thread = ({ onCloseThread }) => {
                 name="prompt"
                 value={reportDetails.prompt}
                 onChange={handleInputChange}
+                readOnly
               />
             </div>
 

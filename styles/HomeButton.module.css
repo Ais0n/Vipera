@@ -1,56 +1,55 @@
 /* HomeButton.module.css */
 
+.container_ouroboros,
+.container_discussion {
+  display: flex; /* Use flexbox for layout */
+  align-items: center; /* Center items vertically */
+  justify-content: flex-start; /* Align items to the left */
+  width: 321px;
+  height: 80px;
+  position: relative; /* No need to change this */
+}
+
+.container_ouroboros a,
+.container_discussion a {
+  text-decoration: none;
+}
+
 .container_ouroboros {
-   width: 321px;
-   height: 80px; 
-   background-color: black;
-   position: relative;
+  background-color: black;
 }
 
 .container_discussion {
-    width: 321px;
-    height: 80px; 
-    background-color: white;
-    border-color: black;
-    border-style: solid;
-    position: relative;
- }
-  
+  background-color: white;
+  border: 1px solid black;
+}
+
+.text_ouroboros,
+.text_df {
+  font-family: 'Roboto', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 26px;
+  margin-left: 10px;
+  text-decoration: none;
+}
+
 .text_ouroboros {
-    font-family: 'Roboto', sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 26px;
-    color: white;
-    margin-left: 95px; /* Spacing between icon and text */
-    margin-top: 23px;
-    position: absolute;
-  }
+  color: white;
+}
 
 .text_df {
-    font-family: 'Roboto', sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 26px;
-    color: black;
-    margin-left: 95px; /* Spacing between icon and text */
-    margin-top: 23px;
-    position: absolute;
-  }
-  
+  color: black;
+}
+
 .icon {
-    margin-left: 48px;
-    margin-top: 21px;
-    flex-shrink: 0; /* Prevent icon from shrinking */
-    position: absolute;
-  }
+  margin-left: 48px;
+  margin-top: 5px;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
 
 .icon_df {
-    margin-left: 46px;
-    margin-top: 26px;
-    flex-shrink: 0; /* Prevent icon from shrinking */
-    position: absolute;
-  }
-  
-
-  
+  margin-left: 46px;
+  margin-top: 10px;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}

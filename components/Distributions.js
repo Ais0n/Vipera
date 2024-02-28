@@ -96,19 +96,20 @@ const Distributions = ({distribution, category}) => {
   }, [distribution, category]);
 
   const categoryTexts = {
-    gender: "Gender Scale: Computer Vision models being used can only classify images as men, women or ambiguous. This can be inaccurate and misleading. Learn more about AI bias",
-    skinTone: "Fitzpatrick Skin Scale is a classification system based on the amount of melanin present in the skin and has 6 shades. Monk Skin Tone scale has 10 shades. Learn more about AI bias.",
-    age: "Age Scale: Computer Vision models being used can only classify images in ranges of age. This can be inaccurate and misleading. Learn more about AI bias"
+    gender: "Gender Scale: Computer Vision models being used can only classify images as men, women or ambiguous. This can be inaccurate and misleading.",
+    skinTone: "Fitzpatrick Skin Scale is a classification system based on the amount of melanin present in the skin and has 6 shades. Monk Skin Tone scale has 10 shades.",
+    age: "Age Scale: Computer Vision models being used can only classify images in ranges of age. This can be inaccurate and misleading."
   };
 
   return (
     <>
         <div class={styles.distributionBox}>
             <div className={styles.lightBulb}>
-                <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
+                <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
             </div>
             <p className={styles.distributionBoxText}>
                 {categoryTexts[category]}
+                {' '}<a href="https://forum.weaudit.org/t/learn-about-algorithmic-bias-categories-with-real-life-examples/307" className={styles.learnMoreLink}>Learn more about AI bias</a>
             </p>
         </div>
         <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
