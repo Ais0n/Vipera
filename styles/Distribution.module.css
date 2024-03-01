@@ -44,7 +44,8 @@
     padding: 0 10px; /* Add padding on the sides */
   }
 
-  .distributionBoxText {
+  .distributionBoxText,
+  .learnMoreLink {
     font-size: 13px;
   }
 }

@@ -1,19 +1,26 @@
 // pages/decoupled.js
+
 import APIService from '../api/APIService';
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
 import Header from '../components/Header';
 import Analyze from '../components/Analyze';
-import AnalyzeStyle from '../styles/Analyze.module.css';
+import GenerateState from '../components/GenerateState';
+import style from '../styles/GeneratePage.module.css';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDoneGenerating, setIsDoneGenerating] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
+
+  const handleRefreshClick = () => {
+    handleGenerateClick(promptStr);
+  };
 
   const handleGenerateClick = async (userInput) => {
     if (isGenerating || userInput.trim() === "") {
@@ -22,6 +29,7 @@ const Generate = () => {
     }
 
     setIsGenerating(true);
+    setIsDoneGenerating(false);
     setError('');
     
     // ----- Decoupled Images API Logic ----- //
@@ -52,7 +60,7 @@ const Generate = () => {
       console.log("Predict API Response:", predictData); // Print the entire API response
       //predict data is a list of strings (urls of images)
       setImages(predictData); // Update the img data
-      
+      setIsDoneGenerating(true);
       /*testing*/
       // const imgs = ["https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/D2PNBXYCDE52.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/JOB1MELWFN9O.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/OZMBL5KNA0KC.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/B7R70L1P2L43.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/ID437Y9727LA.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/8BDXCVXYY24B.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/EZPJM7ZHPRQM.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/F27MQHRSYVAH.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/NW0MNSFEYV3K.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/IVFFFOYIW9DL.png"]
       // setImages(imgs);
@@ -144,17 +152,22 @@ const Generate = () => {
   return (
     <div>
       <Header />
+      <h1 className={style.mainTitle}>Ouroboros</h1>
+      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
+      {/* {images.length <= 0 && (
+        <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
       {isGenerating ? (
-        <div className={AnalyzeStyle.loadingContainer}>
-          <div className={AnalyzeStyle.loadingGIF}>
-            <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+        <>
+          <div className={style.loadingContainer}>
+            <div className={style.loadingSnake}></div>
+            <div className={style.loadingText}>
+                Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+            </div>
           </div>
-          <div className={AnalyzeStyle.loadingText}>
-              Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
-          </div>
-      </div>
+        </>
       ) : (
         images.length > 0 && (
           <>
@@ -164,6 +177,7 @@ const Generate = () => {
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
               resultPrompt={promptStr}
+              onRefreshClick={handleRefreshClick}
             />
           </>
         )
