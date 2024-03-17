@@ -55,7 +55,8 @@
     padding: 0 10px; /* Add padding on the sides */
   }
 
-  .imageBoxText {
+  .imageBoxText,
+  .learnMoreLink {
     font-size: 13px;
   }
 
