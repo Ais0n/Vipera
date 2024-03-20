@@ -6,12 +6,16 @@ import SearchBar from '../components/SearchBar';
 
 import Header from '../components/Header';
 import Analyze from '../components/Analyze';
+import AnalyzeImages from '../components/AnalyzeImages';
+import AnalyzeDistribution from '../components/AnalyzeDistribution';
 import GenerateState from '../components/GenerateState';
 import style from '../styles/GeneratePage.module.css';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDoneGenerating, setIsDoneGenerating] = useState(false);
+  const [isDoneImage, setIsDoneImage] = useState(false);
+  const [isDoneDistribution, setIsDoneDistribution] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
@@ -30,6 +34,10 @@ const Generate = () => {
 
     setIsGenerating(true);
     setIsDoneGenerating(false);
+    //keeps track of if images done generating
+    setIsDoneImage(false); 
+    setIsDoneDistribution(false); 
+
     setError('');
     
     // ----- Decoupled Images API Logic ----- //
@@ -62,6 +70,8 @@ const Generate = () => {
       //predict data is a list of strings (urls of images)
       setImages(predictData); // Update the img data
       setIsDoneGenerating(true);
+      //image done generating, display immediately
+      setIsDoneImage(true); 
     }
     catch{
       console.error("API Error:", error);
@@ -98,12 +108,12 @@ const Generate = () => {
         gender: oroResult.gender,
         skinTone: oroResult.skinTone
       });
-
     } catch (error) {
       console.error("API Error:", error);
       setError('Failed to generate distribution. Please try again.');
     } finally {
       setIsGenerating(false);
+      setIsDoneDistribution(true); 
     }
     
   };
@@ -118,31 +128,45 @@ const Generate = () => {
       )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       {error && <p>{error}</p>}
-      {isGenerating ? (
-        <>
+      {isDoneDistribution ? (
+        images.length > 0 && (
+          <>
+              <AnalyzeDistribution
+                  images={images}
+                  distribution={distribution}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={setSelectedCategory}
+                  resultPrompt={promptStr}
+                  onRefreshClick={handleRefreshClick}
+              />
+          </>
+      )
+    ) :isDoneImage ? (
+        images.length > 0 && (
+              <>
+                  <AnalyzeImages
+                      images={images}
+                      distribution={distribution}
+                      selectedCategory={selectedCategory}
+                      onSelectCategory={setSelectedCategory}
+                      resultPrompt={promptStr}
+                      onRefreshClick={handleRefreshClick}
+                  />
+              </>
+          )
+      ) : (
+        isGenerating && (
           <div className={style.loadingContainer}>
             <div className={style.loadingSnake}></div>
             <div className={style.loadingText}>
-                Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+              Loading...Stable Diffusion is working hard to generate realistic images. May take up to a minute.
             </div>
-          </div>
-        </>
-      ) : (
-        images.length > 0 && (
-          <>
-            <Analyze
-              images={images}
-              distribution={distribution}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              resultPrompt={promptStr}
-              onRefreshClick={handleRefreshClick}
-            />
-          </>
+        </div>
         )
       )}
     </div>
   );
+
 };
 
 export default Generate;
