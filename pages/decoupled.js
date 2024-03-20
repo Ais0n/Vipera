@@ -42,6 +42,7 @@ const Generate = () => {
       prompt: userInput,
       num: 9
     };
+    let predictData;
     setPromptStr(userInput);
     try {
       const predictResponse = await fetch(predict_lambda_url, {
@@ -56,17 +57,20 @@ const Generate = () => {
         throw new Error(`HTTP predict error! status: ${predictResponse.status}`);
       }
 
-      const predictData = await predictResponse.json();
+      predictData = await predictResponse.json();
       console.log("Predict API Response:", predictData); // Print the entire API response
       //predict data is a list of strings (urls of images)
       setImages(predictData); // Update the img data
       setIsDoneGenerating(true);
-      /*testing*/
-      // const imgs = ["https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/D2PNBXYCDE52.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/JOB1MELWFN9O.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/OZMBL5KNA0KC.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/B7R70L1P2L43.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/ID437Y9727LA.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/8BDXCVXYY24B.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/EZPJM7ZHPRQM.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/F27MQHRSYVAH.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/NW0MNSFEYV3K.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/IVFFFOYIW9DL.png"]
-      // setImages(imgs);
-      
-      //start of ouroboros api 
-      //currently, both api calls are in the same try catch statment but could be separated in the future
+    }
+    catch{
+      console.error("API Error:", error);
+      setError('Failed to generate images. Please try again.');
+    }
+
+
+    //generating distribution
+    try{
       const oroRequestData = {
         imgs: predictData
       };
@@ -97,56 +101,11 @@ const Generate = () => {
 
     } catch (error) {
       console.error("API Error:", error);
-      setError('Failed to generate images. Please try again.');
+      setError('Failed to generate distribution. Please try again.');
     } finally {
       setIsGenerating(false);
     }
-    // ----- END Decoupled Images API Logic ----- //
-  
-    /*
-    // ----- Original Images API Logic ----- //
-    // Define the data structure for the API request
-    const requestData = {
-      promptStr: userInput
-    };
-
-    setPromptStr(userInput); // Set the prompt string when generation is initiated
-
-    try {
-      const response = await fetch("http://18.224.86.65:5001/ouroboros", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data); // Print the entire API response
-
-      const result = data[0];
-
-      setImages(result.imgs); // Update the img data
-      
-      setDistribution({ // Update the distribution data
-        age: result.age,
-        gender: result.gender,
-        skinTone: result.skinTone
-      });
-
-    } catch (error) {
-      console.error("API Error:", error);
-      setError('Failed to generate images. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-
-    // ----- END Original Images API Logic ----- //
-    */
+    
   };
 
   return (
