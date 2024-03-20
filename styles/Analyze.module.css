@@ -71,4 +71,8 @@
     .greyBgContent {
         flex-direction: column; /* Stack children vertically */
     }
+    
+    .analyzeContent {
+        margin-left: 15px;
+    }
 }

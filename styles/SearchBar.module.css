@@ -14,7 +14,7 @@
 
 .generateLabel {
   color: var(--black, #000);
-  font-family: 'Roboto', sans-serif;
+  font: Roboto;
   font-size: 32px;
   font-weight: 600;
   line-height: 40px;
@@ -22,15 +22,60 @@
   padding-left: 15px; /* aligns with the start of searchBar */
 }
 
-.inputAndButtonsContainer {
+.descriptionAndsdContainer {
+  align-self: flex-start;
   display: flex;
-  justify-content: space-between; /* This might need to change to 'flex-start' with gaps to ensure proper alignment */
+  flex-direction: row; /* Stack children horizontally */
+  justify-content: space-between; /* This will put maximum space between children */
+  align-items: center; /* Vertically center align items */
+  padding-left: 15px; /* Padding on the left */
+  padding-right: 15px; /* Padding on the right to ensure the button does not touch the edge */
+  width: 100%; /* Take full width to ensure the children can be spaced properly */
+  margin-top: 18px;
+}
+
+.description {
+  font: Roboto;
+  font-weight: 600;
+  color: #676767;
+  display: flex;
+}
+
+.sdButton {
+  display: flex;
   align-items: center;
-  width: 100%; /* Make width responsive */
-  max-width: 1350px; /* Optional: Set a max-width for large screens */
-  padding-left: 15px; /* Adjust this value to ensure alignment with the label above */
-  padding-right: 15px; /* Adjust this value to maintain symmetry */
-  box-sizing: border-box; /* Ensure padding is included in the width */
+  gap: 10px;
+  border-radius: 8px;
+  background: #F5F5F5;
+  padding: 0px 10px;
+  height: 42.67px;
+  border: none;
+  text-decoration: none;
+  align-self: flex-end;
+}
+
+.sdButtonText {
+  transform: rotate(0.333deg);
+  color: var(--Gray-2, #797B7B);
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.sdButton:hover {
+  background-color: #333333; /* Darker background on hover */
+}
+
+.generateContainer {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: row; /* Stack children horizontally */
+  position: relative;
+  align-self: flex-start;
+  padding-left: 15px; /* aligns with the start of searchBar */
+  width: 100%;
 }
 
 .searchBar {
@@ -38,8 +83,7 @@
   height: 64px;
   border: 1px solid #A4ACA8;
   background: #FFF;
-  margin-top: 58.67px;
-  margin-right: 13px; /* Ensure this margin matches the gap you want between searchBar and searchButton */
+  margin-right: 13px; /* gap with searchButton */
   padding-left: 30px;
   font-family: Roboto;
   font-size: 14px;
@@ -57,17 +101,9 @@
   line-height: 20px;
 }
 
-.buttonsContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
 .searchButton {
   width: 179px;
   height: 65px;
-  margin-left: 13px; /* Space between search bar and button */
-  margin-top: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -88,39 +124,64 @@
   background-color: #333333; /* Darker background on hover */
 }
 
-.sdButton {
+/* example prompts */
+.examplePromptsContainer {
+  display: flex;
+  flex-direction: row; /* Stack children horitzontally */
+  position: relative;
+  margin-top: 20px;
+  align-self: flex-start;
+  padding-left: 15px; /* aligns with the start of searchBar */
+  align-items: center;
+}
+
+.promptSuggestionsText {
+  color: #000000;
+  font: Roboto;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.examplePrompts {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 10px;
-  border-radius: 8px;
-  background: #F5F5F5;
-  width: 135.13px;
-  height: 42.67px;
+  margin-left: 22px;
+}
+
+.examplePromptButton {
+  background-color: #FB9600;
+  color: white;
   border: none;
-  text-decoration: none;
-}
-
-.sdButtonText {
-  transform: rotate(0.333deg);
-  color: var(--Gray-2, #797B7B);
-  font-family: Roboto;
+  padding: 10px 20px;
+  margin: 0 4px;
+  cursor: pointer;
+  font-weight: 400;
   font-size: 14px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 22px;
+  font: Inter;
 }
 
-.sdButton:hover {
-  background-color: #333333; /* Darker background on hover */
+.examplePromptButton:last-child {
+  margin-right: 0;
 }
 
 @media screen and (max-width: 670px) {
   .sdButton {
     width: 80px;
+    margin-left: 10px;
   }
 
   .searchButton {
     width: 120px;
+    margin-left: 10px;
+  }
+
+  .sdButtonText {
+    font-size: 11px;
+    line-height: 12px;
+  }
+
+  .examplePromptButton {
+    padding: 5px, 5px;
+    font-size: 10px;
   }
 }
