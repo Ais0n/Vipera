@@ -8,6 +8,7 @@
   width: 321px;
   height: 80px;
   position: relative; /* No need to change this */
+  text-decoration: none;
 }
 
 .container_ouroboros a,
@@ -34,12 +35,18 @@
   text-decoration: none;
 }
 
+.no_underline {
+  text-decoration: none;
+}
+
 .text_ouroboros {
   color: white;
+  text-decoration: none;
 }
 
 .text_df {
   color: black;
+  text-decoration: none;
 }
 
 .icon {

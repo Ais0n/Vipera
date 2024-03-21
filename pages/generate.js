@@ -6,6 +6,7 @@ import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import Analyze from '../components/Analyze';
 import GenerateState from '../components/GenerateState';
+import Footer from '../components/Footer';
 import style from '../styles/GeneratePage.module.css';
 
 const Generate = () => {
@@ -102,6 +103,7 @@ const Generate = () => {
       setIsGenerating(false);
     }
   };
+  //document.body.style.margin = 0;
 
   return (
     <div>
@@ -118,7 +120,8 @@ const Generate = () => {
           <div className={style.loadingContainer}>
             <div className={style.loadingSnake}></div>
             <div className={style.loadingText}>
-                Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+                <div className={style.loadingTextItem}>Loading...</div>
+                <div className={style.loadingTextItem}>Stable Diffusion is working hard to generate realistic images for you!</div>
             </div>
           </div>
         </>
@@ -136,6 +139,7 @@ const Generate = () => {
           </>
         )
       )}
+      <Footer />
     </div>
   );
 };

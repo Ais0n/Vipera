@@ -103,7 +103,7 @@ const Distributions = ({distribution, category}) => {
 
   return (
     <>
-        <div class={styles.distributionBox}>
+        <div className={styles.distributionBox}>
             <div className={styles.lightBulb}>
                 <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
             </div>

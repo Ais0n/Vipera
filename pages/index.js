@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import HomeDescription from '../components/HomeDescription';
 import GoToOuroboros from '../components/GoToOuroboros';
 import GoToDiscussionForum from '../components/GoToDiscussionForum';
+import Footer from '../components/Footer';
 
 // test
 export default function Home() {
@@ -38,7 +39,9 @@ export default function Home() {
 
       </main>
 
-      <footer>
+      <Footer />
+
+      {/* <footer>
         <a
           href="https://google.com"
           target="_blank"
@@ -47,7 +50,7 @@ export default function Home() {
           Powered by{' '}
           <img src="" alt="logo" className={styles.logo} />
         </a>
-      </footer> 
+      </footer>  */}
 
       <style jsx>{`
         main {
@@ -96,8 +99,8 @@ export default function Home() {
       <style jsx global>{`
         html,
         body {
-          padding: 0;
-          margin: 0;
+          padding: 0%;
+          margin: 0%;
           font-family:
             -apple-system,
             BlinkMacSystemFont,

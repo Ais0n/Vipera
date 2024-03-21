@@ -6,7 +6,7 @@ import styles from '../styles/HomeDescription.module.css';
 const HomeDescription = () => {
     return (
       <>
-        <div class={styles.imageBox}>
+        <div className={styles.imageBox}>
             <div className={styles.lightBulb}>
               <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
             </div>
