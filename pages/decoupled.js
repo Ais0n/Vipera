@@ -28,7 +28,7 @@ const Generate = () => {
 
   const handleGenerateClick = async (userInput) => {
     if (isGenerating || userInput.trim() === "") {
-      console.log("Either generation in progress or user input is empty.");
+      console.debug("Either generation in progress or user input is empty.");
       return;
     }
 
@@ -66,7 +66,7 @@ const Generate = () => {
       }
 
       predictData = await predictResponse.json();
-      console.log("Predict API Response:", predictData); // Print the entire API response
+      console.debug("Predict API Response:", predictData); // Print the entire API response
       //predict data is a list of strings (urls of images)
       setImages(predictData); // Update the img data
       setIsDoneGenerating(true);
@@ -84,7 +84,7 @@ const Generate = () => {
       const oroRequestData = {
         imgs: predictData
       };
-      console.log("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
+      console.debug("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
       const oroResponse = await fetch(ouroboros_api_new_url, {
         method: "POST",
         headers: {
@@ -96,10 +96,10 @@ const Generate = () => {
       if (!oroResponse.ok) {
         throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
       }
-      console.log("success in oro response");
+      console.debug("success in oro response");
 
       const oroData = await oroResponse.json();
-      console.log("Oro API Response:", oroData); // Print the entire API response
+      console.debug("Oro API Response:", oroData); // Print the entire API response
 
       const oroResult = oroData[0];
 
@@ -108,12 +108,13 @@ const Generate = () => {
         gender: oroResult.gender,
         skinTone: oroResult.skinTone
       });
+      //only allow for distribution if non error
+      setIsDoneDistribution(true); 
     } catch (error) {
       console.error("API Error:", error);
       setError('Failed to generate distribution. Please try again.');
     } finally {
       setIsGenerating(false);
-      setIsDoneDistribution(true); 
     }
     
   };
@@ -159,7 +160,7 @@ const Generate = () => {
           <div className={style.loadingContainer}>
             <div className={style.loadingSnake}></div>
             <div className={style.loadingText}>
-              Loading...Stable Diffusion is working hard to generate realistic images. May take up to a minute.
+              Please wait...Stable Diffusion is working hard to generate realistic images. May take up to a minute.
             </div>
         </div>
         )
