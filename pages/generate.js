@@ -17,6 +17,7 @@ const Generate = () => {
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
+  const [postDone, setPostDone] = useState(false);
 
   const handleRefreshClick = () => {
     handleGenerateClick(promptStr);
@@ -109,7 +110,7 @@ const Generate = () => {
     <div>
       <Header />
       <h1 className={style.mainTitle}>Ouroboros</h1>
-      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
+      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} isPostDone={postDone} />
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
@@ -140,7 +141,32 @@ const Generate = () => {
         )
       )}
       <Footer />
+
+      <style jsx global>{`
+        html,
+        body {
+          padding: 0;
+          margin: 0;
+          font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            Segoe UI,
+            Roboto,
+            Oxygen,
+            Ubuntu,
+            Cantarell,
+            Fira Sans,
+            Droid Sans,
+            Helvetica Neue,
+            sans-serif;
+        }
+        * {
+          box-sizing: border-box;
+        }
+      `}</style>
     </div>
+
+    
   );
 };
 

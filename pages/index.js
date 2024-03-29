@@ -9,19 +9,19 @@ import Footer from '../components/Footer';
 // test
 export default function Home() {
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Ouroboros</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
-      <main>
+        <div className={styles.bgImage}>
+          <img src={'/ouroborosbg.png'} alt="bg" />
+        </div>
         <div className={styles.mainContainer}>
           <div className={styles.titleContainer}>
-            <h1 className={styles.title}>
               Fight harmful bias in AI,<br></br>
               with data.
-            </h1>
           </div>
           <div className={styles.descriptionContainer}>
               <HomeDescription />
@@ -37,7 +37,6 @@ export default function Home() {
 
         </div>
 
-      </main>
 
       <Footer />
 
@@ -99,8 +98,8 @@ export default function Home() {
       <style jsx global>{`
         html,
         body {
-          padding: 0%;
-          margin: 0%;
+          padding: 0;
+          margin: 0;
           font-family:
             -apple-system,
             BlinkMacSystemFont,

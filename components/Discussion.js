@@ -6,9 +6,13 @@ import styles from '../styles/Discussion.module.css';
 
 const Discussion = ({ resultPrompt }) => {
   const [isThreadVisible, setThreadVisible] = useState(false);
+  const [postDone, setPostDone] = useState(false);
 
   const handleStartDiscussion = () => setThreadVisible(true);
-  const handleCloseThread = () => setThreadVisible(false);
+  const handleCloseThread = () => {
+    setThreadVisible(false);
+    setPostDone(true);
+  };
 
   return (
     <div className={styles.discussionContainer}>

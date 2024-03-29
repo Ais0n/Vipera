@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import styles from '../styles/GenerateState.module.css';
 
-const GenerateState = ({ isGenerating, isDoneGenerating }) => {
+const GenerateState = ({ isGenerating, isDoneGenerating, isPostDone }) => {
     if (!isGenerating && !isDoneGenerating) {
         return (
             <div className={styles.stateContainer}>
@@ -44,7 +44,7 @@ const GenerateState = ({ isGenerating, isDoneGenerating }) => {
             </div>
         )
     }
-    else if (isDoneGenerating) {
+    else if (isDoneGenerating && isPostDone) {
         return (
             <div className={styles.stateContainer}>
                 <div className={styles.stateContainerChild}>

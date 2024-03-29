@@ -2,28 +2,26 @@
 
 .imageBox {
     display: flex;
-    align-items: left;
-    width: 766px;
-    height: 76px;
+    width: 56vw;
+    height: 10vh;
     background: white;
     /* margin-top: 48px; /* space from category button */
-    /* padding-left: 10px; */ 
   }
   
   .imageBoxText {
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 2.6vh;
     color: black;
-    margin-left: 10px; /* Spacing between icon and text */
-    margin-top: 8px;
+    margin-left: .7vw; /* Spacing between icon and text */
+    margin-top: 1vh;
   }
   
   .lightBulb {
-    margin-left: 8px;
-    margin-top: 15px;
-    flex-shrink: 0; /* Prevent icon from shrinking */
+    margin-left: .7vw;
+    margin-top: 2vh;
+    /* flex-shrink: 0; Prevent icon from shrinking */
   }
   
 

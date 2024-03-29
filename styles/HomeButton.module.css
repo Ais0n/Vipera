@@ -5,8 +5,8 @@
   display: flex; /* Use flexbox for layout */
   align-items: center; /* Center items vertically */
   justify-content: flex-start; /* Align items to the left */
-  width: 321px;
-  height: 80px;
+  width: 22vw;
+  height: 12vh;
   position: relative; /* No need to change this */
   text-decoration: none;
 }
@@ -28,7 +28,7 @@
 .text_ouroboros,
 .text_df {
   font-family: 'Roboto', sans-serif;
-  font-size: 20px;
+  font-size: 1.4vw;
   font-weight: 600;
   line-height: 26px;
   margin-left: 10px;

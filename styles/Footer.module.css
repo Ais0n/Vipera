@@ -4,6 +4,8 @@
     width: 100%;
     font-family: 'Roboto', sans-serif;
     padding-bottom: 69px;
+    position: relative;
+    margin-top: 375px;
 }
 
 .leftFrame {
