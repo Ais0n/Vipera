@@ -31,9 +31,9 @@
   width: 56vw;
   height: 24vh;
   font-family: 'Roboto', sans-serif;
-  font-size: 5vw;
+  font-size: min(5vw, 14vh);
   font-weight: 600;
-  line-height: 12vh;
+  line-height: min(6.7vw, 12vh);
   letter-spacing: 0em;
   text-align: center;
   white-space: nowrap;

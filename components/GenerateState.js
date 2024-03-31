@@ -64,6 +64,26 @@ const GenerateState = ({ isGenerating, isDoneGenerating, isPostDone }) => {
             </div>
         )
     }
+    else {
+        return (
+            <div className={styles.stateContainer}>
+                <div className={styles.stateContainerChild}>
+                    <img src={'/generate-svg/generateblack-analyseorange.svg'} alt="currently generating state" />
+                    <div className={styles.stateLabels}>
+                        <div className={styles.item1}>
+                            Generate
+                        </div>
+                        <div className={styles.item2}>
+                            Analyze
+                        </div>
+                        <div className={styles.item3}>
+                            Post
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
 }
 

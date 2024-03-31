@@ -10,7 +10,7 @@
   
   .imageBoxText {
     font-family: 'Roboto', sans-serif;
-    font-size: 14px;
+    font-size: min(1vw, 2vh);
     font-weight: 400;
     line-height: 2.6vh;
     color: black;
@@ -21,6 +21,7 @@
   .lightBulb {
     margin-left: .7vw;
     margin-top: 2vh;
+    margin-right: .7vw;
     /* flex-shrink: 0; Prevent icon from shrinking */
   }
   

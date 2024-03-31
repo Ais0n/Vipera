@@ -19,7 +19,7 @@ class APIService {
 
   constructor() {
     fal.config({
-      credentials:
+      credentials: ""
     });
 }
     // Generate a random seed within the specified range

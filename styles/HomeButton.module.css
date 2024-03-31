@@ -28,7 +28,7 @@
 .text_ouroboros,
 .text_df {
   font-family: 'Roboto', sans-serif;
-  font-size: 1.4vw;
+  font-size: min(1.4vw, 3vh);
   font-weight: 600;
   line-height: 26px;
   margin-left: 10px;
@@ -50,13 +50,17 @@
 }
 
 .icon {
-  margin-left: 48px;
-  margin-top: 5px;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  margin-left: min(3.5vw, 5vh);
+  margin-top: min(.26vw, .5vh);
+  width: 3.1vw;
+  height: 5vh;
+/* flex-shrink: 0; Prevent icon from shrinking */
 }
 
 .icon_df {
   margin-left: 46px;
   margin-top: 10px;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  width: 3.1vw;
+  height: 5vh;
+  /* flex-shrink: 0; Prevent icon from shrinking */
 }
