@@ -6,7 +6,7 @@ import styles from '../styles/ImageGrid.module.css';
 const ImageGrid = ({ images }) => {
     return (
       <>
-        <div class={styles.imageBox}>
+        <div className={styles.imageBox}>
           <div className={styles.lightBulb}>
             <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
           </div>

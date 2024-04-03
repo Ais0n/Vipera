@@ -4,7 +4,7 @@
   margin-top: 29px;
   width: 189px;
   height: 52px;
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 40px;
   font-weight: 600;
   line-height: 52px;
@@ -22,17 +22,22 @@
 }
 
 .loadingText {
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 20px; /* Consider using 'vw' or 'em' for scalable text */
   font-weight: 600;
   line-height: 26px;
   letter-spacing: 0em;
   text-align: center;
   color: #838383;
-  margin-top: 18px;
   margin-left: auto; /* Center horizontally */
   margin-right: auto; /* Center horizontally */
   padding: 0 10px; /* Add padding to maintain spacing on smaller screens */
+  padding-bottom: 100px;
+}
+
+.loadingTextItem {
+  margin-top: 18px;
+  width: 334px;
 }
 
 @keyframes rotate-animation {

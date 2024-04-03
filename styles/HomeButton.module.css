@@ -5,9 +5,10 @@
   display: flex; /* Use flexbox for layout */
   align-items: center; /* Center items vertically */
   justify-content: flex-start; /* Align items to the left */
-  width: 321px;
-  height: 80px;
+  width: 22vw;
+  height: 12vh;
   position: relative; /* No need to change this */
+  text-decoration: none;
 }
 
 .container_ouroboros a,
@@ -27,29 +28,39 @@
 .text_ouroboros,
 .text_df {
   font-family: 'Roboto', sans-serif;
-  font-size: 20px;
+  font-size: min(1.4vw, 3vh);
   font-weight: 600;
   line-height: 26px;
   margin-left: 10px;
   text-decoration: none;
 }
 
+.no_underline {
+  text-decoration: none;
+}
+
 .text_ouroboros {
   color: white;
+  text-decoration: none;
 }
 
 .text_df {
   color: black;
+  text-decoration: none;
 }
 
 .icon {
-  margin-left: 48px;
-  margin-top: 5px;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  margin-left: min(3.5vw, 5vh);
+  margin-top: min(.26vw, .5vh);
+  width: 3.1vw;
+  height: 5vh;
+/* flex-shrink: 0; Prevent icon from shrinking */
 }
 
 .icon_df {
   margin-left: 46px;
   margin-top: 10px;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  width: 3.1vw;
+  height: 5vh;
+  /* flex-shrink: 0; Prevent icon from shrinking */
 }

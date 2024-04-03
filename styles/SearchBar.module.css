@@ -57,7 +57,7 @@
 .sdButtonText {
   transform: rotate(0.333deg);
   color: var(--Gray-2, #797B7B);
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 600;
@@ -85,7 +85,7 @@
   background: #FFF;
   margin-right: 13px; /* gap with searchButton */
   padding-left: 30px;
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -94,7 +94,7 @@
 
 .searchBar::placeholder {
   color: #C9C9C9;
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -113,7 +113,7 @@
 }
 
 .searchButtonText {
-  font-family: Roboto, sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 600;

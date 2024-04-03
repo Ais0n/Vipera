@@ -4,23 +4,24 @@ import Header from '../components/Header';
 import HomeDescription from '../components/HomeDescription';
 import GoToOuroboros from '../components/GoToOuroboros';
 import GoToDiscussionForum from '../components/GoToDiscussionForum';
+import Footer from '../components/Footer';
 
 // test
 export default function Home() {
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Ouroboros</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
-      <main>
+        <div className={styles.bgImage}>
+          <img src={'/ouroborosbg.png'} alt="bg" />
+        </div>
         <div className={styles.mainContainer}>
           <div className={styles.titleContainer}>
-            <h1 className={styles.title}>
               Fight harmful bias in AI,<br></br>
               with data.
-            </h1>
           </div>
           <div className={styles.descriptionContainer}>
               <HomeDescription />
@@ -36,9 +37,10 @@ export default function Home() {
 
         </div>
 
-      </main>
 
-      <footer>
+      <Footer />
+
+      {/* <footer>
         <a
           href="https://google.com"
           target="_blank"
@@ -47,7 +49,7 @@ export default function Home() {
           Powered by{' '}
           <img src="" alt="logo" className={styles.logo} />
         </a>
-      </footer> 
+      </footer>  */}
 
       <style jsx>{`
         main {

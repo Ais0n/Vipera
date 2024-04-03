@@ -6,14 +6,16 @@ import styles from '../styles/HomeButton.module.css';
 const GoToOuroboros = () => {
     return (
       <>
-        <div class={styles.container_ouroboros}>
+      <a className={styles.no_underline} href="generate">
+        <div className={styles.container_ouroboros}>
             <div className={styles.icon}>
                 <img src={'/Obby.svg'} alt="obby" />
             </div>
-            <a href="generate" className={styles.text_ouroboros}>
-                Go to Ouroboros
-            </a>
+            <div className={styles.text_ouroboros}>
+              Go to Ouroboros
+            </div>            
         </div>
+      </a>
       </>
     );
 };
