@@ -124,7 +124,7 @@
 }
 
 .trendingImageWrapper {
-  margin: 32px;
+  margin: 16px;
   overflow: hidden; /* Ensures content fits within the borders */
 }
 
