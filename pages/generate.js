@@ -19,6 +19,12 @@ const Generate = () => {
   const [promptStr, setPromptStr] = useState('');
   const [postDone, setPostDone] = useState(false);
 
+  const TRENDING_IMAGES = [
+    { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
+    { id: 'post2', src: '/post2.svg', alt: 'Post 2' },
+    { id: 'post3', src: '/post3.svg', alt: 'Post 3' }
+  ];
+
   const handleRefreshClick = () => {
     handleGenerateClick(promptStr);
   };
@@ -115,6 +121,18 @@ const Generate = () => {
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      {!isGenerating && images.length <= 0 && (
+        <div className={style.trendingContainer}>
+          <h2 className={style.trendingTitle}>Trending discussion posts</h2>
+          <div className={style.trendingPosts}>
+            {TRENDING_IMAGES.map(image => (
+              <div key={image.id} className={style.trendingImageWrapper}>
+                <img src={image.src} alt={image.alt} className={style.trendingImage} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {error && <p>{error}</p>}
       {isGenerating ? (
         <>

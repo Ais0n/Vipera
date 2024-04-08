@@ -1,3 +1,5 @@
+/* Footer.module.css */
+
 .footerContainer {
     display: flex;
     background-color: #222222;
@@ -5,7 +7,7 @@
     font-family: 'Roboto', sans-serif;
     padding-bottom: 69px;
     position: relative;
-    margin-top: 375px;
+    margin-top: 91px;
 }
 
 .leftFrame {

@@ -8,18 +8,17 @@
   margin-top: 53px; /* Space from the header */
   margin-left: auto;
   margin-right: auto;
-  width: 85%; /* Use 100% of parent container */
+  width: 80%; /* Use 100% of parent container */
   max-width: 1350px; /* Keep the max-width to prevent it from getting too wide */
 }
 
 .generateLabel {
   color: var(--black, #000);
-  font: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-size: 32px;
   font-weight: 600;
   line-height: 40px;
   align-self: flex-start;
-  padding-left: 15px; /* aligns with the start of searchBar */
 }
 
 .descriptionAndsdContainer {
@@ -28,7 +27,6 @@
   flex-direction: row; /* Stack children horizontally */
   justify-content: space-between; /* This will put maximum space between children */
   align-items: center; /* Vertically center align items */
-  padding-left: 15px; /* Padding on the left */
   padding-right: 15px; /* Padding on the right to ensure the button does not touch the edge */
   width: 100%; /* Take full width to ensure the children can be spaced properly */
   margin-top: 18px;
@@ -74,7 +72,6 @@
   flex-direction: row; /* Stack children horizontally */
   position: relative;
   align-self: flex-start;
-  padding-left: 15px; /* aligns with the start of searchBar */
   width: 100%;
 }
 
@@ -84,7 +81,7 @@
   border: 1px solid #A4ACA8;
   background: #FFF;
   margin-right: 13px; /* gap with searchButton */
-  padding-left: 30px;
+  padding-left: 30px; /* inner padding for prompt input */
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
   font-style: normal;
@@ -131,7 +128,6 @@
   position: relative;
   margin-top: 20px;
   align-self: flex-start;
-  padding-left: 15px; /* aligns with the start of searchBar */
   align-items: center;
 }
 
