@@ -1,13 +1,12 @@
-.bgImage {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
-}
+/* Home.module.css */
 
-.container {
-  min-height: 100vh;
+.bgImage {
+  background-image: url('/ouroborosbg.png'); /* Set the background image */
+  background-size: cover; /* Cover the entire area */
+  background-position: center; /* Center the background image */
+  position: relative;
+  height: 100vh; /* Full height of the viewport or as needed */
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -15,11 +14,6 @@
 .mainContainer {
   display: flex;
   flex-direction: column;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 14vw;
-  width: 66vw;
-  height: 75vh;
   background-color: white;
   padding: 10vh 4.68vw 10vh 4.68vw;
   justify-content: center;
@@ -61,4 +55,81 @@
 
 .genPageButton2 {
   padding-left: 32px;
+}
+
+.firstTitle {
+  display: flex;
+  font-family: 'Roboto', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.secondTitle {
+  display: flex;
+  font-family: 'Roboto', sans-serif;
+  font-size: 40px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Align children to the center for smaller screens */
+  position: relative;
+  margin-top: 134px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  max-width: 1350px;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: row; /* Stack children horizontally */
+  margin-top: 84px;
+}
+
+.stepImageWrapper {
+  margin: 8px;
+  overflow: hidden; /* Ensures content fits within the borders */
+}
+
+.stepImage {
+  display: block; /* Removes bottom margin/padding inherent to img */
+  width: 100%; /* Ensures the image fills the container */
+  height: auto; /* Keeps the image aspect ratio */
+}
+
+.trendingContainer {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Align children to the center for smaller screens */
+  position: relative;
+  margin-top: 135px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  max-width: 1350px;
+}
+
+.trendingPosts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: column;
+  margin-top: 84px;
+}
+
+.trendingImageWrapper {
+  margin: 16px;
+  overflow: hidden; /* Ensures content fits within the borders */
+}
+
+.trendingImage {
+  display: block; /* Removes bottom margin/padding inherent to img */
+  width: 100%; /* Ensures the image fills the container */
+  height: auto; /* Keeps the image aspect ratio */
 }

@@ -13,6 +13,43 @@
   margin-right: auto;
 }
 
+.trendingContainer {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Align children to the center for smaller screens */
+  position: relative;
+  margin-top: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  max-width: 1350px;
+}
+
+.trendingTitle {
+  display: flex;
+  align-self: flex-start;
+  font-family: 'Roboto', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.trendingPosts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.trendingImageWrapper {
+  margin: 14px;
+  overflow: hidden;
+}
+
+.trendingImage {
+  display: block; /* Removes bottom margin/padding inherent to img */
+  width: 100%; /* Ensures the image fills the container */
+  height: auto; /* Keeps the image aspect ratio */
+}
+
 .loadingContainer {
   display: flex;
   justify-content: center; /* Center orizontally */

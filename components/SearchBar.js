@@ -46,7 +46,7 @@ function SearchBar({ onGenerateClick, isGenerating }) {
       {showPrompts && (
         <div className={styles.examplePromptsContainer}>
           <div className={styles.promptSuggestionsText}>
-            Not sure how to write prompts?: Try these
+            Not sure how to write prompts? Try these:
           </div>
           <div className={styles.examplePrompts}>
             {['A Doctor', 'A kindergarten teacher', 'A rich American family', 'Thug'].map((prompt) => (
