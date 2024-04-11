@@ -66,6 +66,7 @@
   letter-spacing: 0em;
   text-align: center;
   color: #838383;
+  margin-top: 30px;
   margin-left: auto; /* Center horizontally */
   margin-right: auto; /* Center horizontally */
   padding: 0 10px; /* Add padding to maintain spacing on smaller screens */
