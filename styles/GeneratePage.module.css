@@ -23,6 +23,7 @@
   margin-right: auto;
   width: 80%;
   max-width: 1350px;
+  margin-bottom: 152px;
 }
 
 .trendingTitle {
@@ -56,6 +57,8 @@
   align-items: center; /* Center vertically */
   flex-direction: column;
   width: 100%; /* Take the full width of the parent element */
+  margin-top: 60px;
+  margin-bottom: 700px;
 }
 
 .loadingText {
@@ -66,6 +69,7 @@
   letter-spacing: 0em;
   text-align: center;
   color: #838383;
+  margin-top: 30px;
   margin-left: auto; /* Center horizontally */
   margin-right: auto; /* Center horizontally */
   padding: 0 10px; /* Add padding to maintain spacing on smaller screens */

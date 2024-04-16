@@ -121,6 +121,7 @@ const Generate = () => {
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      {error && <p>{error}</p>}
       {!isGenerating && images.length <= 0 && (
         <div className={style.trendingContainer}>
           <h2 className={style.trendingTitle}>Trending discussion posts</h2>

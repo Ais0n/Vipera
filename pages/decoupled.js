@@ -1,14 +1,13 @@
 // pages/decoupled.js
 
-import APIService from '../api/APIService';
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
 import Header from '../components/Header';
-import Analyze from '../components/Analyze';
 import AnalyzeImages from '../components/AnalyzeImages';
 import AnalyzeDistribution from '../components/AnalyzeDistribution';
 import GenerateState from '../components/GenerateState';
+import Footer from '../components/Footer';
 import style from '../styles/GeneratePage.module.css';
 
 const Generate = () => {
@@ -22,8 +21,19 @@ const Generate = () => {
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
 
+  const TRENDING_IMAGES = [
+    { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
+    { id: 'post2', src: '/post2.svg', alt: 'Post 2' },
+    { id: 'post3', src: '/post3.svg', alt: 'Post 3' }
+  ];
+
+  const ensureImagesSelected = () => {
+    setSelectedCategory('images');
+  };
+
   const handleRefreshClick = () => {
     handleGenerateClick(promptStr);
+    ensureImagesSelected();
   };
 
   const handleGenerateClick = async (userInput) => {
@@ -34,7 +44,6 @@ const Generate = () => {
 
     setIsGenerating(true);
     setIsDoneGenerating(false);
-    //keeps track of if images done generating
     setIsDoneImage(false); 
     setIsDoneDistribution(false); 
 
@@ -79,7 +88,7 @@ const Generate = () => {
     }
 
 
-    //generating distribution
+    // generating distribution
     try{
       const oroRequestData = {
         imgs: predictData
@@ -108,7 +117,7 @@ const Generate = () => {
         gender: oroResult.gender,
         skinTone: oroResult.skinTone
       });
-      //only allow for distribution if non error
+      // only allow for distribution if non error
       setIsDoneDistribution(true); 
     } catch (error) {
       console.error("API Error:", error);
@@ -127,34 +136,38 @@ const Generate = () => {
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected}/>
       {error && <p>{error}</p>}
-      {isDoneDistribution ? (
-        images.length > 0 && (
-          <>
-              <AnalyzeDistribution
-                  images={images}
-                  distribution={distribution}
-                  selectedCategory={selectedCategory}
-                  onSelectCategory={setSelectedCategory}
-                  resultPrompt={promptStr}
-                  onRefreshClick={handleRefreshClick}
-              />
-          </>
-      )
-    ) :isDoneImage ? (
-        images.length > 0 && (
-              <>
-                  <AnalyzeImages
-                      images={images}
-                      distribution={distribution}
-                      selectedCategory={selectedCategory}
-                      onSelectCategory={setSelectedCategory}
-                      resultPrompt={promptStr}
-                      onRefreshClick={handleRefreshClick}
-                  />
-              </>
-          )
+      {!isGenerating && images.length <= 0 && (
+        <div className={style.trendingContainer}>
+          <h2 className={style.trendingTitle}>Trending discussion posts</h2>
+          <div className={style.trendingPosts}>
+            {TRENDING_IMAGES.map(image => (
+              <div key={image.id} className={style.trendingImageWrapper}>
+                <img src={image.src} alt={image.alt} className={style.trendingImage} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {isDoneImage ? (
+        <AnalyzeImages
+            images={images}
+            distribution={distribution}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            resultPrompt={promptStr}
+            onRefreshClick={handleRefreshClick}
+        />
+      ) : isDoneDistribution ? (
+        <AnalyzeDistribution
+            images={images}
+            distribution={distribution}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            resultPrompt={promptStr}
+            onRefreshClick={handleRefreshClick}
+        />
       ) : (
         isGenerating && (
           <div className={style.loadingContainer}>
@@ -162,10 +175,35 @@ const Generate = () => {
             <div className={style.loadingText}>
               Please wait...Stable Diffusion is working hard to generate realistic images. May take up to a minute.
             </div>
-        </div>
+          </div>
         )
       )}
-    </div>
+    <Footer />
+
+    <style jsx global>{`
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          Segoe UI,
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          Fira Sans,
+          Droid Sans,
+          Helvetica Neue,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    `}</style>
+  </div>
+    
   );
 
 };

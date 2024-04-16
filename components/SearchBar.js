@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
 
-function SearchBar({ onGenerateClick, isGenerating }) {
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
   const [inputValue, setInputValue] = useState('');
   const [showPrompts, setShowPrompts] = useState(true); // show example prompts or not
 
@@ -11,6 +11,7 @@ function SearchBar({ onGenerateClick, isGenerating }) {
     event.preventDefault();
     onGenerateClick(inputValue);
     setShowPrompts(false);
+    ensureImagesSelected();
   };
 
   const handleExamplePromptClick = (prompt) => {
