@@ -11,6 +11,7 @@
     margin-left: auto; /* Center the section horizontally */
     margin-right: auto; /* Center the section horizontally */
     padding-top: 32px; /* Padding for top */
+    padding-bottom: 100px;
 }
 
 .greyBgContent {
@@ -28,7 +29,8 @@
     font-size: 32px;
     font-style: normal;
     font-weight: 600;
-    line-height: 40px; /* 125% */}
+    line-height: 40px; /* 125% */
+}
 
 .promptIconContainer {
     display: flex;
@@ -70,5 +72,9 @@
 @media screen and (max-width: 1090px) {
     .greyBgContent {
         flex-direction: column; /* Stack children vertically */
+    }
+    
+    .analyzeContent {
+        margin-left: 15px;
     }
 }

@@ -4,41 +4,72 @@ import Header from '../components/Header';
 import HomeDescription from '../components/HomeDescription';
 import GoToOuroboros from '../components/GoToOuroboros';
 import GoToDiscussionForum from '../components/GoToDiscussionForum';
+import Footer from '../components/Footer';
 
 // test
-export default function Home() {
+const Home = () => {
+  const STEPS_IMAGES = [
+    { id: 'step1', src: '/step1.svg', alt: 'Step 1' },
+    { id: 'step2', src: '/step2.svg', alt: 'Step 2' },
+    { id: 'step3', src: '/step3.svg', alt: 'Step 3' },
+  ];
+
+  const TRENDING_IMAGES = [
+    { id: 'homePost1', src: '/homePost1.svg', alt: 'Trending Post 1' },
+    { id: 'homePost2', src: '/homePost2.svg', alt: 'Trending Post 2' },
+  ];
+
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Ouroboros</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
-      <main>
-        <div className={styles.mainContainer}>
-          <div className={styles.titleContainer}>
-            <h1 className={styles.title}>
-              Fight harmful bias in AI,<br></br>
-              with data.
-            </h1>
-          </div>
-          <div className={styles.descriptionContainer}>
-              <HomeDescription />
-          </div>
-          <div className={styles.navButtons}>
-            <div className={styles.genPageButton1}>
-              <GoToOuroboros />
+        <div className={styles.bgImage}>
+          <div className={styles.mainContainer}>
+            <div className={styles.titleContainer}>
+                Fight harmful bias in AI,<br></br>
+                with data.
             </div>
-            <div className={styles.genPageButton2}>
-              <GoToDiscussionForum />
+            <div className={styles.descriptionContainer}>
+                <HomeDescription />
+            </div>
+            <div className={styles.navButtons}>
+              <div className={styles.genPageButton1}>
+                <GoToOuroboros />
+              </div>
+              <div className={styles.genPageButton2}>
+                <GoToDiscussionForum />
+              </div>
             </div>
           </div>
-
         </div>
+        <div className={styles.stepContainer}>
+          <div className={styles.firstTitle}>OUROBOROS</div>
+          <div className={styles.secondTitle}>3 Key Steps to Fight Bias</div>
+          <div className={styles.steps}>
+            {STEPS_IMAGES.map(image => (
+              <div key={image.id} className={styles.stepImageWrapper}>
+                <img src={image.src} alt={image.alt} className={styles.stepImage} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.trendingContainer}>
+          <div className={styles.firstTitle}>WEAUDIT</div>
+          <div className={styles.secondTitle}>Trending discussion posts</div>
+          <div className={styles.trendingPosts}>
+            {TRENDING_IMAGES.map(image => (
+              <div key={image.id} className={styles.trendingImageWrapper}>
+                <img src={image.src} alt={image.alt} className={styles.trendingImage} />
+              </div>
+            ))}
+          </div>
+        </div>
+      <Footer />
 
-      </main>
-
-      <footer>
+      {/* <footer>
         <a
           href="https://google.com"
           target="_blank"
@@ -47,7 +78,7 @@ export default function Home() {
           Powered by{' '}
           <img src="" alt="logo" className={styles.logo} />
         </a>
-      </footer> 
+      </footer>  */}
 
       <style jsx>{`
         main {
@@ -118,3 +149,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Home;

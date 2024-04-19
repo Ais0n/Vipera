@@ -126,21 +126,21 @@ const Distributions = ({ distribution, category }) => {
     };
 
     return (
-        <>
-            <div className={styles.distributionBox}>
-                <div className={styles.lightBulb}>
-                    <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
-                </div>
-                <p className={styles.distributionBoxText}>
-                    {categoryTexts[category]}
-                    {' '}<a href="https://forum.weaudit.org/t/learn-about-algorithmic-bias-categories-with-real-life-examples/307" className={styles.learnMoreLink}>Learn more about AI bias</a>
-                </p>
-            </div>
-            <div className={styles.gridContainer}>
-                {renderGrid()}   
-            </div>
-        </>
-      );
+      <>
+          <div className={styles.distributionBox}>
+              <div className={styles.lightBulb}>
+                  <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
+              </div>
+              <p className={styles.distributionBoxText}>
+                  {categoryTexts[category]}
+                  {' '}<a href="https://forum.weaudit.org/t/learn-about-algorithmic-bias-categories-with-real-life-examples/307" className={styles.learnMoreLink}>Learn more about AI bias</a>
+              </p>
+          </div>
+          <div className={styles.gridContainer}>
+              {renderGrid()}   
+          </div>
+      </>
+    );
 };
 
 export default Distributions;

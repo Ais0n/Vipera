@@ -1,27 +1,52 @@
 // pages/decoupled.js
-import APIService from '../api/APIService';
+
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
 import Header from '../components/Header';
-import Analyze from '../components/Analyze';
-import AnalyzeStyle from '../styles/Analyze.module.css';
+import AnalyzeImages from '../components/AnalyzeImages';
+import AnalyzeDistribution from '../components/AnalyzeDistribution';
+import GenerateState from '../components/GenerateState';
+import Footer from '../components/Footer';
+import style from '../styles/GeneratePage.module.css';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDoneGenerating, setIsDoneGenerating] = useState(false);
+  const [isDoneImage, setIsDoneImage] = useState(false);
+  const [isDoneDistribution, setIsDoneDistribution] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
 
+  const TRENDING_IMAGES = [
+    { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
+    { id: 'post2', src: '/post2.svg', alt: 'Post 2' },
+    { id: 'post3', src: '/post3.svg', alt: 'Post 3' }
+  ];
+
+  const ensureImagesSelected = () => {
+    setSelectedCategory('images');
+  };
+
+  const handleRefreshClick = () => {
+    handleGenerateClick(promptStr);
+    ensureImagesSelected();
+  };
+
   const handleGenerateClick = async (userInput) => {
     if (isGenerating || userInput.trim() === "") {
-      console.log("Either generation in progress or user input is empty.");
+      console.debug("Either generation in progress or user input is empty.");
       return;
     }
 
     setIsGenerating(true);
+    setIsDoneGenerating(false);
+    setIsDoneImage(false); 
+    setIsDoneDistribution(false); 
+
     setError('');
     
     // ----- Decoupled Images API Logic ----- //
@@ -34,6 +59,7 @@ const Generate = () => {
       prompt: userInput,
       num: 9
     };
+    let predictData;
     setPromptStr(userInput);
     try {
       const predictResponse = await fetch(predict_lambda_url, {
@@ -48,21 +74,26 @@ const Generate = () => {
         throw new Error(`HTTP predict error! status: ${predictResponse.status}`);
       }
 
-      const predictData = await predictResponse.json();
-      console.log("Predict API Response:", predictData); // Print the entire API response
+      predictData = await predictResponse.json();
+      console.debug("Predict API Response:", predictData); // Print the entire API response
       //predict data is a list of strings (urls of images)
       setImages(predictData); // Update the img data
-      
-      /*testing*/
-      // const imgs = ["https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/D2PNBXYCDE52.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/JOB1MELWFN9O.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/OZMBL5KNA0KC.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/B7R70L1P2L43.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/ID437Y9727LA.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/8BDXCVXYY24B.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/EZPJM7ZHPRQM.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/F27MQHRSYVAH.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/NW0MNSFEYV3K.png","https://weaudit-stablediffusion-imagebucket.s3.amazonaws.com/IVFFFOYIW9DL.png"]
-      // setImages(imgs);
-      
-      //start of ouroboros api 
-      //currently, both api calls are in the same try catch statment but could be separated in the future
+      setIsDoneGenerating(true);
+      //image done generating, display immediately
+      setIsDoneImage(true); 
+    }
+    catch{
+      console.error("API Error:", error);
+      setError('Failed to generate images. Please try again.');
+    }
+
+
+    // generating distribution
+    try{
       const oroRequestData = {
         imgs: predictData
       };
-      console.log("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
+      console.debug("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
       const oroResponse = await fetch(ouroboros_api_new_url, {
         method: "POST",
         headers: {
@@ -74,10 +105,10 @@ const Generate = () => {
       if (!oroResponse.ok) {
         throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
       }
-      console.log("success in oro response");
+      console.debug("success in oro response");
 
       const oroData = await oroResponse.json();
-      console.log("Oro API Response:", oroData); // Print the entire API response
+      console.debug("Oro API Response:", oroData); // Print the entire API response
 
       const oroResult = oroData[0];
 
@@ -86,90 +117,95 @@ const Generate = () => {
         gender: oroResult.gender,
         skinTone: oroResult.skinTone
       });
-
+      // only allow for distribution if non error
+      setIsDoneDistribution(true); 
     } catch (error) {
       console.error("API Error:", error);
-      setError('Failed to generate images. Please try again.');
+      setError('Failed to generate distribution. Please try again.');
     } finally {
       setIsGenerating(false);
     }
-    // ----- END Decoupled Images API Logic ----- //
-  
-    /*
-    // ----- Original Images API Logic ----- //
-    // Define the data structure for the API request
-    const requestData = {
-      promptStr: userInput
-    };
-
-    setPromptStr(userInput); // Set the prompt string when generation is initiated
-
-    try {
-      const response = await fetch("http://18.224.86.65:5001/ouroboros", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data); // Print the entire API response
-
-      const result = data[0];
-
-      setImages(result.imgs); // Update the img data
-      
-      setDistribution({ // Update the distribution data
-        age: result.age,
-        gender: result.gender,
-        skinTone: result.skinTone
-      });
-
-    } catch (error) {
-      console.error("API Error:", error);
-      setError('Failed to generate images. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-
-    // ----- END Original Images API Logic ----- //
-    */
+    
   };
 
   return (
     <div>
       <Header />
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      <h1 className={style.mainTitle}>Ouroboros</h1>
+      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
+      {/* {images.length <= 0 && (
+        <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      )} */}
+      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected}/>
       {error && <p>{error}</p>}
-      {isGenerating ? (
-        <div className={AnalyzeStyle.loadingContainer}>
-          <div className={AnalyzeStyle.loadingGIF}>
-            <img src={'/loading_image1.gif'} alt="LoadingGIF" />
+      {!isGenerating && images.length <= 0 && (
+        <div className={style.trendingContainer}>
+          <h2 className={style.trendingTitle}>Trending discussion posts</h2>
+          <div className={style.trendingPosts}>
+            {TRENDING_IMAGES.map(image => (
+              <div key={image.id} className={style.trendingImageWrapper}>
+                <img src={image.src} alt={image.alt} className={style.trendingImage} />
+              </div>
+            ))}
           </div>
-          <div className={AnalyzeStyle.loadingText}>
-              Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
-          </div>
-      </div>
+        </div>
+      )}
+      {isDoneImage ? (
+        <AnalyzeImages
+            images={images}
+            distribution={distribution}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            resultPrompt={promptStr}
+            onRefreshClick={handleRefreshClick}
+        />
+      ) : isDoneDistribution ? (
+        <AnalyzeDistribution
+            images={images}
+            distribution={distribution}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            resultPrompt={promptStr}
+            onRefreshClick={handleRefreshClick}
+        />
       ) : (
-        images.length > 0 && (
-          <>
-            <Analyze
-              images={images}
-              distribution={distribution}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              resultPrompt={promptStr}
-            />
-          </>
+        isGenerating && (
+          <div className={style.loadingContainer}>
+            <div className={style.loadingSnake}></div>
+            <div className={style.loadingText}>
+              Please wait...Stable Diffusion is working hard to generate realistic images. May take up to a minute.
+            </div>
+          </div>
         )
       )}
-    </div>
+    <Footer />
+
+    <style jsx global>{`
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          Segoe UI,
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          Fira Sans,
+          Droid Sans,
+          Helvetica Neue,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    `}</style>
+  </div>
+    
   );
+
 };
 
 export default Generate;

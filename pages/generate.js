@@ -6,6 +6,7 @@ import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import Analyze from '../components/Analyze';
 import GenerateState from '../components/GenerateState';
+import Footer from '../components/Footer';
 import style from '../styles/GeneratePage.module.css';
 
 const Generate = () => {
@@ -16,6 +17,13 @@ const Generate = () => {
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
+  const [postDone, setPostDone] = useState(false);
+
+  const TRENDING_IMAGES = [
+    { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
+    { id: 'post2', src: '/post2.svg', alt: 'Post 2' },
+    { id: 'post3', src: '/post3.svg', alt: 'Post 3' }
+  ];
 
   const handleRefreshClick = () => {
     handleGenerateClick(promptStr);
@@ -102,23 +110,38 @@ const Generate = () => {
       setIsGenerating(false);
     }
   };
+  //document.body.style.margin = 0;
 
   return (
     <div>
       <Header />
       <h1 className={style.mainTitle}>Ouroboros</h1>
-      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating}/>
+      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} isPostDone={postDone} />
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
+      {error && <p>{error}</p>}
+      {!isGenerating && images.length <= 0 && (
+        <div className={style.trendingContainer}>
+          <h2 className={style.trendingTitle}>Trending discussion posts</h2>
+          <div className={style.trendingPosts}>
+            {TRENDING_IMAGES.map(image => (
+              <div key={image.id} className={style.trendingImageWrapper}>
+                <img src={image.src} alt={image.alt} className={style.trendingImage} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {error && <p>{error}</p>}
       {isGenerating ? (
         <>
           <div className={style.loadingContainer}>
             <div className={style.loadingSnake}></div>
             <div className={style.loadingText}>
-                Loading...Stable Diffusion is working hard to generate realistic images for you! Wait for 1 min!
+                <div className={style.loadingTextItem}>Loading...</div>
+                <div className={style.loadingTextItem}>Stable Diffusion is working hard to generate realistic images for you!</div>
             </div>
           </div>
         </>
@@ -136,7 +159,33 @@ const Generate = () => {
           </>
         )
       )}
+      <Footer />
+
+      <style jsx global>{`
+        html,
+        body {
+          padding: 0;
+          margin: 0;
+          font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            Segoe UI,
+            Roboto,
+            Oxygen,
+            Ubuntu,
+            Cantarell,
+            Fira Sans,
+            Droid Sans,
+            Helvetica Neue,
+            sans-serif;
+        }
+        * {
+          box-sizing: border-box;
+        }
+      `}</style>
     </div>
+
+    
   );
 };
 

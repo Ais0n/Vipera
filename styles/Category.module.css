@@ -3,7 +3,7 @@
 .buttonContainer {
     display: flex;
     justify-content: center; /* horizontally centered */
-    margin-top: 2.5vh; /* Use viewport height units for relative spacing */
+    margin-top: 39px;
     width: 100%;
     box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }

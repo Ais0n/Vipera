@@ -1,64 +1,136 @@
-.container {
-  min-height: 100vh;
-  padding: 0 0.5rem;
+/* Home.module.css */
+
+.bgImage {
+  background-image: url('/ouroborosbg.png'); /* Set the background image */
+  background-size: cover; /* Cover the entire area */
+  background-position: center; /* Center the background image */
+  position: relative;
+  height: 100vh; /* Full height of the viewport or as needed */
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.title {
-  margin: auto;
-  margin-top: -1rem;
-  line-height: 4rem;
-  font-size: 3.6rem;
-}
-
-.title {
-  text-align: center;
 }
 
 .mainContainer {
-  margin-top: -70px;
-  width: 893px;
-  height: 556px;
-  background-color: white;
   display: flex;
-  padding: 0.8rem;
   flex-direction: column;
+  background-color: white;
+  padding: 10vh 4.68vw 10vh 4.68vw;
   justify-content: center;
   align-items: center;
-  position: relative
-}
-
-.titleContainer {
-  width: 765px;
-  height: 184px;
-  background-color: white;
-  line-height: 4rem;
-  font-size: 3.6rem;
-  padding: 47px 64px 47px 64px;
-  margin-top: -30%;
-  position: absolute;
-}
-
-.descriptionContainer {
-  position: absolute;
-  margin-top: 69px;
-}
-
-.navButtons {
-  margin-top: 395px;
-  height: 350px;
   position: relative;
 }
 
+.titleContainer {
+  width: 56vw;
+  height: 24vh;
+  font-family: 'Roboto', sans-serif;
+  font-size: min(5vw, 14vh);
+  font-weight: 600;
+  line-height: min(6.7vw, 12vh);
+  letter-spacing: 0em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.descriptionContainer {
+  display: flex;
+  margin-top: 9vh;
+  margin-bottom: 9vh;
+  margin-left: 2vw;
+  margin-right: 2vw;
+  width: 50vw;
+  height: 7.8vh;
+  align-items: center;
+}
+
+.navButtons {
+  display: flex;
+  height: 80px;
+}
+
 .genPageButton1 {
-  position: absolute;
-  margin-left: -360px;
+  padding-right: 32px;
 }
 
 .genPageButton2 {
-  position: absolute;
-  margin-left: 40px;
+  padding-left: 32px;
+}
+
+.firstTitle {
+  display: flex;
+  font-family: 'Roboto', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.secondTitle {
+  display: flex;
+  font-family: 'Roboto', sans-serif;
+  font-size: 40px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Align children to the center for smaller screens */
+  position: relative;
+  margin-top: 134px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  max-width: 1350px;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: row; /* Stack children horizontally */
+  margin-top: 84px;
+}
+
+.stepImageWrapper {
+  margin: 8px;
+  overflow: hidden; /* Ensures content fits within the borders */
+}
+
+.stepImage {
+  display: block; /* Removes bottom margin/padding inherent to img */
+  width: 100%; /* Ensures the image fills the container */
+  height: auto; /* Keeps the image aspect ratio */
+}
+
+.trendingContainer {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Align children to the center for smaller screens */
+  position: relative;
+  margin-top: 135px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  max-width: 1350px;
+  margin-bottom: 91px;
+}
+
+.trendingPosts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: column;
+  margin-top: 84px;
+}
+
+.trendingImageWrapper {
+  margin: 16px;
+  overflow: hidden; /* Ensures content fits within the borders */
+}
+
+.trendingImage {
+  display: block; /* Removes bottom margin/padding inherent to img */
+  width: 100%; /* Ensures the image fills the container */
+  height: auto; /* Keeps the image aspect ratio */
 }
