@@ -52,8 +52,9 @@ const Generate = () => {
     // ----- Decoupled Images API Logic ----- //
     //Getting the list of images - would be replaced by the new model later on
     const predict_lambda_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/predict"
-    const ouroboros_api_new_url = "http://18.224.86.65:5002/ouroborosp" 
-    //"http://18.224.86.65:5002/ouroborosnp" for non parallelized
+    const ouroboros_api_new_url = "http://18.224.86.65:5003/ouroborosSkin" 
+    //"http://18.224.86.65:5002/ouroborosp" for parallelized without skintone
+    //"http://18.224.86.65:5002/ouroborosnp" for non parallelized without skintone
 
     const predictRequestData = {
       prompt: userInput,
