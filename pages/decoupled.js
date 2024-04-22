@@ -57,8 +57,15 @@ const Generate = () => {
     //"http://18.224.86.65:5002/ouroborosnp" for non parallelized without skintone
 
     const predictRequestData = {
-      prompt: userInput,
-      num: 9
+      num: 12,
+      prompt: "clear natural portrait or photograph of " + userInput,
+      use_cache : false,
+      width: 512,
+      height: 512,
+      num_inference_steps: 31, //quality of image, may increase time
+      guidance_scale: 12, // increase to make prompts less creative and more deterministic
+      scheduler: "DPMSolverMultistep", 
+      negative_prompt: "blurry, black and white image, cartoon, text, painting, building",
     };
     let predictData;
     setPromptStr(userInput);
