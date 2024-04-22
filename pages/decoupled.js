@@ -150,23 +150,23 @@ const Generate = () => {
           </div>
         </div>
       )}
-      {isDoneImage ? (
-        <AnalyzeImages
-            images={images}
-            distribution={distribution}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            resultPrompt={promptStr}
-            onRefreshClick={handleRefreshClick}
-        />
-      ) : isDoneDistribution ? (
+      {isDoneDistribution ? (
         <AnalyzeDistribution
-            images={images}
-            distribution={distribution}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            resultPrompt={promptStr}
-            onRefreshClick={handleRefreshClick}
+          images={images}
+          distribution={distribution}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          resultPrompt={promptStr}
+          onRefreshClick={handleRefreshClick}
+        />
+      ) : isDoneImage ? (
+        <AnalyzeImages
+          images={images}
+          distribution={distribution}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          resultPrompt={promptStr}
+          onRefreshClick={handleRefreshClick}
         />
       ) : (
         isGenerating && (
