@@ -1,120 +1,146 @@
-// components/Distributions.js
-
-import React, { useEffect, useRef } from 'react';
+//Distributions.js
+import React from 'react';
 import styles from '../styles/Distribution.module.css';
 
-
-const Distributions = ({distribution, category}) => {
-    const canvasRef = useRef(null);
-
-    useEffect(() => {
-    
-    const draw = () => {
-    const canvas = canvasRef.current;
-      if (canvas.getContext) {
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const display = (att, dist) => {
-            if (att == 'gender'){
-                var colors = [['Female','#FDBB84'],['Male','#E5604B']];
-            }
-            else if (att == 'age'){
-                var colors = [['70+','#08519C'],['60-69','#08519C'],['50-59','#2C7FB8'],['40-49','#2C7FB8'],['30-39','#41B6C4'],['20-29','#41B6C4'],['10-19','#A1DAB4'],['3-9','#FFFFCC'],['0-2','#FFFFCC']];
-            }                                                                                      
-            else if (att == 'skinTone'){
-                var colors = [['VI','#27190F'],['V','#58402E'],['IV','#766043'],['III','#9D7961'],['II','#CAB4A5'],['I','#E7CBBA']];
-            }
-            var catamts = [];
-            var displayratios = []
-            for (let i = 0; i < colors.length; i++){
-                var cat = colors[i][0];
-                var amount = dist[colors[i][0]] * 225;
-                if (i != 0){
-                    amount += catamts[i-1];
-                }
-                catamts.push(amount);
-                var ratio = Math.round(dist[cat] * 100)
-                if (ratio != 0) {
-                    displayratios.push(cat + ': ' + ratio.toString() + '%')
-                }
-                else { // not want to display 0%
-                    displayratios.push('0')
-                }
-            }
-            var x = 0;
-            var y = 0;
-            var k = 0;
-            for (let i = 0; i < 15; i++) {
-                y = i * 51;
-                x = 0;
-                for (let j = 0; j < 15; j++) {
-                    x = j * 51;
-                    var curSquare = i*15 + j;
-                    if (curSquare > catamts[k]){
-                        k += 1;
-                    }
-                    ctx.fillStyle = colors[k][1];
-                    ctx.fillRect(x, y, 50, 50);
-                }
-            }
-            ctx.font = "14px 'Inter'";
-            ctx.fillStyle = "black";
-            for (let i = 0; i < colors.length; i++) {
-                var cat = colors[i][0];
-                var catValue = dist[cat];
-                var amount = catValue * 225; // 225 is the scaling factor
-                var displayRatio = displayratios[i];
-
-                if (displayRatio != '0') {
-                     // Measure the text
-                     var textMetrics = ctx.measureText(displayRatio);
-                     var textWidth = textMetrics.width + 25; // 25px padding on each side
-                     var textHeight = parseInt(ctx.font, 10) + 10; // Extract the font size
- 
-                     // Calculate the position where the category amount ends
-                     var textX = canvas.width / 2; // Center textX in the canvas
-                     var textY = i * (canvas.height / colors.length) + (canvas.height / (2 * colors.length));
- 
-                     // Draw the white background for the text
-                     ctx.fillStyle = "white";
-                     ctx.fillRect(textX, textY, textWidth, textHeight);
- 
-                     // Draw the text over the background
-                     ctx.fillStyle = "black";
-                     ctx.fillText(displayRatio, textX + textWidth*0.2, textY + textHeight*0.8); // Adjust textY to account for the height of the text
-                }
-            }   
-        } 
-        display(category, distribution[category]);
-      } else {
-        alert('Browser not supported');
-      }
+const Distributions = ({ distribution, category }) => {
+    const getColor = (att) => {
+        // Define colors based on distribution data
+        if (att === 'gender') {
+            return [['Female', '#FDBB84'], ['Male', '#E5604B']];
+        } else if (att === 'age') {
+            return [['70+', '#08519C'], ['60-69', '#08519C'], ['50-59', '#2C7FB8'], ['40-49', '#2C7FB8'], ['30-39', '#41B6C4'], ['20-29', '#41B6C4'], ['10-19', '#A1DAB4'], ['3-9', '#FFFFCC'], ['0-2', '#FFFFCC']];
+        } else if (att === 'skinTone') {
+            return [['VI', '#27190F'], ['V', '#58402E'], ['IV', '#766043'], ['III', '#9D7961'], ['II', '#CAB4A5'], ['I', '#E7CBBA']];
+        }
     };
 
-    draw();
-  }, [distribution, category]);
+    const getCategory = (att) => {
+        if (att === 'gender') {
+            return {
+                '#FDBB84': 'Female',
+                '#E5604B': 'Male'
+            };
+        } else if (att === 'age') {
+            return {
+                '#08519C': '60+',
+                '#2C7FB8': '40-59',
+                '#41B6C4': '20-39',
+                '#A1DAB4': '10-19',
+                '#FFFFCC': '0-9'
+            };
+        } else if (att === 'skinTone') {
+            return {
+                '#27190F': 'VI',
+                '#58402E': 'V',
+                '#766043': 'IV',
+                '#9D7961': 'III',
+                '#CAB4A5': 'II',
+                '#E7CBBA': 'I'
+            };
+        }
+    }
 
-  const categoryTexts = {
-    gender: "Gender Scale: Computer Vision models being used can only classify images as men, women or ambiguous. This can be inaccurate and misleading.",
-    skinTone: "Fitzpatrick Skin Scale is a classification system based on the amount of melanin present in the skin and has 6 shades. Monk Skin Tone scale has 10 shades.",
-    age: "Age Scale: Computer Vision models being used can only classify images in ranges of age. This can be inaccurate and misleading."
-  };
+    const renderGrid = () => {
+        const grid = [];
+        const colors = getColor(category);
+        const totalSquares = 100; // Total number of squares in the grid
+        let currentIndex = 0;
 
-  return (
-    <>
-        <div className={styles.distributionBox}>
-            <div className={styles.lightBulb}>
-                <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
-            </div>
-            <p className={styles.distributionBoxText}>
-                {categoryTexts[category]}
-                {' '}<a href="https://forum.weaudit.org/t/learn-about-algorithmic-bias-categories-with-real-life-examples/307" className={styles.learnMoreLink}>Learn more about AI bias</a>
-            </p>
-        </div>
-        <canvas ref={canvasRef} className={styles.canvas} width={762} height={765}></canvas>
-    </>
-  );
+        // Group categories by color
+        const groupedCategories = colors.reduce((acc, [cat, color]) => {
+            if (!acc[color]) {
+                acc[color] = [];
+            }
+            acc[color].push(cat);
+            return acc;
+        }, {});
+
+        // Calculate total counts for each group
+        const totalCounts = Object.values(groupedCategories).map(group => {
+            return group.reduce((sum, cat) => sum + Math.round(distribution[category][cat] * totalSquares), 0);
+        });
+        // Generate new labels for each group using the mapped labels
+        const newLabels = Object.keys(groupedCategories).map(color => {
+            const newLabel = getCategory(category)[color];
+            return [newLabel, color];
+        });
+
+        let sum = totalCounts.reduce((a, b) => a + b, 0);
+        if (sum > totalSquares) {
+            // Find the index of the category with the most count
+            let maxIndex = totalCounts.indexOf(Math.max(...totalCounts));
+            // Reduce the count of the category with the most count by 1
+            totalCounts[maxIndex] -= 1;
+            // Re-calculate the sum to ensure it's 100
+            sum = totalCounts.reduce((a, b) => a + b, 0);
+            // Adjust the count of the category with the most count if necessary
+            if (sum > totalSquares) {
+                totalCounts[maxIndex] -= (sum - totalSquares);
+            }
+        }
+        if (sum < totalSquares) {
+            // Find the index of the category with the most count
+            let max = totalCounts.indexOf(Math.max(...totalCounts));
+            // Reduce the count of the category with the most count by 1
+            totalCounts[max] += 1;
+            // Re-calculate the sum to ensure it's 100
+            sum = totalCounts.reduce((a, b) => a + b, 0);
+            // Adjust the count of the category with the most count if necessary
+            if (sum > totalSquares) {
+                totalCounts[maxIndex] -= (sum - totalSquares);
+            }
+        }
+
+        const percentages = totalCounts.map(count => (count / totalSquares) * 100);
+
+         // Iterate through new labels and populate the grid
+        newLabels.forEach(([newLabel, color], index) => {
+            const count = totalCounts[index];
+            const percentage = percentages[index];
+            for (let i = 0; i < count; i++) {
+                if (i == Math.floor(count/2)) {
+                    grid.push(
+                        <div key={currentIndex++} className={styles.gridSquareContainer}>
+                            <div className={styles.label} style={{ left: '49%'}}>{`${newLabel}: ${percentage.toFixed(0)}%`}</div>
+                            <div className={styles.gridSquare} style={{ backgroundColor: color }}></div>
+                        </div>
+                    );
+                } else {
+                    grid.push(
+                        <div key={currentIndex++} className={styles.gridSquareContainer}>
+                            <div className={styles.gridSquare} style={{ backgroundColor: color }}></div>
+                        </div>
+                    );
+                }
+            }
+        });
+
+        return grid;
+    };
+
+
+    const categoryTexts = {
+        gender: "Gender Scale: Computer Vision models being used can only classify images as men, women or ambiguous. This can be inaccurate and misleading.",
+        skinTone: "Fitzpatrick Skin Scale is a classification system based on the amount of melanin present in the skin and has 6 shades. Monk Skin Tone scale has 10 shades.",
+        age: "Age Scale: Computer Vision models being used can only classify images in ranges of age. This can be inaccurate and misleading."
+    };
+
+    return (
+      <>
+          <div className={styles.distributionBox}>
+              <div className={styles.lightBulb}>
+                  <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
+              </div>
+              <p className={styles.distributionBoxText}>
+                  {categoryTexts[category]}
+                  {' '}<a href="https://forum.weaudit.org/t/learn-about-algorithmic-bias-categories-with-real-life-examples/307" className={styles.learnMoreLink}>Learn more about AI bias</a>
+              </p>
+          </div>
+          <div className={styles.gridContainer}>
+              {renderGrid()}   
+          </div>
+      </>
+    );
 };
 
 export default Distributions;
