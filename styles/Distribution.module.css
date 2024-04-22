@@ -1,10 +1,43 @@
 /* Distribution.module.css */
 
-.canvas {
-  width: 762px;
-  height: 765px;
-  margin-top: 50px;
+.gridContainer {
+  position: relative;
+  display: grid;
+  width: 100%; /* Full width to be responsive */
+  max-width: 762px; /* Maximum width */
+  height: auto; /* Height should be auto to maintain aspect ratio */
+  grid-template-columns: repeat(10, minmax(44px, 1fr)); /* 10 columns, each taking up an equal fraction of the available space */
+  grid-gap: 0;
+  margin: 48px auto 0 auto; /* Top margin and auto for left and right */
 }
+
+
+
+.gridSquare {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover; /* Ensures the content covers the area of the grid cell */
+  border: 1px solid #FFFFFF  ; /* Optional: add a border to each square */
+}
+.label {
+  position: absolute;
+  display: flex; /* Use flexbox to center the label text */
+  transform: translate(0%, 160%);
+  font-size: 12px;
+  color: white;
+  z-index: 10; /* Ensure it's above the grid squares */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent black background */
+  padding: 2px 4px; /* Add some padding around the text */
+  border-radius: 3px; /* Optional: Add rounded corners */
+}
+
+.labelText {
+  font-size: 13px; /* Adjust the font size for the label text */
+  /* Additional styles to format the label text as desired */
+}
+
+
 
 .distributionBox {
   display: flex;
