@@ -1,5 +1,7 @@
 // components/Thread.js
 
+import { Constants } from '../Constants.js';
+
 import React, { useState, useRef } from 'react';
 import Select from 'react-select';
 import styles from '../styles/Thread.module.css';
@@ -66,9 +68,8 @@ const Thread = ({ onCloseThread, resultPrompt }) => {
       },
       body: JSON.stringify({
         headers: {
-          "Api-Key": "49bd812ab9daebbac85dfadb4c089e0f2f4284816370738d72c9e6e449fa797b",
-          // "Api-Key": "faa52080e7da71c54395adbaafa82d33590b26cb3426d0060ea0088ba0f26091",
-          "Api-Username": "CMUweaudit-admin",
+          "Api-Key": Constants.apiKey,
+          "Api-Username": Constants.apiUsername,
         },
         params: {
           title: "Report distribution of prompt: " + reportDetails.prompt,
