@@ -1,5 +1,7 @@
 // components/Thread.js
 
+import { Constants } from '../Constants.js';
+
 import React, { useState, useRef } from 'react';
 import Select from 'react-select';
 import styles from '../styles/Thread.module.css';
@@ -57,20 +59,53 @@ const Thread = ({ onCloseThread, resultPrompt }) => {
   };
 
   const isFormFilled = reportDetails.prompt && reportDetails.visualization.length > 0 && reportDetails.harms.length > 0;
+
+  const postToDiscourse = async () => {
+    const response = await fetch('http://18.224.86.65:5002/ouroPost', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        headers: {
+          "Api-Key": Constants.apiKey,
+          "Api-Username": Constants.apiUsername,
+        },
+        params: {
+          title: "Report distribution of prompt: " + reportDetails.prompt,
+          raw: "Report distribution category: " + reportDetails.visualization.join(', ') + "\n" + 
+            "Harm noticed: " + reportDetails.harms.join(', '),
+          category: 54, // https://forum.weaudit.org/c/ouroboros-discussion/54
+          tags: reportDetails.visualization
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create discourse thread');
+    }
+
+    // const responseData = await response.json();
+    // window.location.href = responseData.url; // Redirect to the created post
+  };
+
   const [isSubmitted, setIsSubmitted] = useState(false); // track submission
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsSubmitted(true); // Set isSubmitted to true when the form is submitted
-  
-    // Close the thread and hide the confirmation after 4.5 seconds
-    setTimeout(() => {
-      setIsSubmitted(false); // Hide the confirmation message
-      onCloseThread(); // Close the thread
-    }, 4500);
-  
-    // Implement submission logic here (for future use)
-    console.log(reportDetails);
+    if (!isFormFilled) return;
+
+    try {
+      await postToDiscourse();
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onCloseThread();
+      }, 4500);
+    } catch (error) {
+      console.error('Error posting to Discourse:', error);
+      alert('There was an error posting your thread.');
+    }
   };
 
   // Function to determine the circle style
