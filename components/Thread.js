@@ -134,7 +134,7 @@ const Thread = ({ onCloseThread, resultPrompt }) => {
               <span className={styles.closeButton} onClick={() => setIsSubmitted(false)}>x</span>
               <h2 className={styles.confirmationTitle}>Posted!</h2>
               <p className={styles.confirmationBody}>Your thread has been posted to the discussion forum.</p>
-              <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={styles.goToDiscussionsButton}>Go to discussions</a>
+              <a href="https://forum.weaudit.org/c/ouroboros-discussion/54" className={styles.goToDiscussionsButton}>Go to discussions</a>
             </div>
           </>
         )}
