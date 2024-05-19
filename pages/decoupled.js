@@ -141,6 +141,10 @@ const Generate = () => {
     
   };
 
+  const handleGenerateMoreClick = () => {
+    handleGenerateClick(promptStr, true);
+  };
+
   return (
     <div>
       <Header />
@@ -171,6 +175,8 @@ const Generate = () => {
           onSelectCategory={setSelectedCategory}
           resultPrompt={promptStr}
           onRefreshClick={handleRefreshClick}
+          onGenerateMoreClick={handleGenerateMoreClick}
+          isGenerating={isGenerating}
         />
       ) : isDoneImage ? (
         <AnalyzeImages
@@ -180,6 +186,8 @@ const Generate = () => {
           onSelectCategory={setSelectedCategory}
           resultPrompt={promptStr}
           onRefreshClick={handleRefreshClick}
+          onGenerateMoreClick={handleGenerateMoreClick}
+          isGenerating={isGenerating}
         />
       ) : (
         isGenerating && (
@@ -190,11 +198,6 @@ const Generate = () => {
             </div>
           </div>
         )
-      )}
-      {images.length > 0 && (
-        <button onClick={() => handleGenerateClick(promptStr, true)} className={style.generateMoreButton} disabled={isGenerating}>
-          Generate More Images
-        </button>
       )}
     <Footer />
 
