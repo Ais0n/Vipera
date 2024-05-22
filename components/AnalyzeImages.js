@@ -9,7 +9,7 @@ import Discussion from './Discussion';
 import style from '../styles/Analyze.module.css';
 import generateStyle from '../styles/GeneratePage.module.css';
 
-const AnalyzeImages = ({ images, distribution, selectedCategory, onSelectCategory, resultPrompt, onRefreshClick }) => {
+const AnalyzeImages = ({ images, distribution, selectedCategory, onSelectCategory, resultPrompt, onRefreshClick, onGenerateMoreClick, isGenerating}) => {
     return (
         <section className={style.analyzeSection}>
             <div className={style.greyBgContent}>
@@ -23,6 +23,9 @@ const AnalyzeImages = ({ images, distribution, selectedCategory, onSelectCategor
                             <div className={style.analyzeIcon} onClick={onRefreshClick}>
                                 <img src={'/refresh-cw.svg'} alt="refresh" />
                             </div>
+                            <button onClick={onGenerateMoreClick} className={style.generateMoreButton} disabled={isGenerating}>
+                                Generate More Images
+                            </button>
                             {/* <div className={style.analyzeIcon}>
                                 <img src={'/trash.svg'} alt="trash" />
                             </div> */}

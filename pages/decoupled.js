@@ -36,7 +36,7 @@ const Generate = () => {
     ensureImagesSelected();
   };
 
-  const handleGenerateClick = async (userInput) => {
+  const handleGenerateClick = async (userInput, append = false) => {
     if (isGenerating || userInput.trim() === "") {
       console.debug("Either generation in progress or user input is empty.");
       return;
@@ -85,7 +85,13 @@ const Generate = () => {
       predictData = await predictResponse.json();
       console.debug("Predict API Response:", predictData); // Print the entire API response
       //predict data is a list of strings (urls of images)
-      setImages(predictData); // Update the img data
+
+      if (append) {
+        setImages(prevImages => [...prevImages, ...predictData]); // Append new images
+      } else {
+        setImages(predictData); // Replace with new images
+      }
+
       setIsDoneGenerating(true);
       //image done generating, display immediately
       setIsDoneImage(true); 
@@ -95,11 +101,10 @@ const Generate = () => {
       setError('Failed to generate images. Please try again.');
     }
 
-
     // generating distribution
-    try{
+    try {
       const oroRequestData = {
-        imgs: predictData
+        imgs: append ? [...images, ...predictData] : predictData // Use the whole image set
       };
       console.debug("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
       const oroResponse = await fetch(ouroboros_api_new_url, {
@@ -136,6 +141,10 @@ const Generate = () => {
     
   };
 
+  const handleGenerateMoreClick = () => {
+    handleGenerateClick(promptStr, true);
+  };
+
   return (
     <div>
       <Header />
@@ -166,6 +175,8 @@ const Generate = () => {
           onSelectCategory={setSelectedCategory}
           resultPrompt={promptStr}
           onRefreshClick={handleRefreshClick}
+          onGenerateMoreClick={handleGenerateMoreClick}
+          isGenerating={isGenerating}
         />
       ) : isDoneImage ? (
         <AnalyzeImages
@@ -175,6 +186,8 @@ const Generate = () => {
           onSelectCategory={setSelectedCategory}
           resultPrompt={promptStr}
           onRefreshClick={handleRefreshClick}
+          onGenerateMoreClick={handleGenerateMoreClick}
+          isGenerating={isGenerating}
         />
       ) : (
         isGenerating && (
@@ -211,9 +224,7 @@ const Generate = () => {
       }
     `}</style>
   </div>
-    
   );
-
 };
 
 export default Generate;

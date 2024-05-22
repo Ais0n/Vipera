@@ -8,7 +8,7 @@ import Discussion from './Discussion';
 
 import style from '../styles/Analyze.module.css';
 
-const AnalyzeDistribution = ({ images, distribution, selectedCategory, onSelectCategory, resultPrompt, onRefreshClick }) => {
+const AnalyzeDistribution = ({ images, distribution, selectedCategory, onSelectCategory, resultPrompt, onRefreshClick, onGenerateMoreClick, isGenerating}) => {
     return (
         <section className={style.analyzeSection}>
             <div className={style.greyBg}>
@@ -23,6 +23,9 @@ const AnalyzeDistribution = ({ images, distribution, selectedCategory, onSelectC
                                 <div className={style.analyzeIcon} onClick={onRefreshClick}>
                                     <img src={'/refresh-cw.svg'} alt="refresh" />
                                 </div>
+                                <button onClick={onGenerateMoreClick} className={style.generateMoreButton} disabled={isGenerating}>
+                                    Generate More Images
+                                </button>
                                 {/* <div className={style.analyzeIcon}>
                                     <img src={'/trash.svg'} alt="trash" />
                                 </div> */}
