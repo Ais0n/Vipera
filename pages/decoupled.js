@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
-
 import Header from '../components/Header';
 import AnalyzeImages from '../components/AnalyzeImages';
 import AnalyzeDistribution from '../components/AnalyzeDistribution';
@@ -51,15 +50,15 @@ const Generate = () => {
     
     // ----- Decoupled Images API Logic ----- //
     //Getting the list of images - would be replaced by the new model later on
-    const predict_lambda_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/predict"
-    const ouroboros_api_new_url = "http://18.224.86.65:5001/ouroborosSkin" 
+    const generate_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/generate"
+    const generate_with_id_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/generate_with_ids"
+    const ouroboros_api_new_url = "http://18.224.86.65:5001/ouroborosSkin"
     //"http://18.224.86.65:5001/ouroborosp" for parallelized without skintone
     //"http://18.224.86.65:5001/ouroborosnp" for non parallelized without skintone
 
-    const predictRequestData = {
+    const generateRequestData = {
       num: 12,
       prompt: "clear natural portrait or photograph of " + userInput,
-      use_cache : false,
       width: 512,
       height: 512,
       num_inference_steps: 31, //quality of image, may increase time
@@ -67,25 +66,50 @@ const Generate = () => {
       scheduler: "DPMSolverMultistep", 
       negative_prompt: "blurry, black and white image, cartoon, text, painting, building",
     };
+    let generateData;
     let predictData;
+    let generateWithIdsResponse;
+    let generateWithIdsData;
     setPromptStr(userInput);
     try {
-      const predictResponse = await fetch(predict_lambda_url, {
+      const generateResponse = await fetch(generate_url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(predictRequestData)
+        body: JSON.stringify(generateRequestData)
       });
 
-      if (!predictResponse.ok) {
-        throw new Error(`HTTP predict error! status: ${predictResponse.status}`);
+      if (!generateResponse.ok) {
+        throw new Error(`HTTP generate error! status: ${generateResponse.status}`);
       }
 
-      predictData = await predictResponse.json();
-      console.debug("Predict API Response:", predictData); // Print the entire API response
-      //predict data is a list of strings (urls of images)
+      generateData = await generateResponse.json();
+      const predictionIDs = generateData;
+      while (true) {
+        generateWithIdsResponse = await fetch(generate_with_id_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ ids: predictionIDs })
+        });
 
+        if (!generateWithIdsResponse.ok) {
+          throw new Error(`HTTP generate_with_ids error! status: ${generateWithIdsResponse.status}`);
+        }
+        generateWithIdsData = await generateWithIdsResponse.json();
+        if (generateWithIdsData.status === "Images still not processed, please try again in sometime") {
+          console.debug("Images still not processed, waiting...");
+          await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds before retrying
+        } else {
+          break;
+        }
+      }
+
+      predictData = generateWithIdsData;
+      //predict data is a list of strings (urls of images)
+      console.debug("Generate with IDs API Response:", predictData);
       if (append) {
         setImages(prevImages => [...prevImages, ...predictData]); // Append new images
       } else {
