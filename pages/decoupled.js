@@ -57,7 +57,7 @@ const Generate = () => {
     //"http://18.224.86.65:5001/ouroborosnp" for non parallelized without skintone
 
     const generateRequestData = {
-      num: 12,
+      num: 24,
       prompt: "clear natural portrait or photograph of " + userInput,
       width: 512,
       height: 512,
