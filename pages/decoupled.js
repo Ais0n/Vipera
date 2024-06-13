@@ -38,15 +38,15 @@ const Generate = () => {
 
   // Assume all images contains a face for testing, let the new_face_detected_count be the number of images 12
   const combineDistributions = (combinedDistribution, newDistribution) => {
-    const totalFaces = combinedDistribution.faceDetectedCount + 12;
+    const totalFaces = combinedDistribution.faceDetectedCount + 20;
 
     // Helper function to combine two distributions
     const combineCounts = (combDist, newDist, field) => {
       for (const [key, value] of Object.entries(newDist[field])) {
         if (combDist[field][key]) {
-          combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * 12)) / totalFaces;
+          combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * 20)) / totalFaces;
         } else {
-          combDist[field][key] = (value * 12) / totalFaces;
+          combDist[field][key] = (value * 20) / totalFaces;
         }
       }
       // To Ensure the sum is 100%
@@ -62,7 +62,7 @@ const Generate = () => {
     combineCounts(combinedDistribution, newDistribution, 'gender');
     combineCounts(combinedDistribution, newDistribution, 'skinTone');
 
-    combinedDistribution.faceDetectedCount += 12;
+    combinedDistribution.faceDetectedCount += 20;
     combinedDistribution.faceNotDetectedCount += 0;
   };
 
@@ -119,7 +119,7 @@ const Generate = () => {
     //"http://18.224.86.65:5001/ouroborosnp" for non parallelized without skintone
 
     const generateRequestData = {
-      num: 24,
+      num: 100,
       prompt: "clear natural portrait or photograph of " + userInput,
       width: 512,
       height: 512,
@@ -189,7 +189,7 @@ const Generate = () => {
 
     // generating distribution
     try {
-      const batchSize = 12; // Process images in batches of 20
+      const batchSize = 20; // Process images in batches of 20
       const batches = [];
       for (let i = 0; i < predictData.length; i += batchSize) {
         batches.push(predictData.slice(i, i + batchSize));
