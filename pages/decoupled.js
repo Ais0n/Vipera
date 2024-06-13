@@ -16,7 +16,7 @@ const Generate = () => {
   const [isDoneDistribution, setIsDoneDistribution] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
-  const [distribution, setDistribution] = useState({ age: {}, gender: {}, skintone: {} });
+  const [distribution, setDistribution] = useState({ age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0});
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
 
@@ -34,6 +34,68 @@ const Generate = () => {
     handleGenerateClick(promptStr);
     ensureImagesSelected();
   };
+
+
+  // Assume all images contains a face for testing, let the new_face_detected_count be the number of images 12
+  const combineDistributions = (combinedDistribution, newDistribution) => {
+    const totalFaces = combinedDistribution.faceDetectedCount + 12;
+
+    // Helper function to combine two distributions
+    const combineCounts = (combDist, newDist, field) => {
+      for (const [key, value] of Object.entries(newDist[field])) {
+        if (combDist[field][key]) {
+          combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * 12)) / totalFaces;
+        } else {
+          combDist[field][key] = (value * 12) / totalFaces;
+        }
+      }
+      // To Ensure the sum is 100%
+      let sum = Object.values(combDist[field]).reduce((acc, val) => acc + val, 0);
+      let diff = 1 - sum;
+      
+      // Find the key with the maximum value and adjust it by the difference, to be improved if needed
+      let maxKey = Object.keys(combDist[field]).reduce((a, b) => combDist[field][a] > combDist[field][b] ? a : b);
+      combDist[field][maxKey] += diff;
+    };
+
+    combineCounts(combinedDistribution, newDistribution, 'age');
+    combineCounts(combinedDistribution, newDistribution, 'gender');
+    combineCounts(combinedDistribution, newDistribution, 'skinTone');
+
+    combinedDistribution.faceDetectedCount += 12;
+    combinedDistribution.faceNotDetectedCount += 0;
+  };
+
+  /********** The actual function after backend is ready **********/
+  // const combineDistributions = (combinedDistribution, newDistribution) => {
+  //   const totalFaces = combinedDistribution.faceDetectedCount + newDistribution.face_detected_count;
+
+  //   // Helper function to combine two distributions
+  //   const combineCounts = (combDist, newDist, field) => {
+  //     for (const [key, value] of Object.entries(newDist[field])) {
+  //       if (combDist[field][key]) {
+  //         combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * newDistribution.face_detected_count)) / totalFaces;
+  //       } else {
+  //         combDist[field][key] = (value * newDistribution.face_detected_count) / totalFaces;
+  //       }
+  //     }
+      // // Ensure the sum is 100%
+      // let sum = Object.values(combDist[field]).reduce((acc, val) => acc + val, 0);
+      // let diff = 1 - sum;
+      
+      // // Find the key with the maximum value and adjust it by the difference, to be improved if needed
+      // let maxKey = Object.keys(combDist[field]).reduce((a, b) => combDist[field][a] > combDist[field][b] ? a : b);
+      // combDist[field][maxKey] += diff;
+  //   };
+
+  //   combineCounts(combinedDistribution, newDistribution, 'age');
+  //   combineCounts(combinedDistribution, newDistribution, 'gender');
+  //   combineCounts(combinedDistribution, newDistribution, 'skinTone');
+
+  //   combinedDistribution.faceDetectedCount += newDistribution.face_detected_count;
+  //   combinedDistribution.faceNotDetectedCount += newDistribution.face_not_detected_count;
+  // };
+
 
   const handleGenerateClick = async (userInput, append = false) => {
     if (isGenerating || userInput.trim() === "") {
@@ -61,8 +123,8 @@ const Generate = () => {
       prompt: "clear natural portrait or photograph of " + userInput,
       width: 512,
       height: 512,
-      num_inference_steps: 31, //quality of image, may increase time
-      guidance_scale: 12, // increase to make prompts less creative and more deterministic
+      num_inference_steps: 31,
+      guidance_scale: 12,
       scheduler: "DPMSolverMultistep", 
       negative_prompt: "blurry, black and white image, cartoon, text, painting, building",
     };
@@ -127,34 +189,51 @@ const Generate = () => {
 
     // generating distribution
     try {
-      const oroRequestData = {
-        imgs: append ? [...images, ...predictData] : predictData // Use the whole image set
-      };
-      console.debug("OuroborosAPI Input:", JSON.stringify(oroRequestData)); // Print the entire API response
-      const oroResponse = await fetch(ouroboros_api_new_url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(oroRequestData)
-      });
-
-      if (!oroResponse.ok) {
-        throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
+      const batchSize = 12; // Process images in batches of 20
+      const batches = [];
+      for (let i = 0; i < predictData.length; i += batchSize) {
+        batches.push(predictData.slice(i, i + batchSize));
       }
-      console.debug("success in oro response");
 
-      const oroData = await oroResponse.json();
-      console.debug("Oro API Response:", oroData); // Print the entire API response
+      const combinedDistribution = { age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 };
 
-      const oroResult = oroData[0];
+      for (const batch of batches) {
+        const oroRequestData = {
+          imgs: batch
+        };
+        console.debug("OuroborosAPI Input:", JSON.stringify(oroRequestData));
+        const oroResponse = await fetch(ouroboros_api_new_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(oroRequestData)
+        });
 
-      setDistribution({ 
-        age: oroResult.age,
-        gender: oroResult.gender,
-        skinTone: oroResult.skinTone
-      });
-      // only allow for distribution if non error
+        if (!oroResponse.ok) {
+          throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
+        }
+        console.debug("success in oro response");
+
+        const oroData = await oroResponse.json();
+        console.debug("Oro API Response:", oroData); // Print the entire API response
+
+        const oroResult = oroData[0];
+
+        // Combine distributions
+        combineDistributions(combinedDistribution, oroResult);
+      }
+
+      if (append) {
+        setDistribution(prevDistribution => {
+          const newDistribution = { ...prevDistribution };
+          combineDistributions(newDistribution, combinedDistribution);
+          return newDistribution;
+        });
+      }
+      else{
+        setDistribution(combinedDistribution);
+      }
       setIsDoneDistribution(true); 
     } catch (error) {
       console.error("API Error:", error);
