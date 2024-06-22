@@ -35,21 +35,20 @@ const Generate = () => {
     ensureImagesSelected();
   };
 
-
-  // Assume all images contains a face for testing, let the new_face_detected_count be the number of images 12
+  // Helper function to combine two distributions
   const combineDistributions = (combinedDistribution, newDistribution) => {
-    const totalFaces = combinedDistribution.faceDetectedCount + 20;
+    const totalFaces = combinedDistribution.faceDetectedCount + newDistribution.face_detected_count;
 
     // Helper function to combine two distributions
     const combineCounts = (combDist, newDist, field) => {
       for (const [key, value] of Object.entries(newDist[field])) {
         if (combDist[field][key]) {
-          combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * 20)) / totalFaces;
+          combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * newDistribution.face_detected_count)) / totalFaces;
         } else {
-          combDist[field][key] = (value * 20) / totalFaces;
+          combDist[field][key] = (value * newDistribution.face_detected_count) / totalFaces;
         }
       }
-      // To Ensure the sum is 100%
+      // Ensure the sum is 100%
       let sum = Object.values(combDist[field]).reduce((acc, val) => acc + val, 0);
       let diff = 1 - sum;
       
@@ -62,40 +61,9 @@ const Generate = () => {
     combineCounts(combinedDistribution, newDistribution, 'gender');
     combineCounts(combinedDistribution, newDistribution, 'skinTone');
 
-    combinedDistribution.faceDetectedCount += 20;
-    combinedDistribution.faceNotDetectedCount += 0;
+    combinedDistribution.faceDetectedCount += newDistribution.face_detected_count;
+    combinedDistribution.faceNotDetectedCount += newDistribution.face_not_detected_count;
   };
-
-  /********** The actual function after backend is ready **********/
-  // const combineDistributions = (combinedDistribution, newDistribution) => {
-  //   const totalFaces = combinedDistribution.faceDetectedCount + newDistribution.face_detected_count;
-
-  //   // Helper function to combine two distributions
-  //   const combineCounts = (combDist, newDist, field) => {
-  //     for (const [key, value] of Object.entries(newDist[field])) {
-  //       if (combDist[field][key]) {
-  //         combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * newDistribution.face_detected_count)) / totalFaces;
-  //       } else {
-  //         combDist[field][key] = (value * newDistribution.face_detected_count) / totalFaces;
-  //       }
-  //     }
-      // // Ensure the sum is 100%
-      // let sum = Object.values(combDist[field]).reduce((acc, val) => acc + val, 0);
-      // let diff = 1 - sum;
-      
-      // // Find the key with the maximum value and adjust it by the difference, to be improved if needed
-      // let maxKey = Object.keys(combDist[field]).reduce((a, b) => combDist[field][a] > combDist[field][b] ? a : b);
-      // combDist[field][maxKey] += diff;
-  //   };
-
-  //   combineCounts(combinedDistribution, newDistribution, 'age');
-  //   combineCounts(combinedDistribution, newDistribution, 'gender');
-  //   combineCounts(combinedDistribution, newDistribution, 'skinTone');
-
-  //   combinedDistribution.faceDetectedCount += newDistribution.face_detected_count;
-  //   combinedDistribution.faceNotDetectedCount += newDistribution.face_not_detected_count;
-  // };
-
 
   const handleGenerateClick = async (userInput, append = false) => {
     if (isGenerating || userInput.trim() === "") {
@@ -119,7 +87,7 @@ const Generate = () => {
     //"http://18.224.86.65:5001/ouroborosnp" for non parallelized without skintone
 
     const generateRequestData = {
-      num: 100,
+      num: 40,
       prompt: "clear natural portrait or photograph of " + userInput,
       width: 512,
       height: 512,
