@@ -87,7 +87,7 @@ const Generate = () => {
     //"http://18.224.86.65:5001/ouroborosnp" for non parallelized without skintone
 
     const generateRequestData = {
-      num: 40,
+      num: 100,
       prompt: "clear natural portrait or photograph of " + userInput,
       width: 512,
       height: 512,
@@ -157,7 +157,7 @@ const Generate = () => {
 
     // generating distribution
     try {
-      const batchSize = 20; // Process images in batches of 20
+      const batchSize = 12; // Process images in batches of 12
       const batches = [];
       for (let i = 0; i < predictData.length; i += batchSize) {
         batches.push(predictData.slice(i, i + batchSize));
@@ -166,6 +166,11 @@ const Generate = () => {
       const combinedDistribution = { age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 };
 
       for (const batch of batches) {
+        console.log("Batch:", batch);
+        // check if the batch is empty
+        if (batch.length === 0) {
+          continue;
+        }
         const oroRequestData = {
           imgs: batch
         };
@@ -177,6 +182,8 @@ const Generate = () => {
           },
           body: JSON.stringify(oroRequestData)
         });
+
+        console.log("Oro Response:", oroResponse);
 
         if (!oroResponse.ok) {
           throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
