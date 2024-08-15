@@ -1,0 +1,68 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "profession": "doctor",
+          "age": "40",
+          "gender": "male"
+        }
+      },
+      {
+        "id": "Coat",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Shirt",
+        "attributes": {
+          "color": "blue"
+        }
+      },
+      {
+        "id": "Tie",
+        "attributes": {
+          "color": "blue and black"
+        }
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {}
+      },
+      {
+        "id": "Background",
+        "attributes": {
+          "color": "white",
+          "texture": "smooth"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Shirt",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "relationship": "wearing around neck"
+      },
+      {
+        "source": "Doctor",
+        "target": "Background",
+        "relationship": "in front of"
+      }
+    ]
+  }

@@ -1,0 +1,109 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "gender": "male",
+          "profession": "doctor",
+          "beard": "yes"
+        }
+      },
+      {
+        "id": "Coat",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Tie",
+        "attributes": {
+          "color": "blue"
+        }
+      },
+      {
+        "id": "Glasses",
+        "attributes": {
+          "color": "black"
+        }
+      },
+      {
+        "id": "Office",
+        "attributes": {}
+      },
+      {
+        "id": "Equipment",
+        "attributes": {}
+      },
+      {
+        "id": "Walls",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Blinds",
+        "attributes": {}
+      },
+      {
+        "id": "Desk",
+        "attributes": {}
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Glasses",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Office",
+        "target": "Equipment",
+        "relationship": "contains"
+      },
+      {
+        "source": "Office",
+        "target": "Walls",
+        "relationship": "has"
+      },
+      {
+        "source": "Office",
+        "target": "Blinds",
+        "relationship": "has"
+      },
+      {
+        "source": "Desk",
+        "target": "Equipment",
+        "relationship": "contains"
+      },
+      {
+        "source": "Desk",
+        "target": "Walls",
+        "relationship": "has"
+      },
+      {
+        "source": "Desk",
+        "target": "Blinds",
+        "relationship": "has"
+      },
+      {
+        "source": "Doctor",
+        "target": "Office",
+        "relationship": "located in"
+      },
+      {
+        "source": "Doctor",
+        "target": "Desk",
+        "relationship": "located at"
+      }
+    ]
+  }

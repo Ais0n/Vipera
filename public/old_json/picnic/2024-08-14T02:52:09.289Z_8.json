@@ -1,0 +1,70 @@
+{
+    "nodes": [
+        {
+            "id": "man",
+            "attributes": {
+                "age": "30",
+                "gender": "male",
+                "occupation": "engineer",
+                "clothing": "blue shirt and shorts",
+                "drink": "beer"
+            }
+        },
+        {
+            "id": "little girl",
+            "attributes": {
+                "age": "5",
+                "gender": "female",
+                "clothing": "blue dress",
+                "drink": "juice"
+            }
+        },
+        {
+            "id": "woman",
+            "attributes": {
+                "age": "28",
+                "gender": "female",
+                "clothing": "white shirt",
+                "drink": "water"
+            }
+        },
+        {
+            "id": "table",
+            "attributes": {
+                "cloth": "blue and white checkered",
+                "food": "sandwiches, carrots, and salad"
+            }
+        },
+        {
+            "id": "bottles",
+            "attributes": {
+                "contents": "beer and water",
+                "location": "on table"
+            }
+        },
+        {
+            "id": "cups",
+            "attributes": {
+                "contents": "beer and juice",
+                "location": "on table"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "man",
+            "target": "little girl",
+            "relationship": "father and daughter"
+        },
+        {
+            "source": "man",
+            "target": "woman",
+            "relationship": "husband and wife"
+        },
+        {
+            "source": "little girl",
+            "target": "woman",
+            "relationship": "mother and daughter"
+        }
+    ]
+}

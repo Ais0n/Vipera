@@ -15,7 +15,7 @@ const SceneGraph = ({ data }) => {
     const height = svg.node().getBoundingClientRect().height;
 
     const simulation = d3.forceSimulation(data.nodes)
-      .force('link', d3.forceLink(data.edges).id(d => d.id).distance(50)) // Increase link distance
+      .force('link', d3.forceLink(data.edges).id(d => d.id).distance(150)) // Increase link distance
       .force('charge', d3.forceManyBody().strength(-500)) // Increase repulsive force
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collide', d3.forceCollide().radius(d => Math.sqrt(d.size) * 12 + 5)); // Add collision force
@@ -30,34 +30,34 @@ const SceneGraph = ({ data }) => {
       .attr('stroke-width', d => Math.sqrt(d.size) * 3);
 
     // Add edge labels
-    setTimeout(() => {
-      const edgeLabelBg = svg.append('g')
-        .attr('font-family', 'sans-serif')
-        .attr('font-size', 12)
-        .selectAll('text')
-        .data(data.edges)
-        .join('rect')
-        .attr('x', d => {return (d.source.x + d.target.x) / 2 - (d.type ? d.type.length * 4 : 0)})
-        .attr('y', d => {return (d.source.y + d.target.y) / 2 - 9})
-        .attr('width', d => d.type ? d.type.length * 8 : 0) // Approximate width calculation
-        .attr('height', 12)
-        .attr('fill', 'lightgrey')
-        .attr('rx', 4) // Set border radius
-        .attr('ry', 4) // Set border radius
+    // setTimeout(() => {
+    //   const edgeLabelBg = svg.append('g')
+    //     .attr('font-family', 'sans-serif')
+    //     .attr('font-size', 12)
+    //     .selectAll('text')
+    //     .data(data.edges)
+    //     .join('rect')
+    //     .attr('x', d => {return (d.source.x + d.target.x) / 2 - (d.type ? d.type.length * 4 : 0)})
+    //     .attr('y', d => {return (d.source.y + d.target.y) / 2 - 9})
+    //     .attr('width', d => d.type ? d.type.length * 8 : 0) // Approximate width calculation
+    //     .attr('height', 12)
+    //     .attr('fill', 'lightgrey')
+    //     .attr('rx', 4) // Set border radius
+    //     .attr('ry', 4) // Set border radius
 
-      const edgeLabel = svg.append('g')
-        .attr('font-family', 'sans-serif')
-        .attr('font-size', 12)
-        .selectAll('text')
-        .data(data.edges)
-        .join('text')
-        .attr('x', d => {return (d.source.x + d.target.x) / 2})
-        .attr('y', d => {return (d.source.y + d.target.y) / 2})
-        // .attr('dy', '0.35em')
-        .attr('text-anchor', 'middle')
-        .text(d => !d.type ? '' : d.type.length > 10 ? (d.type.slice(0, 8) + '..') : d.type)
-        .style('opacity', d => d.type ? 1 : 0)
-    }, 2500)
+    //   const edgeLabel = svg.append('g')
+    //     .attr('font-family', 'sans-serif')
+    //     .attr('font-size', 12)
+    //     .selectAll('text')
+    //     .data(data.edges)
+    //     .join('text')
+    //     .attr('x', d => {return (d.source.x + d.target.x) / 2})
+    //     .attr('y', d => {return (d.source.y + d.target.y) / 2})
+    //     // .attr('dy', '0.35em')
+    //     .attr('text-anchor', 'middle')
+    //     .text(d => !d.type ? '' : d.type.length > 10 ? (d.type.slice(0, 8) + '..') : d.type)
+    //     .style('opacity', d => d.type ? 1 : 0)
+    // }, 2500)
     
     const node = svg.append('g')
       .attr('stroke', '#fff')

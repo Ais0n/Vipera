@@ -1,0 +1,190 @@
+{
+"nodes": [
+{
+"name": "Bear",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "large"
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Bear cub",
+"type": "animal",
+"attributes": {
+"color": "brown",

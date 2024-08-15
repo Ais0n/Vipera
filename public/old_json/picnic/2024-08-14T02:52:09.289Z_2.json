@@ -1,0 +1,68 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "35",
+                "gender": "Male",
+                "shirt": "Blue",
+                "position": "Sitting"
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "age": "35",
+                "gender": "Female",
+                "position": "Sitting"
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "age": "10",
+                "position": "Sitting"
+            }
+        },
+        {
+            "id": "Boy",
+            "attributes": {
+                "age": "6",
+                "position": "Sitting"
+            }
+        },
+        {
+            "id": "Food",
+            "attributes": {
+                "type": "Picnic"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Woman",
+            "relationship": "Married"
+        },
+        {
+            "source": "Man",
+            "target": "Girl",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Boy",
+            "relationship": "Father-Son"
+        },
+        {
+            "source": "Woman",
+            "target": "Girl",
+            "relationship": "Mother-Daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Boy",
+            "relationship": "Mother-Son"
+        }
+    ]
+}

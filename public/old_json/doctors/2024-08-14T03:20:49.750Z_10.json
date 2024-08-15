@@ -1,0 +1,52 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "profession": "Doctor",
+                "gender": "Male",
+                "age": "Middle-aged"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "White",
+                "pattern": "Solid",
+                "style": "Long-sleeved"
+            }
+        },
+        {
+            "id": "Tie",
+            "attributes": {
+                "color": "Blue",
+                "pattern": "Solid",
+                "width": "Narrow"
+            }
+        },
+        {
+            "id": "Hospital",
+            "attributes": {
+                "type": "Medical facility",
+                "purpose": "Treatment and care"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Lab coat",
+            "relationship": "Wears"
+        },
+        {
+            "source": "Doctor",
+            "target": "Tie",
+            "relationship": "Wears"
+        },
+        {
+            "source": "Doctor",
+            "target": "Hospital",
+            "relationship": "Works at"
+        }
+    ]
+}

@@ -1,0 +1,56 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "profession": "Doctor"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "Black"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Paper",
+            "attributes": {
+                "color": "White"
+            }
+        },
+        {
+            "id": "Hospital",
+            "attributes": {
+                "location": "hospital"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Hospital",
+            "relationship": "works at"
+        },
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Paper",
+            "relationship": "Holding"
+        },
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        }
+    ]
+}

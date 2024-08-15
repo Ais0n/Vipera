@@ -1,0 +1,105 @@
+{
+  "nodes": [
+    {
+      "id": "Woman in blue shirt",
+      "attributes": {
+        "position": "left",
+        "seat": "on blanket",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Woman in white shirt",
+      "attributes": {
+        "position": "middle",
+        "seat": "on blanket",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Woman in blue shirt with child",
+      "attributes": {
+        "position": "right",
+        "seat": "on blanket",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Child",
+      "attributes": {
+        "position": "right",
+        "seat": "on blanket",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Blanket",
+      "attributes": {
+        "position": "on grass",
+        "seat": "on grass",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Cup",
+      "attributes": {
+        "position": "on blanket",
+        "seat": "on blanket",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Car",
+      "attributes": {
+        "position": "in background",
+        "seat": "on road",
+        "food": "sandwich"
+      }
+    },
+    {
+      "id": "Tree",
+      "attributes": {
+        "position": "in background",
+        "seat": "on grass",
+        "food": "sandwich"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "Woman in blue shirt",
+      "target": "Woman in white shirt",
+      "relationship": "sitting next to"
+    },
+    {
+      "source": "Woman in white shirt",
+      "target": "Woman in blue shirt with child",
+      "relationship": "sitting next to"
+    },
+    {
+      "source": "Woman in blue shirt with child",
+      "target": "Child",
+      "relationship": "sitting next to"
+    },
+    {
+      "source": "Woman in blue shirt with child",
+      "target": "Blanket",
+      "relationship": "sitting on"
+    },
+    {
+      "source": "Blanket",
+      "target": "Cup",
+      "relationship": "on"
+    },
+    {
+      "source": "Blanket",
+      "target": "Car",
+      "relationship": "in front of"
+    },
+    {
+      "source": "Blanket",
+      "target": "Tree",
+      "relationship": "in front of"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "shirt": "red plaid",
+                "smiling": true,
+                "sitting": true
+            }
+        },
+        {
+            "id": "Boy",
+            "attributes": {
+                "shirt": "blue",
+                "smiling": true,
+                "sitting": true
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "shirt": "white with blue flowers",
+                "smiling": true,
+                "sitting": true
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Boy",
+            "relationship": "father-son"
+        },
+        {
+            "source": "Man",
+            "target": "Girl",
+            "relationship": "father-daughter"
+        }
+    ]
+}

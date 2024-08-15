@@ -25,6 +25,7 @@ const Generate = () => {
   const [promptStr, setPromptStr] = useState('');
   const [graphs, setGraphs] = useState([]);
   const [aggregatedGraph, setAggregatedGraph] = useState({});
+  const [useSceneGraph, setUseSceneGraph] = useState(false);
 
   const TRENDING_IMAGES = [
     { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
@@ -237,54 +238,52 @@ const Generate = () => {
     setIsDoneSceneGraph(false);
 
     setError('');
-    const IMAGE_DIR = './received_images';
-
-    let prompt = `Generate a clear image of ${userInput}`
+    let IMAGE_DIR = userInput.toLowerCase().includes("doctor") ? 'doctors' : 'picnic';
+    let DATE = IMAGE_DIR == 'doctors' ? "2024-08-14T03:20:49.750Z" : "2024-08-14T02:52:09.289Z";
+  
     let image_num = 20;
     let imageIds = [];
     for (let i = 0; i < image_num; i++) {
-      imageIds.push(new Date().toISOString() + '_' + String(i))
+      imageIds.push(DATE + '_' + String(i))
     }
 
     try {
-      const baseUrl = '/api';
+      const baseUrl = '/temp_images';
 
       for (let imageId of imageIds) {
-        const genImageUrl = `${baseUrl}/generate-images?prompt=${prompt}&image_id=${imageId}`;
-        const getImageUrl = `${baseUrl}/get-image/${imageId}`;
+        const getImageUrl = `${baseUrl}/${IMAGE_DIR}/${imageId}.png`;
 
-        let response;
-        const maxTries = 10;
-        let tryCount = 0;
-
-        do {
-          tryCount++;
-          response = await axios.get(genImageUrl);
-        } while (response.status !== 200 && tryCount < maxTries);
-
-        if (response.status === 200) {
-          const imageData = await axios.get(getImageUrl, { responseType: 'arraybuffer' });
-          function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            return window.btoa(binary);
+        const imageData = await axios.get(getImageUrl, { responseType: 'arraybuffer' });
+        function arrayBufferToBase64(buffer) {
+          let binary = '';
+          const bytes = new Uint8Array(buffer);
+          const len = bytes.byteLength;
+          for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
           }
-          const base64Image = arrayBufferToBase64(imageData.data);
-          setImages(prevImages => [...prevImages, { id: imageId, data: base64Image }]); // Append new images
-          setIsDoneImage(true);
-        } else {
-          console.error(`Error generating image with ID: ${imageId}`);
+          return window.btoa(binary);
         }
+        const base64Image = arrayBufferToBase64(imageData.data);
+        setImages(prevImages => [...prevImages, { id: imageId, data: base64Image }]); // Append new images
+        setIsDoneImage(true);
       }
 
-      const getSceneGraphUrl = `/a2pi/get-scene-graph?image_ids=${imageIds.join(',')}`;
-      const sceneGraphResponse = await axios.get(getSceneGraphUrl);
-      let sceneGraphResponseData = sceneGraphResponse.data;
-      console.log(sceneGraphResponseData);
+      if(!useSceneGraph) {
+        setIsDoneGenerating(true);
+        return;
+      }
+
+      let sceneGraphResponseData = [];
+      for(let imageId of imageIds) {
+        const getSceneGraphUrl = `/old_json/${IMAGE_DIR}/${imageId}.json`;
+        const sceneGraphResponse = await axios.get(getSceneGraphUrl);
+        sceneGraphResponseData.push(sceneGraphResponse.data);
+      }
+
+      // const getSceneGraphUrl = `/a2pi/get-scene-graph?image_ids=${imageIds.join(',')}`;
+      // const sceneGraphResponse = await axios.get(getSceneGraphUrl);
+      // let sceneGraphResponseData = sceneGraphResponse.data;
+      // console.log(sceneGraphResponseData);
 
       // let sceneGraphResponseData = testData;
 
@@ -340,18 +339,20 @@ const Generate = () => {
         //   }
         // }
         try {
-          function extractJsonFromResponse(response) {
-            const startIndex = Math.min(response.indexOf('{'), response.indexOf('['));
-            const endIndex = Math.max(response.lastIndexOf('}'), response.lastIndexOf(']')) + 1;
-            const jsonPart = response.slice(startIndex, endIndex);
-            return jsonPart;
-          }
-          let raw_str = extractJsonFromResponse(s);
-          if(!raw_str || typeof(raw_str) != 'string' || raw_str.length == 0) {
-            throw new Error("Error parsing string " + s);
-          }
-          let obj = JSON.parse(raw_str);
-          console.log(obj);
+          // function extractJsonFromResponse(response) {
+          //   const startIndex = Math.min(response.indexOf('{'), response.indexOf('['));
+          //   const endIndex = Math.max(response.lastIndexOf('}'), response.lastIndexOf(']')) + 1;
+          //   const jsonPart = response.slice(startIndex, endIndex);
+          //   return jsonPart;
+          // }
+          // let raw_str = extractJsonFromResponse(s);
+          // if(!raw_str || typeof(raw_str) != 'string' || raw_str.length == 0) {
+          //   throw new Error("Error parsing string " + s);
+          // }
+          // let obj = JSON.parse(raw_str);
+          let obj = s;
+          obj = JSON.parse(JSON.stringify(obj).toLowerCase())
+          // console.log(obj);
           _graphs.push(validateGraph(obj));
         } catch (err) {
           console.error(err);
@@ -502,19 +503,22 @@ const Generate = () => {
   return (
     <div>
       <Header />
+      <button onClick={setUseSceneGraph}> Use Scene Graph</button>
       <h1 className={style.mainTitle}>Ouroboros</h1>
       <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} />
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} />
+
       
       {error && <p>{error}</p>}
       {isGenerating && <div className={style.analyzeView}>
+        {useSceneGraph &&
         <div className={style.sceneGraph}>
           {!isDoneSceneGraph && <ProcessingIndicator />}
           <SceneGraph data={aggregatedGraph}></SceneGraph>
-        </div>
+        </div>}
         <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
           <div className={style.imageContainer}>
@@ -526,7 +530,7 @@ const Generate = () => {
           </div>
         </div>
       </div>}
-      <Footer />
+
 
       <style jsx global>{`
       html,

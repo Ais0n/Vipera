@@ -1,0 +1,49 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "profession": "Doctor",
+                "gender": "Male",
+                "age": "Middle-aged"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "White"
+            }
+        },
+        {
+            "id": "Tie",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "Black",
+                "material": "Plastic",
+                "purpose": "Medical examination"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Tie",
+            "relationship": "Wearing"
+        }
+    ]
+}

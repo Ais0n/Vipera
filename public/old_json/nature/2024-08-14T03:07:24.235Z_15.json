@@ -1,0 +1,38 @@
+{
+"nodes": [
+{
+"name": "Gazelle",
+"attributes": {
+"color": "brown",
+"species": "Gazelle",
+"location": "field"
+}
+},
+{
+"name": "Grass",
+"attributes": {
+"color": "green",
+"location": "field"
+}
+},
+{
+"name": "Dirt",
+"attributes": {
+"color": "brown",
+"location": "field"
+}
+}
+],
+"edges": [
+{
+"source": "Gazelle",
+"target": "Grass",
+"relationship": "standing on"
+},
+{
+"source": "Gazelle",
+"target": "Dirt",
+"relationship": "walking on"
+}
+]
+}

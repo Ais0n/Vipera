@@ -1,0 +1,74 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "age": "30",
+                "gender": "Male",
+                "profession": "Doctor"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "Black"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Computer",
+            "attributes": {
+                "size": "Large",
+                "position": "On desk",
+                "function": "Medical records"
+            }
+        },
+        {
+            "id": "Desk",
+            "attributes": {
+                "size": "Large",
+                "position": "In room",
+                "function": "Workspace"
+            }
+        },
+        {
+            "id": "Door",
+            "attributes": {
+                "position": "In room",
+                "function": "Entrance/exit"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Computer",
+            "relationship": "Works with"
+        },
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Desk",
+            "relationship": "Works at"
+        },
+        {
+            "source": "Doctor",
+            "target": "Door",
+            "relationship": "Enters/exits through"
+        },
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        }
+    ]
+}

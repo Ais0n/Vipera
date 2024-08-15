@@ -1,0 +1,88 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "35",
+                "gender": "Male"
+            }
+        },
+        {
+            "id": "Girl in pink",
+            "attributes": {
+                "age": "10",
+                "gender": "Female"
+            }
+        },
+        {
+            "id": "Girl in white",
+            "attributes": {
+                "age": "12",
+                "gender": "Female"
+            }
+        },
+        {
+            "id": "Girl in blue",
+            "attributes": {
+                "age": "15",
+                "gender": "Female"
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "age": "38",
+                "gender": "Female"
+            }
+        },
+        {
+            "id": "Food",
+            "attributes": {
+                "type": "Picnic",
+                "quantity": "Lots"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Girl in pink",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Girl in white",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Girl in blue",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Girl in pink",
+            "relationship": "Mother-Daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Girl in white",
+            "relationship": "Mother-Daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Girl in blue",
+            "relationship": "Mother-Daughter"
+        },
+        {
+            "source": "Girl in pink",
+            "target": "Girl in white",
+            "relationship": "Sisters"
+        },
+        {
+            "source": "Girl in white",
+            "target": "Girl in blue",
+            "relationship": "Sisters"
+        }
+    ]
+}

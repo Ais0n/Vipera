@@ -1,0 +1,70 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "gender": "male",
+          "profession": "doctor"
+        }
+      },
+      {
+        "id": "Gloves",
+        "attributes": {}
+      },
+      {
+        "id": "Face Mask",
+        "attributes": {}
+      },
+      {
+        "id": "White Coat",
+        "attributes": {}
+      },
+      {
+        "id": "Tie",
+        "attributes": {}
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {}
+      },
+      {
+        "id": "Nurse",
+        "attributes": {
+          "gender": "female",
+          "profession": "nurse"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Gloves",
+        "type": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Face Mask",
+        "type": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "White Coat",
+        "type": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "type": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "type": "holding"
+      },
+      {
+        "source": "Doctor",
+        "target": "Nurse",
+        "type": "working together"
+      }
+    ]
+  }

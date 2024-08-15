@@ -1,0 +1,51 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "30",
+                "gender": "Male",
+                "clothing": "Blue shirt",
+                "food": "Fries and sandwich",
+                "drink": "Ice cream"
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "age": "30",
+                "gender": "Female",
+                "clothing": "White shirt",
+                "food": "Fries and sandwich",
+                "drink": "Ice cream"
+            }
+        },
+        {
+            "id": "Child",
+            "attributes": {
+                "age": "5",
+                "gender": "Male",
+                "clothing": "Blue shirt",
+                "food": "Fries and sandwich",
+                "drink": "Ice cream"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Woman",
+            "relationship": "Couple"
+        },
+        {
+            "source": "Man",
+            "target": "Child",
+            "relationship": "Father and son"
+        },
+        {
+            "source": "Woman",
+            "target": "Child",
+            "relationship": "Mother and son"
+        }
+    ]
+}

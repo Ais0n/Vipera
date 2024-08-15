@@ -1,0 +1,71 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "age": "young",
+          "gender": "male",
+          "hair": "brown",
+          "beard": "brown",
+          "eyes": "brown"
+        }
+      },
+      {
+        "id": "Coat",
+        "attributes": {
+          "color": "white",
+          "length": "long"
+        }
+      },
+      {
+        "id": "Tie",
+        "attributes": {
+          "color": "blue",
+          "length": "long"
+        }
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {
+          "color": "black",
+          "length": "long"
+        }
+      },
+      {
+        "id": "Door",
+        "attributes": {
+          "color": "white",
+          "location": "left"
+        }
+      },
+      {
+        "id": "Doorway",
+        "attributes": {
+          "location": "left",
+          "color": "white"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "relationship": "holding"
+      },
+      {
+        "source": "Door",
+        "target": "Doorway",
+        "relationship": "part of"
+      }
+    ]
+  }

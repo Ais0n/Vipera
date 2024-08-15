@@ -1,0 +1,75 @@
+{
+    "nodes": [
+        {
+            "id": "man",
+            "attributes": {
+                "age": "30",
+                "gender": "male",
+                "occupation": "businessman",
+                "clothing": "blue shirt and jeans"
+            }
+        },
+        {
+            "id": "girl1",
+            "attributes": {
+                "age": "8",
+                "gender": "female",
+                "clothing": "blue shirt and blue jeans"
+            }
+        },
+        {
+            "id": "girl2",
+            "attributes": {
+                "age": "12",
+                "gender": "female",
+                "clothing": "pink shirt and blue jeans"
+            }
+        },
+        {
+            "id": "blue_bowl",
+            "attributes": {
+                "color": "blue",
+                "content": "snacks"
+            }
+        },
+        {
+            "id": "orange",
+            "attributes": {
+                "color": "orange",
+                "shape": "round"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "man",
+            "target": "girl1",
+            "relationship": "father-daughter"
+        },
+        {
+            "source": "man",
+            "target": "girl2",
+            "relationship": "father-daughter"
+        },
+        {
+            "source": "girl1",
+            "target": "girl2",
+            "relationship": "sisters"
+        },
+        {
+            "source": "girl1",
+            "target": "blue_bowl",
+            "relationship": "eating"
+        },
+        {
+            "source": "girl2",
+            "target": "blue_bowl",
+            "relationship": "eating"
+        },
+        {
+            "source": "girl2",
+            "target": "orange",
+            "relationship": "sitting on"
+        }
+    ]
+}

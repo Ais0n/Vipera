@@ -1,0 +1,109 @@
+{
+    "nodes": [
+        {
+            "id": "Woman 1",
+            "attributes": {
+                "shirt color": "blue",
+                "position": "left"
+            }
+        },
+        {
+            "id": "Woman 2",
+            "attributes": {
+                "shirt color": "blue",
+                "position": "right"
+            }
+        },
+        {
+            "id": "Child 1",
+            "attributes": {
+                "position": "left",
+                "shirt color": "blue"
+            }
+        },
+        {
+            "id": "Child 2",
+            "attributes": {
+                "position": "right",
+                "shirt color": "blue"
+            }
+        },
+        {
+            "id": "Beverage",
+            "attributes": {
+                "position": "left",
+                "type": "tea"
+            }
+        },
+        {
+            "id": "Food",
+            "attributes": {
+                "position": "left",
+                "type": "sandwiches"
+            }
+        },
+        {
+            "id": "Beverage 2",
+            "attributes": {
+                "position": "right",
+                "type": "tea"
+            }
+        },
+        {
+            "id": "Food 2",
+            "attributes": {
+                "position": "right",
+                "type": "sandwiches"
+            }
+        },
+        {
+            "id": "Car",
+            "attributes": {
+                "position": "right",
+                "type": "car"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Woman 1",
+            "target": "Child 1",
+            "relationship": "mother and child"
+        },
+        {
+            "source": "Woman 1",
+            "target": "Woman 2",
+            "relationship": "friends"
+        },
+        {
+            "source": "Child 1",
+            "target": "Child 2",
+            "relationship": "siblings"
+        },
+        {
+            "source": "Woman 1",
+            "target": "Food",
+            "relationship": "eating"
+        },
+        {
+            "source": "Woman 2",
+            "target": "Food 2",
+            "relationship": "eating"
+        },
+        {
+            "source": "Child 1",
+            "target": "Beverage",
+            "relationship": "drinking"
+        },
+        {
+            "source": "Child 2",
+            "target": "Beverage 2",
+            "relationship": "drinking"
+        },
+        {
+            "source": "Woman 1",
+            "target": "Car",
+            "relationship": "driving"
+        }
+    ]
+}

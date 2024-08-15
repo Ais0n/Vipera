@@ -1,0 +1,40 @@
+{
+    "nodes": [
+        {
+            "id": "man",
+            "attributes": {
+                "age": "35",
+                "gender": "male",
+                "clothing": "blue sweater"
+            }
+        },
+        {
+            "id": "girl",
+            "attributes": {
+                "age": "8",
+                "gender": "female",
+                "clothing": "pink shirt"
+            }
+        },
+        {
+            "id": "woman",
+            "attributes": {
+                "age": "30",
+                "gender": "female",
+                "clothing": "red shirt"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "man",
+            "target": "girl",
+            "relationship": "father-daughter"
+        },
+        {
+            "source": "man",
+            "target": "woman",
+            "relationship": "father-wife"
+        }
+    ]
+}
