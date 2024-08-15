@@ -50,7 +50,7 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
             Not sure how to write prompts? Try these:
           </div>
           <div className={styles.examplePrompts}>
-            {['A Doctor', 'A kindergarten teacher', 'A rich American family', 'Thug'].map((prompt) => (
+            {['A cinematic photo of a doctor', 'A family having a picnic in the park'].map((prompt) => (
               <button
                 key={prompt}
                 type="button"
