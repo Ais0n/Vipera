@@ -1,0 +1,70 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "age": "young",
+          "profession": "doctor",
+          "smile": "smiling"
+        }
+      },
+      {
+        "id": "Coat",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Tie",
+        "attributes": {
+          "color": "blue"
+        }
+      },
+      {
+        "id": "Shirt",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {
+          "color": "black"
+        }
+      },
+      {
+        "id": "Background",
+        "attributes": {
+          "color": "blue",
+          "pattern": "stripes"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Shirt",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "relationship": "holding"
+      },
+      {
+        "source": "Doctor",
+        "target": "Background",
+        "relationship": "posing in front of"
+      }
+    ]
+  }

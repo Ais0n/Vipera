@@ -1,0 +1,77 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {}
+      },
+      {
+        "id": "Glasses",
+        "attributes": {}
+      },
+      {
+        "id": "Hat",
+        "attributes": {}
+      },
+      {
+        "id": "Tie",
+        "attributes": {}
+      },
+      {
+        "id": "Coat",
+        "attributes": {}
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {}
+      },
+      {
+        "id": "Chair",
+        "attributes": {
+          "color": "Black"
+        }
+      },
+      {
+        "id": "Bottle",
+        "attributes": {
+          "color": "White"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Glasses",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Hat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "relationship": "holding"
+      },
+      {
+        "source": "Doctor",
+        "target": "Chair",
+        "relationship": "in front of"
+      },
+      {
+        "source": "Doctor",
+        "target": "Bottle",
+        "relationship": "next to"
+      }
+    ]
+  }

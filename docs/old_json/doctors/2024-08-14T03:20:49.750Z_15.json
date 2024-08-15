@@ -1,0 +1,38 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "gender": "male",
+                "profession": "doctor",
+                "age": "middle-aged",
+                "facial hair": "goatee"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "White"
+            }
+        },
+        {
+            "id": "Desk",
+            "attributes": {
+                "location": "office",
+                "contents": "papers and bottles"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Desk",
+            "relationship": "standing in front of"
+        }
+    ]
+}

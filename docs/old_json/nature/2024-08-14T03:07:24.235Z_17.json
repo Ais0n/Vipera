@@ -1,0 +1,114 @@
+Here is the JSON format for the scene graph:
+```json
+{
+ "nodes": [
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+       "color": "brown"
+     },
+     "position": [0.0, 0.0, 0.22, 0.11]
+   },
+   {
+     "type": "mountain",
+     "attributes": {
+       "height": "tall",
+      
+```

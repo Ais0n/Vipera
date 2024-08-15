@@ -1,0 +1,134 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "35",
+                "gender": "Male"
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "age": "10",
+                "gender": "Female"
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "age": "25",
+                "gender": "Female"
+            }
+        },
+        {
+            "id": "Salad",
+            "attributes": {
+                "color": "Green"
+            }
+        },
+        {
+            "id": "Beverage",
+            "attributes": {
+                "color": "Yellow"
+            }
+        },
+        {
+            "id": "Bowl",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Cup",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Fork",
+            "attributes": {
+                "color": "Yellow"
+            }
+        },
+        {
+            "id": "Spoon",
+            "attributes": {
+                "color": "Yellow"
+            }
+        },
+        {
+            "id": "Bird",
+            "attributes": {
+                "color": "White"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Girl",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Woman",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Girl",
+            "target": "Man",
+            "relationship": "Daughter-Father"
+        },
+        {
+            "source": "Woman",
+            "target": "Man",
+            "relationship": "Daughter-Father"
+        },
+        {
+            "source": "Man",
+            "target": "Salad",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Girl",
+            "target": "Salad",
+            "relationship": "Daughter-Father"
+        },
+        {
+            "source": "Woman",
+            "target": "Salad",
+            "relationship": "Daughter-Father"
+        },
+        {
+            "source": "Salad",
+            "target": "Beverage",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Salad",
+            "target": "Bowl",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Beverage",
+            "target": "Bowl",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Bowl",
+            "target": "Cup",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Cup",
+            "target": "Fork",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Fork",
+            "target": "Spoon",
+            "relationship": "Father-Daughter"
+        }
+    ]
+}

@@ -1,0 +1,105 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "40",
+                "gender": "Male",
+                "relationship": "Father"
+            }
+        },
+        {
+            "id": "Girl in Pink",
+            "attributes": {
+                "age": "10",
+                "gender": "Female",
+                "relationship": "Daughter"
+            }
+        },
+        {
+            "id": "Girl in White",
+            "attributes": {
+                "age": "12",
+                "gender": "Female",
+                "relationship": "Daughter"
+            }
+        },
+        {
+            "id": "Apples",
+            "attributes": {
+                "count": "2",
+                "color": "Red"
+            }
+        },
+        {
+            "id": "Bowls",
+            "attributes": {
+                "count": "2",
+                "food": "Pizza"
+            }
+        },
+        {
+            "id": "Beverages",
+            "attributes": {
+                "count": "2",
+                "drinks": "Soda"
+            }
+        },
+        {
+            "id": "Blanket",
+            "attributes": {
+                "color": "Blue and White",
+                "size": "Large"
+            }
+        },
+        {
+            "id": "Park",
+            "attributes": {
+                "location": "Outside",
+                "grassy": "Yes"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Girl in Pink",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Girl in White",
+            "relationship": "Father-Daughter"
+        },
+        {
+            "source": "Girl in Pink",
+            "target": "Girl in White",
+            "relationship": "Siblings"
+        },
+        {
+            "source": "Man",
+            "target": "Apples",
+            "relationship": "Father-Daughters"
+        },
+        {
+            "source": "Man",
+            "target": "Bowls",
+            "relationship": "Father-Daughters"
+        },
+        {
+            "source": "Man",
+            "target": "Beverages",
+            "relationship": "Father-Daughters"
+        },
+        {
+            "source": "Man",
+            "target": "Blanket",
+            "relationship": "Father-Daughters"
+        },
+        {
+            "source": "Man",
+            "target": "Park",
+            "relationship": "Father-Daughters"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "name": "Dr. John Smith",
+                "profession": "Doctor",
+                "age": "45",
+                "gender": "Male"
+            }
+        },
+        {
+            "id": "Office",
+            "attributes": {
+                "name": "Smith Medical Center",
+                "address": "123 Main Street",
+                "phone": "555-555-5555",
+                "email": "[john.smith@medicalcenter.com](mailto:john.smith@medicalcenter.com)"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Office",
+            "relationship": "works at"
+        }
+    ]
+}

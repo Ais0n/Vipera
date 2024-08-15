@@ -1,0 +1,109 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "35",
+                "gender": "Male",
+                "shirt": "Blue",
+                "watch": "Silver",
+                "hair": "Brown",
+                "smile": "Smiling"
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "age": "32",
+                "gender": "Female",
+                "shirt": "Pink",
+                "hair": "Brown",
+                "smile": "Smiling"
+            }
+        },
+        {
+            "id": "Boy",
+            "attributes": {
+                "age": "7",
+                "gender": "Male",
+                "shirt": "Blue",
+                "hair": "Brown",
+                "smile": "Smiling"
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "age": "5",
+                "gender": "Female",
+                "shirt": "Pink",
+                "hair": "Blonde",
+                "smile": "Smiling"
+            }
+        },
+        {
+            "id": "Bottle",
+            "attributes": {
+                "color": "Green",
+                "content": "Water"
+            }
+        },
+        {
+            "id": "Bread",
+            "attributes": {
+                "type": "Sandwich"
+            }
+        },
+        {
+            "id": "Pizza",
+            "attributes": {
+                "type": "Pizza"
+            }
+        },
+        {
+            "id": "Cup",
+            "attributes": {
+                "color": "Yellow",
+                "content": "Soda"
+            }
+        },
+        {
+            "id": "Blanket",
+            "attributes": {
+                "color": "Blue and white"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Woman",
+            "relationship": "Married"
+        },
+        {
+            "source": "Man",
+            "target": "Boy",
+            "relationship": "Father and son"
+        },
+        {
+            "source": "Man",
+            "target": "Girl",
+            "relationship": "Father and daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Boy",
+            "relationship": "Mother and son"
+        },
+        {
+            "source": "Woman",
+            "target": "Girl",
+            "relationship": "Mother and daughter"
+        },
+        {
+            "source": "Boy",
+            "target": "Girl",
+            "relationship": "Siblings"
+        }
+    ]
+}

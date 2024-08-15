@@ -1,0 +1,41 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "shirt": "blue",
+                "smiling": "yes",
+                "eating": "yes",
+                "holding food": "yes"
+            }
+        },
+        {
+            "id": "Little Girl",
+            "attributes": {
+                "shirt": "blue",
+                "smiling": "yes",
+                "eating": "yes"
+            }
+        },
+        {
+            "id": "Little Boy",
+            "attributes": {
+                "shirt": "blue",
+                "smiling": "yes",
+                "eating": "yes"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Little Girl",
+            "relationship": "father"
+        },
+        {
+            "source": "Man",
+            "target": "Little Boy",
+            "relationship": "father"
+        }
+    ]
+}

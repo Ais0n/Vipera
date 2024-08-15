@@ -1,0 +1,48 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "age": "35",
+                "gender": "Male",
+                "profession": "Doctor"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "White"
+            }
+        },
+        {
+            "id": "Tie",
+            "attributes": {
+                "color": "Blue",
+                "pattern": "Dotted"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "Black"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Tie",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "Wearing"
+        }
+    ]
+}

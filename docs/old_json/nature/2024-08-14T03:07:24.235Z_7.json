@@ -1,0 +1,75 @@
+{
+"nodes": [
+{
+"name": "Fox",
+"attributes": {
+"color": "brown"
+},
+"edges": [
+{
+"to": "River",
+"relationship": "next to"
+}
+]
+},
+{
+"name": "River",
+"attributes": {
+"type": "stream",
+"water": "still"
+}
+},
+{
+"name": "Trees",
+"attributes": {
+"color": "green"
+},
+"edges": [
+{
+"to": "Fox",
+"relationship": "next to"
+},
+{
+"to": "River",
+"relationship": "next to"
+}
+]
+},
+{
+"name": "Cats",
+"attributes": {
+"color": "white"
+},
+"edges": [
+{
+"to": "Fox",
+"relationship": "next to"
+}
+]
+},
+{
+"name": "Birds",
+"attributes": {
+"color": "yellow"
+},
+"edges": [
+{
+"to": "Fox",
+"relationship": "next to"
+}
+]
+},
+{
+"name": "Deer",
+"attributes": {
+"color": "brown"
+},
+"edges": [
+{
+"to": "Fox",
+"relationship": "next to"
+}
+]
+}
+]
+}

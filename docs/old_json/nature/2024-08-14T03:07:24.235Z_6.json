@@ -1,0 +1,38 @@
+{
+"nodes": [
+{
+"name": "Lion",
+"attributes": {
+"species": "Lion",
+"color": "brown",
+"size": "large"
+},
+{
+"name": "Lion cub",
+"attributes": {
+"species": "Lion",
+"color": "brown",
+"size": "small"
+}
+},
+{
+"name": "Grass",
+"attributes": {
+"color": "green",
+"texture": "rough"
+}
+}
+],
+"edges": [
+{
+"source": "Lion",
+"target": "Lion cub",
+"relationship": "parent-child"
+},
+{
+"source": "Lion cub",
+"target": "Grass",
+"relationship": "standing on"
+}
+]
+}

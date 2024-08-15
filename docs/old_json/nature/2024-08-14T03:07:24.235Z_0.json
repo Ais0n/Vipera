@@ -1,0 +1,52 @@
+{
+    "nodes": [
+        {
+            "id": "Deer",
+            "attributes": {
+                "color": "brown",
+                "size": "small",
+                "species": "deer"
+            }
+        },
+        {
+            "id": "Tree",
+            "attributes": {
+                "size": "large",
+                "location": "forest"
+            }
+        },
+        {
+            "id": "Grass",
+            "attributes": {
+                "color": "green",
+                "texture": "smooth",
+                "location": "field"
+            }
+        },
+        {
+            "id": "Shadow",
+            "attributes": {
+                "color": "black",
+                "shape": "rectangular",
+                "location": "ground"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Deer",
+            "target": "Tree",
+            "relationship": "in front of"
+        },
+        {
+            "source": "Deer",
+            "target": "Grass",
+            "relationship": "standing on"
+        },
+        {
+            "source": "Deer",
+            "target": "Shadow",
+            "relationship": "casting"
+        }
+    ]
+}

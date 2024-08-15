@@ -1,0 +1,80 @@
+{
+"nodes": [
+{
+"id": "deer",
+"type": "animal",
+"attributes": {
+"color": "brown",
+"species": "deer",
+"location": "field"
+}
+},
+{
+"id": "mountain",
+"type": "landscape",
+"attributes": {
+"height": "tall",
+"location": "background"
+}
+},
+{
+"id": "tree",
+"type": "plant",
+"attributes": {
+"size": "large",
+"location": "field"
+}
+},
+{
+"id": "flower",
+"type": "plant",
+"attributes": {
+"color": "yellow",
+"location": "field"
+}
+},
+{
+"id": "lake",
+"type": "waterbody",
+"attributes": {
+"size": "large",
+"location": "background"
+}
+},
+{
+"id": "mountain range",
+"type": "landscape",
+"attributes": {
+"height": "tall",
+"location": "background"
+}
+}
+],
+"edges": [
+{
+"source": "deer",
+"target": "field",
+"relationship": "located in"
+},
+{
+"source": "tree",
+"target": "field",
+"relationship": "located in"
+},
+{
+"source": "mountain",
+"target": "field",
+"relationship": "in the distance"
+},
+{
+"source": "lake",
+"target": "field",
+"relationship": "in the distance"
+},
+{
+"source": "mountain range",
+"target": "field",
+"relationship": "in the distance"
+}
+]
+}

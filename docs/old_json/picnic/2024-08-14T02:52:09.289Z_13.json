@@ -1,0 +1,58 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "gender": "male",
+                "shirt": "blue",
+                "jeans": "blue",
+                "smiling": "yes"
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "gender": "female",
+                "shirt": "blue",
+                "jeans": "blue",
+                "smiling": "yes"
+            }
+        },
+        {
+            "id": "Child",
+            "attributes": {
+                "gender": "female",
+                "shirt": "pink",
+                "jeans": "blue",
+                "smiling": "yes"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Child",
+            "relationship": "father-daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Child",
+            "relationship": "mother-daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Woman",
+            "relationship": "husband-wife"
+        },
+        {
+            "source": "Man",
+            "target": "Child",
+            "relationship": "father-daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Child",
+            "relationship": "mother-daughter"
+        }
+    ]
+}

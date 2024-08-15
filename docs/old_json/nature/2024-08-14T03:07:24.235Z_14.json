@@ -1,0 +1,45 @@
+{
+"nodes": [
+{
+"name": "Deer 1",
+"attributes": {
+"species": "Deer",
+"color": "Brown",
+"size": "Large",
+"gender": "Male"
+},
+{
+"name": "Deer 2",
+"attributes": {
+"species": "Deer",
+"color": "Brown",
+"size": "Small",
+"gender": "Male"
+}
+},
+{
+"name": "Water",
+"attributes": {
+"type": "Lake",
+"color": "Green"
+}
+}
+],
+"edges": [
+{
+"source": "Deer 1",
+"target": "Deer 2",
+"relationship": "Walking"
+},
+{
+"source": "Deer 1",
+"target": "Water",
+"relationship": "Near"
+},
+{
+"source": "Deer 2",
+"target": "Water",
+"relationship": "Near"
+}
+]
+}

@@ -1,0 +1,97 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "beard": true,
+                "smiling": true
+            }
+        },
+        {
+            "id": "Woman",
+            "attributes": {
+                "blond": true,
+                "smiling": true
+            }
+        },
+        {
+            "id": "Child",
+            "attributes": {
+                "smiling": true
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "smiling": true
+            }
+        },
+        {
+            "id": "Bucket",
+            "attributes": {
+                "color": "blue"
+            }
+        },
+        {
+            "id": "Bowl",
+            "attributes": {
+                "food": true
+            }
+        },
+        {
+            "id": "Frisbee",
+            "attributes": {
+                "food": true
+            }
+        },
+        {
+            "id": "Jar",
+            "attributes": {
+                "food": true
+            }
+        },
+        {
+            "id": "Carrot",
+            "attributes": {
+                "color": "orange"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Woman",
+            "relationship": "sitting next to"
+        },
+        {
+            "source": "Woman",
+            "target": "Child",
+            "relationship": "sitting next to"
+        },
+        {
+            "source": "Child",
+            "target": "Girl",
+            "relationship": "sitting next to"
+        },
+        {
+            "source": "Man",
+            "target": "Bucket",
+            "relationship": "holding"
+        },
+        {
+            "source": "Woman",
+            "target": "Bowl",
+            "relationship": "holding"
+        },
+        {
+            "source": "Child",
+            "target": "Frisbee",
+            "relationship": "holding"
+        },
+        {
+            "source": "Girl",
+            "target": "Jar",
+            "relationship": "holding"
+        }
+    ]
+}

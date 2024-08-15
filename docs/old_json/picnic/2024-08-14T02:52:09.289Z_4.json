@@ -1,0 +1,41 @@
+{
+    "nodes": [
+        {
+            "id": "Man on left",
+            "attributes": {
+                "shirt": "blue",
+                "beard": "yes",
+                "hair": "brown",
+                "smiling": "yes"
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "shirt": "pink and white",
+                "smiling": "yes"
+            }
+        },
+        {
+            "id": "Man on right",
+            "attributes": {
+                "shirt": "blue",
+                "beard": "yes",
+                "hair": "brown",
+                "smiling": "yes"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man on left",
+            "target": "Girl",
+            "relationship": "sitting next to"
+        },
+        {
+            "source": "Man on left",
+            "target": "Man on right",
+            "relationship": "sitting next to"
+        }
+    ]
+}

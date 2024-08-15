@@ -1,0 +1,71 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "profession": "doctor"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "white and black",
+                "location": "around doctor's neck"
+            }
+        },
+        {
+            "id": "Clothes",
+            "attributes": {
+                "color": "Blue and green"
+            }
+        },
+        {
+            "id": "Cabinet",
+            "attributes": {
+                "color": "white",
+                "location": "behind doctor"
+            }
+        },
+        {
+            "id": "Bottle",
+            "attributes": {
+                "location": "on counter",
+                "color": "white"
+            }
+        },
+        {
+            "id": "Pill Bottle",
+            "attributes": {
+                "location": "on counter",
+                "color": "white"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Cabinet",
+            "relationship": "behind"
+        },
+        {
+            "source": "Doctor",
+            "target": "Clothes",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Bottle",
+            "relationship": "next to"
+        },
+        {
+            "source": "Doctor",
+            "target": "Pill Bottle",
+            "relationship": "next to"
+        }
+    ]
+}

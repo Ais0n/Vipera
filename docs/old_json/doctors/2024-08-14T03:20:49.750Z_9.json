@@ -1,0 +1,80 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "profession": "doctor"
+            }
+        },
+        {
+            "id": "laptop",
+            "attributes": {
+                "color": "white",
+                "position": "right"
+            }
+        },
+        {
+            "id": "monitor",
+            "attributes": {
+                "position": "right",
+                "color": "blue"
+            }
+        },
+        {
+            "id": "Shirt",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Tie",
+            "attributes": {
+                "color": "Red"
+            }
+        },
+        {
+            "id": "Glasses",
+            "attributes": {
+                "color": "Blue"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "Black"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "man",
+            "target": "laptop",
+            "relationship": "next to"
+        },
+        {
+            "source": "man",
+            "target": "monitor",
+            "relationship": "next to"
+        },
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Tie",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Glasses",
+            "relationship": "Wearing"
+        }
+    ]
+}

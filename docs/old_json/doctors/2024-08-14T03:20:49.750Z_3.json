@@ -1,0 +1,41 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "name": "Dr. John",
+          "age": "45",
+          "profession": "Physician",
+          "specialty": "Cardiology"
+        }
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {
+          "color": "Black",
+          "length": "Long",
+          "material": "Plastic"
+        }
+      },
+      {
+        "id": "Glasses",
+        "attributes": {
+          "color": "Black",
+          "frame": "Metal",
+          "lens": "Clear"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "relationship": "wears"
+      },
+      {
+        "source": "Doctor",
+        "target": "Glasses",
+        "relationship": "wears"
+      }
+    ]
+  }

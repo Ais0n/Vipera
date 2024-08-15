@@ -1,0 +1,87 @@
+{
+    "nodes": [
+        {
+            "id": "Woman",
+            "attributes": {
+                "age": "35",
+                "gender": "Female",
+                "clothing": "Blue shirt"
+            }
+        },
+        {
+            "id": "Man",
+            "attributes": {
+                "age": "45",
+                "gender": "Male",
+                "clothing": "Blue shirt"
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "age": "10",
+                "gender": "Female",
+                "clothing": "Pink shirt"
+            }
+        },
+        {
+            "id": "Boy",
+            "attributes": {
+                "age": "8",
+                "gender": "Male",
+                "clothing": "Blue shirt"
+            }
+        },
+        {
+            "id": "Food",
+            "attributes": {
+                "type": "Picnic"
+            }
+        },
+        {
+            "id": "Beverage",
+            "attributes": {
+                "type": "Coffee"
+            }
+        },
+        {
+            "id": "Basket",
+            "attributes": {
+                "type": "Picnic basket"
+            }
+        },
+        {
+            "id": "Blanket",
+            "attributes": {
+                "type": "Picnic blanket"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Woman",
+            "target": "Girl",
+            "relationship": "Mother-daughter"
+        },
+        {
+            "source": "Woman",
+            "target": "Boy",
+            "relationship": "Mother-son"
+        },
+        {
+            "source": "Man",
+            "target": "Girl",
+            "relationship": "Father-daughter"
+        },
+        {
+            "source": "Man",
+            "target": "Boy",
+            "relationship": "Father-son"
+        },
+        {
+            "source": "Woman",
+            "target": "Man",
+            "relationship": "Married couple"
+        }
+    ]
+}

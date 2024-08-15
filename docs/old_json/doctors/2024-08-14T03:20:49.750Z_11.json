@@ -1,0 +1,43 @@
+{
+    "nodes": [
+        {
+            "id": "Doctor",
+            "attributes": {
+                "name": "Dr. John",
+                "age": "35",
+                "profession": "Physician",
+                "specialty": "Cardiology",
+                "medical degree": "MD"
+            }
+        },
+        {
+            "id": "Stethoscope",
+            "attributes": {
+                "color": "Black",
+                "length": "30 inches",
+                "weight": "1.5 pounds"
+            }
+        },
+        {
+            "id": "Coat",
+            "attributes": {
+                "color": "White",
+                "material": "Cotton",
+                "size": "Large",
+                "style": "Lab coat"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Doctor",
+            "target": "Stethoscope",
+            "relationship": "Wearing"
+        },
+        {
+            "source": "Doctor",
+            "target": "Coat",
+            "relationship": "Wearing"
+        }
+    ]
+}

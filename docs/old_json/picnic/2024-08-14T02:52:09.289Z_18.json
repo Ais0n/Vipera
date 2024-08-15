@@ -1,0 +1,154 @@
+{
+  "nodes": [
+    {
+      "id": "Man",
+      "attributes": {
+        "age": "35",
+        "gender": "Male",
+        "occupation": "Businessman"
+      }
+    },
+    {
+      "id": "Woman",
+      "attributes": {
+        "age": "30",
+        "gender": "Female",
+        "occupation": "Teacher"
+      }
+    },
+    {
+      "id": "Child",
+      "attributes": {
+        "age": "5",
+        "gender": "Male"
+      }
+    },
+    {
+      "id": "Girl",
+      "attributes": {
+        "age": "12",
+        "gender": "Female"
+      }
+    },
+    {
+      "id": "Bowl",
+      "attributes": {
+        "food": "French fries",
+        "color": "Yellow"
+      }
+    },
+    {
+      "id": "Cup",
+      "attributes": {
+        "drink": "Orange juice",
+        "color": "Yellow"
+      }
+    },
+    {
+      "id": "Blanket",
+      "attributes": {
+        "color": "Blue and white",
+        "size": "Large"
+      }
+    },
+    {
+      "id": "Fork",
+      "attributes": {
+        "color": "Silver"
+      }
+    },
+    {
+      "id": "Spoon",
+      "attributes": {
+        "color": "Silver"
+      }
+    },
+    {
+      "id": "Beverage",
+      "attributes": {
+        "color": "Yellow",
+        "type": "Orange juice"
+      }
+    },
+    {
+      "id": "Food",
+      "attributes": {
+        "color": "Yellow",
+        "type": "French fries"
+      }
+    },
+    {
+      "id": "Family",
+      "attributes": {
+        "relationship": "Husband, wife, and children"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "Man",
+      "target": "Woman",
+      "relationship": "Married"
+    },
+    {
+      "source": "Man",
+      "target": "Child",
+      "relationship": "Father and son"
+    },
+    {
+      "source": "Woman",
+      "target": "Girl",
+      "relationship": "Mother and daughter"
+    },
+    {
+      "source": "Man",
+      "target": "Beverage",
+      "relationship": "Drinking"
+    },
+    {
+      "source": "Woman",
+      "target": "Beverage",
+      "relationship": "Drinking"
+    },
+    {
+      "source": "Child",
+      "target": "Beverage",
+      "relationship": "Drinking"
+    },
+    {
+      "source": "Man",
+      "target": "Fork",
+      "relationship": "Using"
+    },
+    {
+      "source": "Woman",
+      "target": "Fork",
+      "relationship": "Using"
+    },
+    {
+      "source": "Child",
+      "target": "Fork",
+      "relationship": "Using"
+    },
+    {
+      "source": "Man",
+      "target": "Spoon",
+      "relationship": "Using"
+    },
+    {
+      "source": "Woman",
+      "target": "Spoon",
+      "relationship": "Using"
+    },
+    {
+      "source": "Child",
+      "target": "Spoon",
+      "relationship": "Using"
+    },
+    {
+      "source": "Family",
+      "target": "Blanket",
+      "relationship": "Sitting on"
+    }
+  ]
+}

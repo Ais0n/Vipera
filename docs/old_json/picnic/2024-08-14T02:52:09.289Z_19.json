@@ -1,0 +1,109 @@
+{
+    "nodes": [
+        {
+            "id": "Man",
+            "attributes": {
+                "plaid shirt": true,
+                "smiling": true,
+                "holding baby": true
+            }
+        },
+        {
+            "id": "Baby",
+            "attributes": {
+                "smiling": true,
+                "being held": true
+            }
+        },
+        {
+            "id": "Girl",
+            "attributes": {
+                "smiling": true,
+                "sitting on blanket": true
+            }
+        },
+        {
+            "id": "Glass of juice",
+            "attributes": {
+                "on table": true
+            }
+        },
+        {
+            "id": "Glass of water",
+            "attributes": {
+                "on table": true
+            }
+        },
+        {
+            "id": "Bottle of juice",
+            "attributes": {
+                "on table": true
+            }
+        },
+        {
+            "id": "Bottle of water",
+            "attributes": {
+                "on table": true
+            }
+        },
+        {
+            "id": "Sandwich",
+            "attributes": {
+                "on table": true
+            }
+        },
+        {
+            "id": "Pizza",
+            "attributes": {
+                "on table": true
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Baby",
+            "relationship": "holding"
+        },
+        {
+            "source": "Man",
+            "target": "Girl",
+            "relationship": "sitting on blanket"
+        },
+        {
+            "source": "Baby",
+            "target": "Girl",
+            "relationship": "sitting on blanket"
+        },
+        {
+            "source": "Man",
+            "target": "Glass of juice",
+            "relationship": "on table"
+        },
+        {
+            "source": "Man",
+            "target": "Glass of water",
+            "relationship": "on table"
+        },
+        {
+            "source": "Man",
+            "target": "Bottle of juice",
+            "relationship": "on table"
+        },
+        {
+            "source": "Man",
+            "target": "Bottle of water",
+            "relationship": "on table"
+        },
+        {
+            "source": "Baby",
+            "target": "Sandwich",
+            "relationship": "on table"
+        },
+        {
+            "source": "Baby",
+            "target": "Pizza",
+            "relationship": "on table"
+        }
+    ]
+}

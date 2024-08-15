@@ -1,0 +1,40 @@
+{
+"nodes": [
+{
+"name": "Baby animal",
+"attributes": {
+"color": "brown",
+"species": "rabbit",
+"size": "small",
+"location": "field"
+},
+{
+"name": "Grass",
+"attributes": {
+"color": "green",
+"texture": "smooth",
+"location": "field"
+}
+},
+{
+"name": "Dirt",
+"attributes": {
+"color": "brown",
+"texture": "rough",
+"location": "field"
+}
+}
+],
+"edges": [
+{
+"source": "Baby animal",
+"target": "Grass",
+"relationship": "on"
+},
+{
+"source": "Baby animal",
+"target": "Dirt",
+"relationship": "next to"
+}
+]
+}

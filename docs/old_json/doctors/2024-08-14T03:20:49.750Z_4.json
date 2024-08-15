@@ -1,0 +1,59 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "eyes": "brown",
+          "hair": "brown",
+          "smile": "smirk",
+          "facial hair": "none"
+        }
+      },
+      {
+        "id": "Coat",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Shirt",
+        "attributes": {
+          "color": "blue"
+        }
+      },
+      {
+        "id": "Tie",
+        "attributes": {
+          "color": "maroon"
+        }
+      },
+      {
+        "id": "Wall",
+        "attributes": {
+          "color": "white"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Shirt",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Wall",
+        "relationship": "positioned in front of"
+      }
+    ]
+  }

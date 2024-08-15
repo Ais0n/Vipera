@@ -1,0 +1,146 @@
+{
+  "nodes": [
+    {
+      "id": "woman",
+      "type": "person",
+      "attributes": {
+        "age": "young",
+        "gender": "female",
+        "relationship": "mother"
+      }
+    },
+    {
+      "id": "boy",
+      "type": "person",
+      "attributes": {
+        "age": "young",
+        "gender": "male",
+        "relationship": "son"
+      }
+    },
+    {
+      "id": "girl",
+      "type": "person",
+      "attributes": {
+        "age": "young",
+        "gender": "female",
+        "relationship": "daughter"
+      }
+    },
+    {
+      "id": "man",
+      "type": "person",
+      "attributes": {
+        "age": "old",
+        "gender": "male",
+        "relationship": "grandfather"
+      }
+    },
+    {
+      "id": "food",
+      "type": "food",
+      "attributes": {
+        "type": "pizza"
+      }
+    },
+    {
+      "id": "plate",
+      "type": "plate",
+      "attributes": {
+        "size": "large"
+      }
+    },
+    {
+      "id": "bowl",
+      "type": "bowl",
+      "attributes": {
+        "size": "large"
+      }
+    },
+    {
+      "id": "cup",
+      "type": "cup",
+      "attributes": {
+        "size": "small"
+      }
+    },
+    {
+      "id": "spoon",
+      "type": "spoon",
+      "attributes": {
+        "size": "small"
+      }
+    },
+    {
+      "id": "blanket",
+      "type": "blanket",
+      "attributes": {
+        "color": "red and white"
+      }
+    },
+    {
+      "id": "field",
+      "type": "field",
+      "attributes": {
+        "grass": "green"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "woman",
+      "target": "boy",
+      "type": "mother-son"
+    },
+    {
+      "source": "woman",
+      "target": "girl",
+      "type": "mother-daughter"
+    },
+    {
+      "source": "man",
+      "target": "woman",
+      "type": "grandfather-mother"
+    },
+    {
+      "source": "woman",
+      "target": "man",
+      "type": "mother-father"
+    },
+    {
+      "source": "woman",
+      "target": "food",
+      "type": "holding"
+    },
+    {
+      "source": "woman",
+      "target": "plate",
+      "type": "holding"
+    },
+    {
+      "source": "woman",
+      "target": "bowl",
+      "type": "holding"
+    },
+    {
+      "source": "woman",
+      "target": "cup",
+      "type": "holding"
+    },
+    {
+      "source": "woman",
+      "target": "spoon",
+      "type": "holding"
+    },
+    {
+      "source": "woman",
+      "target": "blanket",
+      "type": "sitting on"
+    },
+    {
+      "source": "woman",
+      "target": "field",
+      "type": "mother-field"
+    }
+  ]
+}

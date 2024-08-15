@@ -1,0 +1,76 @@
+{
+    "nodes": [
+      {
+        "id": "Doctor",
+        "attributes": {
+          "name": "Dr. Paulson"
+        }
+      },
+      {
+        "id": "Coat",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "id": "Tie",
+        "attributes": {
+          "color": "green"
+        }
+      },
+      {
+        "id": "Watch",
+        "attributes": {
+          "color": "black"
+        }
+      },
+      {
+        "id": "Stethoscope",
+        "attributes": {
+          "color": "black"
+        }
+      },
+      {
+        "id": "Shelf",
+        "attributes": {
+          "location": "behind doctor"
+        }
+      },
+      {
+        "id": "Bottles",
+        "attributes": {}
+      }
+    ],
+    "edges": [
+      {
+        "source": "Doctor",
+        "target": "Coat",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Tie",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Watch",
+        "relationship": "wearing"
+      },
+      {
+        "source": "Doctor",
+        "target": "Stethoscope",
+        "relationship": "holding"
+      },
+      {
+        "source": "Shelf",
+        "target": "Bottles",
+        "relationship": "contains"
+      },
+      {
+        "source": "Doctor",
+        "target": "Shelf",
+        "relationship": "in front of"
+      }
+    ]
+  }
