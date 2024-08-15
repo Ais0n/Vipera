@@ -29,6 +29,9 @@ const SceneGraph = ({ data }) => {
       .join('line')
       .attr('stroke-width', d => Math.sqrt(d.size) * 3);
 
+    link.append('title')
+      .text(d => d.type);
+
     // Add edge labels
     // setTimeout(() => {
     //   const edgeLabelBg = svg.append('g')
@@ -58,7 +61,7 @@ const SceneGraph = ({ data }) => {
     //     .text(d => !d.type ? '' : d.type.length > 10 ? (d.type.slice(0, 8) + '..') : d.type)
     //     .style('opacity', d => d.type ? 1 : 0)
     // }, 2500)
-    
+
     const node = svg.append('g')
       .attr('stroke', '#fff')
       .attr('stroke-width', 1.5)
@@ -66,12 +69,12 @@ const SceneGraph = ({ data }) => {
       .data(data.nodes)
       .join('circle')
       .attr('r', d => Math.sqrt(d.size) * 15)
-      .attr('fill', d => d3.hsl(d.ntype == 'object' ? 180 : 90, 0.5, d.ntype == 'object' ?  0.5 : 0.5 - 0.5 * d.bias))
+      .attr('fill', d => d3.hsl(d.ntype == 'object' ? 180 : 90, 0.5, d.ntype == 'object' ? 0.5 : 0.5 - 0.25 * d.bias))
       .call(drag(simulation));
 
     node.append('title')
-      .text(d => d.id);   
-      
+      .text(d => d.id);
+
     const label = svg.append('g')
       .attr('font-family', 'sans-serif')
       .attr('font-size', 12)
@@ -96,9 +99,9 @@ const SceneGraph = ({ data }) => {
         .transition()
         .duration(200)
         .style('opacity', 1);
-      
+
       // Update tooltip content with a bar chart
-      if(d.ntype != 'attribute') return;
+      if (d.ntype != 'attribute') return;
       const tooltip_g = svg.append('g')
         .attr('class', 'tooltip');
       console.log(tooltip_g)
@@ -143,17 +146,30 @@ const SceneGraph = ({ data }) => {
         .attr('dy', '0.35em')
         .text(([label, value]) => `${label}: ${value}`);
     })
-    .on('mouseout', function () {
+      .on('mouseout', function () {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr('r', d => Math.sqrt(d.size) * 15);
+        label.filter(d => d === this.__data__ && d.ntype != 'object')
+          .transition()
+          .duration(200)
+          .style('opacity', 0);
+        svg.select('.tooltip').remove();
+      });
+
+    link.on('mouseover', function (event, d) {
       d3.select(this)
         .transition()
         .duration(200)
-        .attr('r', d => Math.sqrt(d.size) * 15);
-      label.filter(d => d === this.__data__ && d.ntype != 'object')
+        .attr('stroke-width', Math.sqrt(d.size) * 5);
+    }).on('mouseout', function () {
+      d3.select(this)
         .transition()
         .duration(200)
-        .style('opacity', 0);
-      svg.select('.tooltip').remove();
-    });
+        .attr('stroke-width', d => Math.sqrt(d.size) * 1);
+    }
+    );
 
     simulation.on('tick', () => {
       link
@@ -197,7 +213,7 @@ const SceneGraph = ({ data }) => {
 
     // Add zoom and pan functionality
     const zoom = d3.zoom()
-      .scaleExtent([0.5, 10]) // Set the minimum and maximum zoom levels
+      .scaleExtent([0.2, 10]) // Set the minimum and maximum zoom levels
       .on('zoom', (event) => {
         svg.selectAll('g')
           .attr('transform', event.transform);

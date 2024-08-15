@@ -321,6 +321,13 @@ const Generate = () => {
             }
           })
         })
+        // handle edges: relationship = type
+        edges.forEach(edge => {
+          if(typeof(edge.relationship) != 'undefined') {
+            edge.type = edge.relationship;
+            delete edge.relationship;
+          }
+        })
         return {nodes, edges};
       }
 
@@ -461,12 +468,12 @@ const Generate = () => {
                 let p_i = _p / sum;
                 res += (p_i - avg_p_i) * (p_i-avg_p_i);
               }
-              return res / avg_p_i;
+              return Math.min(1.0, res / avg_p_i);
             }
             let _node = {
               id: String(node.id) + '_' + String(attrName),
               ntype: "attribute",
-              values: attributes[attrName],
+              values: node.size == _size ? attributes[attrName] : {...attributes[attrName], '(unknown)': node.size - _size},
               size: _size,
               bias: measureBias(attributes[attrName])
             };
