@@ -1,0 +1,88 @@
+{
+    "nodes": [
+        {
+            "name": "Chef",
+            "attributes": {
+                "shirt": "white",
+                "apron": "black",
+                "hat": "black",
+                "shoes": "white",
+                "hands": "busy",
+                "bowl": "plate",
+                "spoon": "metal",
+                "plate": "plate",
+                "food": "meat",
+                "table": "wood"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "meat",
+                "spoon": "metal",
+                "table": "wood"
+            }
+        },
+        {
+            "name": "Spoon",
+            "attributes": {
+                "material": "metal",
+                "plate": "plate",
+                "table": "wood"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "plate": "plate",
+                "table": "wood"
+            }
+        },
+        {
+            "name": "Table",
+            "attributes": {
+                "wood": "textured",
+                "plate": "plate",
+                "spoon": "metal",
+                "bowl": "plate",
+                "food": "meat",
+                "table": "wood"
+            }
+        },
+        {
+            "name": "Food",
+            "attributes": {
+                "meat": "meat",
+                "plate": "plate",
+                "table": "wood"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Chef",
+            "target": "Plate",
+            "relationship": "serving"
+        },
+        {
+            "source": "Chef",
+            "target": "Spoon",
+            "relationship": "holding"
+        },
+        {
+            "source": "Chef",
+            "target": "Bowl",
+            "relationship": "next to"
+        },
+        {
+            "source": "Chef",
+            "target": "Table",
+            "relationship": "standing on"
+        },
+        {
+            "source": "Chef",
+            "target": "Food",
+            "relationship": "cooking"
+        }
+    ]
+}

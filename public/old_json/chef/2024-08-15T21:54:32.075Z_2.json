@@ -1,0 +1,84 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "profession": "Chef",
+                "wearing": "Apron",
+                "cooking": "Food"
+            }
+        },
+        {
+            "name": "Food",
+            "attributes": {
+                "type": "Meat and vegetables",
+                "prepared": "In a pan"
+            }
+        },
+        {
+            "name": "Pan",
+            "attributes": {
+                "material": "Metal",
+                "size": "Large"
+            }
+        },
+        {
+            "name": "Broccoli",
+            "attributes": {
+                "type": "Vegetable",
+                "color": "Green"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "material": "Metal",
+                "size": "Large"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "material": "Metal",
+                "size": "Large"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Food",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Man",
+            "target": "Pan",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Broccoli",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Knife",
+            "relationship": "Using"
+        },
+        {
+            "source": "Food",
+            "target": "Pan",
+            "relationship": "In"
+        },
+        {
+            "source": "Knife",
+            "target": "Bowl",
+            "relationship": "In"
+        },
+        {
+            "source": "Food",
+            "target": "Bowl",
+            "relationship": "In"
+        }
+    ]
+}

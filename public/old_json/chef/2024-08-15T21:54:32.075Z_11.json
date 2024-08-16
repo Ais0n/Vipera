@@ -1,0 +1,70 @@
+{
+    "nodes": [
+      {
+        "name": "Chef",
+        "attributes": {
+          "shirt": "white",
+          "apron": "black",
+          "hat": "black",
+          "glove": "black",
+          "watch": "black",
+          "shoes": "black",
+          "beard": "yes",
+          "age": "middle-aged",
+          "occupation": "Chef"
+        }
+      },
+      {
+        "name": "Food",
+        "attributes": {
+          "type": "meat",
+          "color": "brown",
+          "shape": "round",
+          "size": "large",
+          "location": "plate"
+        }
+      },
+      {
+        "name": "Plate",
+        "attributes": {
+          "color": "white",
+          "shape": "round",
+          "size": "large",
+          "location": "table"
+        }
+      },
+      {
+        "name": "Table",
+        "attributes": {
+          "color": "black",
+          "shape": "rectangular",
+          "size": "large",
+          "location": "kitchen"
+        }
+      },
+      {
+        "name": "Kitchen",
+        "attributes": {
+          "color": "black",
+          "shape": "rectangular",
+          "size": "large",
+          "location": "restaurant"
+        }
+      },
+      {
+        "name": "Restaurant",
+        "attributes": {
+          "type": "fine dining",
+          "ambiance": "formal",
+          "location": "city"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Chef",
+        "target": "Food",
+        "type": "cooking"
+      }
+    ]
+  }

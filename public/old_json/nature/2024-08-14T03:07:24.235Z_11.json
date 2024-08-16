@@ -1,47 +1,42 @@
-Here is the scene graph in JSON format:
-```json
 {
- "nodes": [
-   {
-     "name": "Deer",
-     "attributes": {
-       "color": "brown",
-       "species": "deer"
-     },
-     "relationships": [
-       {
-         "type": "in",
-         "target": "Field"
-       }
-     ]
-   },
-   {
-     "name": "Field",
-     "attributes": {
-       "color": "green",
-       "type": "field"
-     },
-     "relationships": [
-       {
-         "type": "contains",
-         "target": "Deer"
-       }
-     ]
-   },
-   {
-     "name": "Buffalo",
-     "attributes": {
-       "color": "brown",
-       "species": "buffalo"
-     },
-     "relationships": [
-       {
-         "type": "in",
-         "target": "Field"
-       }
-     ]
-   }
- ]
+  "nodes": [
+    {
+      "name": "Deer",
+      "attributes": {
+        "color": "brown",
+        "species": "deer"
+      }
+    },
+    {
+      "name": "Field",
+      "attributes": {
+        "color": "green",
+        "type": "field"
+      }
+    },
+    {
+      "name": "Buffalo",
+      "attributes": {
+        "color": "brown",
+        "species": "buffalo"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "Deer",
+      "target": "Field",
+      "type": "in"
+    },
+    {
+      "source": "Field",
+      "target": "Deer",
+      "type": "contains"
+    },
+    {
+      "source": "Buffalo",
+      "target": "Field",
+      "type": "in"
+    }
+  ]
 }
-```
-In the image, there are three animals: two deer and one buffalo. They are all in a grassy field, which is the main focus of the scene. The deer are standing near the center of the field, while the buffalo is located towards the right side of the field. The animals are all part of the same natural environment, and they are all in the field together.

@@ -1,0 +1,66 @@
+{
+    "nodes": [
+        {
+            "name": "Chef",
+            "attributes": {
+                "hat": "Yes",
+                "shirt": "Yes",
+                "apron": "Yes",
+                "beard": "Yes",
+                "cooking": "Yes"
+            }
+        },
+        {
+            "name": "Pan",
+            "attributes": {
+                "food": "Yes",
+                "stirring": "Yes"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "food": "Yes",
+                "stirring": "No"
+            }
+        },
+        {
+            "name": "Kitchen",
+            "attributes": {
+                "stove": "Yes",
+                "oven": "Yes",
+                "sink": "No"
+            }
+        },
+        {
+            "name": "Kitchenware",
+            "attributes": {
+                "stove": "Yes",
+                "oven": "Yes",
+                "sink": "No"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Chef",
+            "target": "Pan",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Bowl",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Kitchen",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Kitchenware",
+            "relationship": "Cooking"
+        }
+    ]
+}

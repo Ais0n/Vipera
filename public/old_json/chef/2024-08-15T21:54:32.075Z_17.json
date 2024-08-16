@@ -1,0 +1,133 @@
+{
+    "nodes": [
+      {
+        "name": "Man",
+        "attributes": {
+          "hat": "Yes",
+          "shirt": "Yes",
+          "apron": "Yes",
+          "beard": "Yes",
+          "stirring": "Yes"
+        }
+      },
+      {
+        "name": "Frying Pan",
+        "attributes": {
+          "food": "Yes",
+          "stirring": "Yes"
+        }
+      },
+      {
+        "name": "Bowls",
+        "attributes": {
+          "food": "Yes"
+        }
+      },
+      {
+        "name": "Kitchen",
+        "attributes": {
+          "stove": "Yes",
+          "bowls": "Yes",
+          "food": "Yes"
+        }
+      },
+      {
+        "name": "Bowls of food",
+        "attributes": {
+          "food": "Yes"
+        }
+      },
+      {
+        "name": "Food",
+        "attributes": {
+          "stirring": "Yes"
+        }
+      },
+      {
+        "name": "Food on the stove",
+        "attributes": {
+          "stirring": "Yes"
+        }
+      },
+      {
+        "name": "Food on the stove",
+        "attributes": {
+          "stirring": "Yes"
+        }
+      },
+      {
+        "name": "Food on the stove",
+        "attributes": {
+          "stirring": "Yes"
+        }
+      },
+      {
+        "name": "Food on the stove",
+        "attributes": {
+          "stirring": "Yes"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Man",
+        "target": "Frying Pan",
+        "relationship": "stirring"
+      },
+      {
+        "source": "Man",
+        "target": "Bowls",
+        "relationship": "food"
+      },
+      {
+        "source": "Man",
+        "target": "Kitchen",
+        "relationship": "food"
+      },
+      {
+        "source": "Frying Pan",
+        "target": "Bowls",
+        "relationship": "food"
+      },
+      {
+        "source": "Frying Pan",
+        "target": "Kitchen",
+        "relationship": "food"
+      },
+      {
+        "source": "Bowls",
+        "target": "Kitchen",
+        "relationship": "food"
+      },
+      {
+        "source": "Bowls",
+        "target": "Bowls of food",
+        "relationship": "food"
+      },
+      {
+        "source": "Bowls of food",
+        "target": "Food",
+        "relationship": "food"
+      },
+      {
+        "source": "Food",
+        "target": "Food on the stove",
+        "relationship": "stirring"
+      },
+      {
+        "source": "Food on the stove",
+        "target": "Food on the stove",
+        "relationship": "stirring"
+      },
+      {
+        "source": "Food on the stove",
+        "target": "Food on the stove",
+        "relationship": "stirring"
+      },
+      {
+        "source": "Food on the stove",
+        "target": "Food on the stove",
+        "relationship": "stirring"
+      }
+    ]
+  }

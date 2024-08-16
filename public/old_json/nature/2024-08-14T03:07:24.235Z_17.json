@@ -1,114 +1,77 @@
-Here is the JSON format for the scene graph:
-```json
 {
- "nodes": [
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-       "color": "brown"
-     },
-     "position": [0.0, 0.0, 0.22, 0.11]
-   },
-   {
-     "type": "mountain",
-     "attributes": {
-       "height": "tall",
-      
-```
+    "nodes": [
+        {
+            "name": "Bull",
+            "attributes": {
+                "color": "brown",
+                "species": "bull",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Deer",
+            "attributes": {
+                "species": "deer",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Baby Deer",
+            "attributes": {
+                "species": "deer",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Trees",
+            "attributes": {
+                "species": "tree",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Flowers",
+            "attributes": {
+                "species": "flower",
+                "location": "field"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Bull",
+            "target": "Deer",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Bull",
+            "target": "Baby Deer",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Deer",
+            "target": "Baby Deer",
+            "relationship": "parent-child"
+        },
+        {
+            "source": "Deer",
+            "target": "Trees",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Bull",
+            "target": "Trees",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Bull",
+            "target": "Flowers",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Deer",
+            "target": "Flowers",
+            "relationship": "coexisting"
+        }
+    ]
+}

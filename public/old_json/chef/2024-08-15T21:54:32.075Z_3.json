@@ -1,0 +1,75 @@
+{
+    "nodes": [
+        {
+            "name": "Chef",
+            "attributes": {
+                "position": "standing",
+                "action": "cutting",
+                "wearing": "white jacket",
+                "cooking": "plate of food"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "position": "on table",
+                "food": "meat and vegetables"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "position": "in chef's hand",
+                "action": "cutting"
+            }
+        },
+        {
+            "name": "Bottles",
+            "attributes": {
+                "position": "on counter",
+                "liquid": "wine"
+            }
+        },
+        {
+            "name": "Onion",
+            "attributes": {
+                "position": "on table",
+                "color": "white"
+            }
+        },
+        {
+            "name": "Broccoli",
+            "attributes": {
+                "position": "on table",
+                "color": "green"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Chef",
+            "target": "Plate",
+            "relationship": "cutting"
+        },
+        {
+            "source": "Chef",
+            "target": "Knife",
+            "relationship": "holding"
+        },
+        {
+            "source": "Plate",
+            "target": "Chef",
+            "relationship": "serving"
+        },
+        {
+            "source": "Plate",
+            "target": "Onion",
+            "relationship": "next to"
+        },
+        {
+            "source": "Plate",
+            "target": "Broccoli",
+            "relationship": "next to"
+        }
+    ]
+}

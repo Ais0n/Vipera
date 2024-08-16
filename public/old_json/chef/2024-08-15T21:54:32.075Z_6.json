@@ -1,0 +1,100 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "profession": "Chef",
+                "age": "35",
+                "hair": "Black",
+                "beard": "Yes",
+                "clothes": "Apron and Chef's outfit"
+            }
+        },
+        {
+            "name": "Fork",
+            "attributes": {
+                "material": "Metal",
+                "color": "Silver"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "material": "Metal",
+                "color": "Silver"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "color": "White",
+                "food": "Sushi"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "color": "Silver",
+                "food": "Salad"
+            }
+        },
+        {
+            "name": "Salad",
+            "attributes": {
+                "color": "Green",
+                "type": "Salad"
+            }
+        },
+        {
+            "name": "Tomato",
+            "attributes": {
+                "color": "Red",
+                "type": "Tomato"
+            }
+        },
+        {
+            "name": "Carrot",
+            "attributes": {
+                "color": "Orange",
+                "type": "Carrot"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Fork",
+            "relationship": "Holding"
+        },
+        {
+            "source": "Man",
+            "target": "Knife",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Plate",
+            "relationship": "Serving"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "Using"
+        },
+        {
+            "source": "Salad",
+            "target": "Bowl",
+            "relationship": "In"
+        },
+        {
+            "source": "Tomato",
+            "target": "Salad",
+            "relationship": "In"
+        },
+        {
+            "source": "Carrot",
+            "target": "Salad",
+            "relationship": "In"
+        }
+    ]
+}

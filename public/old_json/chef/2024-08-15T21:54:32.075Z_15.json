@@ -1,0 +1,123 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "age": "35",
+                "occupation": "Chef",
+                "clothes": "Apron and chef's outfit"
+            }
+        },
+        {
+            "name": "Pan",
+            "attributes": {
+                "material": "Metal",
+                "content": "Food"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "material": "Metal",
+                "content": "Salad"
+            }
+        },
+        {
+            "name": "Broccoli",
+            "attributes": {
+            }
+        },
+        {
+            "name": "Spoon",
+            "attributes": {
+                "material": "Metal",
+                "content": "Stirring food"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "material": "Metal",
+                "content": "Cutting food"
+            }
+        },
+        {
+            "name": "Oven",
+            "attributes": {
+                "location": "Kitchen"
+            }
+        },
+        {
+            "name": "Counter",
+            "attributes": {
+            }
+        },
+        {
+            "name": "Bowl of vegetables",
+            "attributes": {
+            }
+        },
+        {
+            "name": "Bowl of meat",
+            "attributes": {
+            }
+        },
+        {
+            "name": "Bowl of salad",
+            "attributes": {
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Pan",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "Adding ingredients"
+        },
+        {
+            "source": "Man",
+            "target": "Spoon",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Oven",
+            "relationship": "Using oven"
+        },
+        {
+            "source": "Bowl of vegetables",
+            "target": "Counter",
+            "relationship": "on"
+        },
+        {
+            "source": "Bowl of meat",
+            "target": "Counter",
+            "relationship": "on"
+        },
+        {
+            "source": "Bowl of salad",
+            "target": "Counter",
+            "relationship": "on"
+        },
+        {
+            "source": "Knife",
+            "target": "Counter",
+            "relationship": "on"
+        },
+        {
+            "source": "Spoon",
+            "target": "Counter",
+            "relationship": "on"
+        },
+        {
+            "source": "Broccoli",
+            "target": "Counter",
+            "relationship": "on"
+        }
+    ]
+}

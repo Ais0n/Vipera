@@ -1,0 +1,106 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "position": "Chef",
+                "clothes": "Apron",
+                "action": "Cutting",
+                "tool": "Knife"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "Salad",
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "food": "Salad",
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "position": "In man's hand",
+                "action": "Cutting"
+            }
+        },
+        {
+            "name": "Orange",
+            "attributes": {
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Bottle",
+            "attributes": {
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Spoon",
+            "attributes": {
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Cutting board",
+            "attributes": {
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Sink",
+            "attributes": {
+                "position": "In kitchen"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Plate",
+            "relationship": "Cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Knife",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "Cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Orange",
+            "relationship": "Cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Bottle",
+            "relationship": "Cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Spoon",
+            "relationship": "Cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Cutting board",
+            "relationship": "Cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Sink",
+            "relationship": "In kitchen"
+        }
+    ]
+}

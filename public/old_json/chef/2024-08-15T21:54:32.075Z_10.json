@@ -1,0 +1,76 @@
+{
+    "nodes": [
+        {
+            "id": "man",
+            "name": "Man",
+            "attributes": {
+                "profession": "Chef",
+                "beard": "Yes",
+                "apron": "Yes",
+                "shirt": "Yes",
+                "jacket": "Yes",
+                "hat": "No",
+                "age": "30",
+                "gender": "Male"
+            }
+        },
+        {
+            "id": "plate",
+            "name": "Plate",
+            "attributes": {
+                "food": "Yes",
+                "broccoli": "Yes",
+                "meat": "Yes",
+                "sauce": "Yes",
+                "size": "Large"
+            }
+        },
+        {
+            "id": "knife",
+            "name": "Knife",
+            "attributes": {
+                "material": "Metal",
+                "size": "Large",
+                "sharpness": "Sharp"
+            }
+        },
+        {
+            "id": "bowl",
+            "name": "Bowl",
+            "attributes": {
+                "food": "Yes",
+                "size": "Small"
+            }
+        },
+        {
+            "id": "spoon",
+            "name": "Spoon",
+            "attributes": {
+                "material": "Metal",
+                "size": "Small"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "man",
+            "target": "plate",
+            "relationship": "Preparing"
+        },
+        {
+            "source": "man",
+            "target": "knife",
+            "relationship": "Using"
+        },
+        {
+            "source": "man",
+            "target": "bowl",
+            "relationship": "Using"
+        },
+        {
+            "source": "man",
+            "target": "spoon",
+            "relationship": "Using"
+        }
+    ]
+}

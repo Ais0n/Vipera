@@ -1,0 +1,113 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "age": "35",
+                "occupation": "Chef",
+                "shirt": "Apron",
+                "hat": "Chef's hat",
+                "beard": "Yes",
+                "cooking utensil": "Fork"
+            }
+        },
+        {
+            "name": "Table",
+            "attributes": {
+                "material": "Wood",
+                "size": "Large"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "material": "Glass",
+                "size": "Small",
+                "contents": "Salad"
+            }
+        },
+        {
+            "name": "Salad",
+            "attributes": {
+                "ingredients": "Lettuce, tomatoes, and other vegetables"
+            }
+        },
+        {
+            "name": "Fork",
+            "attributes": {
+                "material": "Metal",
+                "size": "Large"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "material": "Metal",
+                "size": "Large"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "material": "Glass",
+                "size": "Large",
+                "contents": "Meat and vegetables"
+            }
+        },
+        {
+            "name": "Meat",
+            "attributes": {
+                "type": "Chicken",
+                "cooking method": "Grilled"
+            }
+        },
+        {
+            "name": "Vegetables",
+            "attributes": {
+                "type": "Broccoli, carrots, and other vegetables"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Table",
+            "relationship": "Cooking on"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "Placing salad in"
+        },
+        {
+            "source": "Man",
+            "target": "Fork",
+            "relationship": "Using to eat"
+        },
+        {
+            "source": "Man",
+            "target": "Knife",
+            "relationship": "Using to cut meat"
+        },
+        {
+            "source": "Man",
+            "target": "Plate",
+            "relationship": "Serving food on"
+        },
+        {
+            "source": "Man",
+            "target": "Salad",
+            "relationship": "Preparing to eat"
+        },
+        {
+            "source": "Man",
+            "target": "Meat",
+            "relationship": "Cooking and serving"
+        },
+        {
+            "source": "Man",
+            "target": "Vegetables",
+            "relationship": "Cooking and serving"
+        }
+    ]
+}

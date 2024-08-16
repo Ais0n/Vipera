@@ -1,73 +1,73 @@
 {
-"nodes": [
-{
-"name": "Deer",
-"attributes": {
-"color": "red"
-}
-},
-{
-"name": "Elk",
-"attributes": {
-"color": "brown"
-}
-},
-{
-"name": "Baby Deer",
-"attributes": {
-"color": "brown"
-}
-},
-{
-"name": "Baby Elk",
-"attributes": {
-"color": "brown"
-}
-},
-{
-"name": "Stream",
-"attributes": {
-"water": "yes"
-}
-},
-{
-"name": "Trees",
-"attributes": {
-"green": "yes"
-}
-},
-{
-"name": "Snakes",
-"attributes": {
-"green": "no"
-}
-}
-],
-"edges": [
-{
-"source": "Deer",
-"target": "Stream",
-"relationship": "next to"
-},
-{
-"source": "Deer",
-"target": "Baby Deer",
-"relationship": "parent of"
-},
-{
-"source": "Elk",
-"target": "Baby Elk",
-"relationship": "parent of"
-},
-{
-"source": "Stream",
-"target": "Trees",
-"relationship": "next to"
-},
-{
-"source": "Stream",
-"target": "Snakes",
-"relationship": "next to"
-}
-]
+    "nodes": [
+        {
+            "name": "Deer",
+            "attributes": {
+                "color": "red"
+            }
+        },
+        {
+            "name": "Elk",
+            "attributes": {
+                "color": "brown"
+            }
+        },
+        {
+            "name": "Baby Deer",
+            "attributes": {
+                "color": "brown"
+            }
+        },
+        {
+            "name": "Baby Elk",
+            "attributes": {
+                "color": "brown"
+            }
+        },
+        {
+            "name": "Stream",
+            "attributes": {
+                "water": "yes"
+            }
+        },
+        {
+            "name": "Trees",
+            "attributes": {
+                "green": "yes"
+            }
+        },
+        {
+            "name": "Snakes",
+            "attributes": {
+                "green": "no"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Deer",
+            "target": "Stream",
+            "relationship": "next to"
+        },
+        {
+            "source": "Deer",
+            "target": "Baby Deer",
+            "relationship": "parent of"
+        },
+        {
+            "source": "Elk",
+            "target": "Baby Elk",
+            "relationship": "parent of"
+        },
+        {
+            "source": "Stream",
+            "target": "Trees",
+            "relationship": "next to"
+        },
+        {
+            "source": "Stream",
+            "target": "Snakes",
+            "relationship": "next to"
+        }
+    ]
 }

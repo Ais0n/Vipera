@@ -1,206 +1,61 @@
 {
-"nodes": [
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Baby cow",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
-"name": "Brown cow",
-"attributes": {
-"color": "brown",
-"size": "large"
-}
-},
-{
+    "nodes": [
+      {
+        "id": "cow",
+        "attributes": {
+          "color": "brown"
+        }
+      },
+      {
+        "id": "horse",
+        "attributes": {
+          "color": "brown"
+        }
+      },
+      {
+        "id": "pig",
+        "attributes": {
+          "color": "brown"
+        }
+      },
+      {
+        "id": "deer",
+        "attributes": {
+          "color": "brown"
+        }
+      },
+      {
+        "id": "baby deer",
+        "attributes": {
+          "color": "brown"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "deer",
+        "target": "baby deer",
+        "relationship": "parent-child"
+      },
+      {
+        "source": "deer",
+        "target": "cow",
+        "relationship": "coexisting"
+      },
+      {
+        "source": "deer",
+        "target": "horse",
+        "relationship": "coexisting"
+      },
+      {
+        "source": "deer",
+        "target": "pig",
+        "relationship": "coexisting"
+      },
+      {
+        "source": "deer",
+        "target": "deer",
+        "relationship": "coexisting"
+      }
+    ]
+   }

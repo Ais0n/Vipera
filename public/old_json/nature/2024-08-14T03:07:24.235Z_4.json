@@ -1,52 +1,53 @@
 {
-"nodes": [
-{
-"name": "Deer",
-"attributes": {
-"species": "deer",
-"color": "brown",
-"size": "large"
-},
-{
-"name": "Baby Deer",
-"attributes": {
-"species": "deer",
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Animal",
-"attributes": {
-"species": "deer",
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bird",
-"attributes": {
-"species": "bird",
-"color": "brown",
-"size": "small"
-}
-}
-],
-"edges": [
-{
-"source": "Deer",
-"target": "Baby Deer",
-"relationship": "parent"
-},
-{
-"source": "Deer",
-"target": "Animal",
-"relationship": "identical"
-},
-{
-"source": "Baby Deer",
-"target": "Bird",
-"relationship": "identical"
-}
-]
+    "nodes": [
+        {
+            "name": "Deer",
+            "attributes": {
+                "species": "deer",
+                "color": "brown",
+                "size": "large"
+            }
+        },
+        {
+            "name": "Baby Deer",
+            "attributes": {
+                "species": "deer",
+                "color": "brown",
+                "size": "small"
+            }
+        },
+        {
+            "name": "Animal",
+            "attributes": {
+                "species": "deer",
+                "color": "brown",
+                "size": "small"
+            }
+        },
+        {
+            "name": "Bird",
+            "attributes": {
+                "species": "bird",
+                "color": "brown",
+                "size": "small"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Deer",
+            "target": "Baby Deer",
+            "relationship": "parent"
+        },
+        {
+            "source": "Deer",
+            "target": "Animal",
+            "relationship": "identical"
+        },
+        {
+            "source": "Baby Deer",
+            "target": "Bird",
+            "relationship": "identical"
+        }
+    ]
 }

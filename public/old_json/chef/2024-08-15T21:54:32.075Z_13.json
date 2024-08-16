@@ -1,0 +1,72 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "position": "standing",
+                "wearing": "apron",
+                "cutting": "meat"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "meat",
+                "position": "on table"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "position": "on table",
+                "food": "salad"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "position": "in hand",
+                "cutting": "meat"
+            }
+        },
+        {
+            "name": "Salad",
+            "attributes": {
+                "position": "on table"
+            }
+        },
+        {
+            "name": "Bread",
+            "attributes": {
+                "position": "on table"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Plate",
+            "relationship": "cutting"
+        },
+        {
+            "source": "Man",
+            "target": "Knife",
+            "relationship": "holding"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "next to"
+        },
+        {
+            "source": "Man",
+            "target": "Salad",
+            "relationship": "next to"
+        },
+        {
+            "source": "Man",
+            "target": "Bread",
+            "relationship": "next to"
+        }
+    ]
+}

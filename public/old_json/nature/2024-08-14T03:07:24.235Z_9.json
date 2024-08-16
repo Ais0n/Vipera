@@ -1,169 +1,70 @@
 {
-"nodes": [
-{
-"name": "Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
+    "nodes": [
+        {
+            "name": "Deer",
+            "attributes": {
+                "species": "deer",
+                "color": "brown",
+                "size": "large",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Baby Deer",
+            "attributes": {
+                "species": "deer",
+                "color": "brown",
+                "size": "small",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Bird",
+            "attributes": {
+                "species": "bird",
+                "color": "brown",
+                "size": "small",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Birds",
+            "attributes": {
+                "species": "birds",
+                "color": "brown",
+                "size": "small",
+                "location": "field"
+            }
+        },
+        {
+            "name": "Grass",
+            "attributes": {
+                "type": "grass",
+                "color": "green",
+                "location": "field"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Deer",
+            "target": "Baby Deer",
+            "relationship": "parent-child"
+        },
+        {
+            "source": "Deer",
+            "target": "Birds",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Bird",
+            "target": "Birds",
+            "relationship": "coexisting"
+        },
+        {
+            "source": "Deer",
+            "target": "Grass",
+            "relationship": "grazing"
+        }
+    ]
 }
-},
-{
-"name": "Fawn",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Small",
-"location": "Grassy field"
-}
-},
-{
-"name": "Baby Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Small",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown",
-"size": "Large",
-"location": "Grassy field"
-}
-},
-{
-"name": "Brown Deer",
-"attributes": {
-"species": "Deer",
-"color": "Brown

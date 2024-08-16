@@ -1,0 +1,84 @@
+{
+    "nodes": [
+        {
+            "name": "Chef",
+            "attributes": {
+                "hat": "Yes",
+                "apron": "Yes",
+                "shirt": "Yes",
+                "coat": "No",
+                "tie": "No",
+                "shoes": "No"
+            }
+        },
+        {
+            "name": "Pan",
+            "attributes": {
+                "food": "Yes",
+                "stirring": "Yes"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "Yes"
+            }
+        },
+        {
+            "name": "Carrots",
+            "attributes": {
+                "food": "Yes"
+            }
+        },
+        {
+            "name": "Broccoli",
+            "attributes": {
+                "food": "Yes"
+            }
+        },
+        {
+            "name": "Meat",
+            "attributes": {
+                "food": "Yes"
+            }
+        },
+        {
+            "name": "Cheese",
+            "attributes": {
+                "food": "Yes"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Chef",
+            "target": "Pan",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Plate",
+            "relationship": "Serving"
+        },
+        {
+            "source": "Chef",
+            "target": "Carrots",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Broccoli",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Meat",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Chef",
+            "target": "Cheese",
+            "relationship": "Cooking"
+        }
+    ]
+}

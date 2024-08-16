@@ -1,0 +1,54 @@
+{
+    "nodes": [
+        {
+            "name": "Chef",
+            "attributes": {
+                "hat": "Yes",
+                "shirt": "Black",
+                "apron": "Yes",
+                "beard": "Yes",
+                "cooking": "Yes"
+            }
+        },
+        {
+            "name": "Platter",
+            "attributes": {
+                "food": "Yes",
+                "meat": "Yes",
+                "vegetables": "Yes"
+            }
+        },
+        {
+            "name": "Kitchen",
+            "attributes": {
+                "sink": "Yes",
+                "stove": "Yes",
+                "cabinets": "Yes"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "food": "Yes",
+                "sauce": "Yes"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Chef",
+            "target": "Platter",
+            "relationship": "Preparing"
+        },
+        {
+            "source": "Chef",
+            "target": "Kitchen",
+            "relationship": "Working in"
+        },
+        {
+            "source": "Platter",
+            "target": "Bowl",
+            "relationship": "Serving"
+        }
+    ]
+}

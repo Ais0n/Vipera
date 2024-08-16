@@ -1,35 +1,25 @@
 {
-"nodes": [
-{
-"name": "Deer",
-"attributes": {
-"color": "brown",
-"species": "deer"
-},
-"position": [
-0.36,
-0.42,
-0.69,
-0.6]
-},
-{
-"name": "Grass",
-"attributes": {
-"color": "green",
-"type": "grass"
-},
-"position": [
-0.0,
-0.53,
-0.64,
-0.99]
-}
-],
-"edges": [
-{
-"source": "Deer",
-"target": "Grass",
-"relationship": "swimming in"
-}
-]
+    "nodes": [
+        {
+            "name": "Deer",
+            "attributes": {
+                "color": "brown",
+                "species": "deer"
+            }
+        },
+        {
+            "name": "Grass",
+            "attributes": {
+                "color": "green",
+                "type": "grass"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Deer",
+            "target": "Grass",
+            "relationship": "swimming in"
+        }
+    ]
 }

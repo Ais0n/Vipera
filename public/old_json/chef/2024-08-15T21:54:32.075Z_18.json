@@ -1,0 +1,79 @@
+{
+    "nodes": [
+        {
+            "name": "Chef",
+            "attributes": {
+                "position": "standing",
+                "wearing": "apron",
+                "holding": "knife"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "vegetables",
+                "position": "on table"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "position": "on table",
+                "content": "broth"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "position": "in chef's hand",
+                "type": "chef's knife"
+            }
+        },
+        {
+            "name": "Broth",
+            "attributes": {
+                "position": "in bowl",
+                "content": "broth"
+            }
+        },
+        {
+            "name": "Vegetables",
+            "attributes": {
+                "position": "on plate",
+                "type": "vegetables"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Chef",
+            "target": "Plate",
+            "relationship": "holding"
+        },
+        {
+            "source": "Chef",
+            "target": "Knife",
+            "relationship": "holding"
+        },
+        {
+            "source": "Chef",
+            "target": "Bowl",
+            "relationship": "standing near"
+        },
+        {
+            "source": "Plate",
+            "target": "Chef",
+            "relationship": "prepared by"
+        },
+        {
+            "source": "Broth",
+            "target": "Bowl",
+            "relationship": "contained in"
+        },
+        {
+            "source": "Vegetables",
+            "target": "Plate",
+            "relationship": "on"
+        }
+    ]
+}

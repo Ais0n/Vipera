@@ -1,68 +1,25 @@
 {
  "nodes": [
    {
-     "type": "deer",
+     "type": "deer1",
      "attributes": {
        "color": "brown",
        "size": "large"
-     },
-     "relationships": [
-       {
-         "type": "stands",
-         "target": {
-           "type": "deer",
-           "attributes": {
-             "color": "brown",
-             "size": "small"
-           }
-         }
-       }
-     ]
+     }
    },
    {
-     "type": "deer",
+     "type": "deer2",
      "attributes": {
        "color": "brown",
        "size": "small"
      }
-   },
-   {
-     "type": "deer",
-     "attributes": {
-       "color": "brown",
-       "size": "small"
-     },
-     "relationships": [
-       {
-         "type": "is",
-         "target": {
-           "type": "deer",
-           "attributes": {
-             "color": "brown",
-             "size": "large"
-           }
-         }
-       }
-     ]
-   },
-   {
-     "type": "deer",
-     "attributes": {
-       "color": "brown",
-       "size": "small"
-     },
-     "relationships": [
-       {
-         "type": "is",
-         "target": {
-           "type": "deer",
-           "attributes": {
-             "color": "brown",
-             "size": "large"
-           }
-         }
-       }
-     ]
    }
+ ],
+ "edges": [
+  {
+    "source": "deer1",
+    "target": "deer2",
+    "relationship": "next to"
+  }
  ]
 }

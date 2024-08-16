@@ -239,10 +239,24 @@ const Generate = () => {
     setIsDoneSceneGraph(false);
 
     setError('');
-    let IMAGE_DIR = userInput.toLowerCase().includes("doctor") ? 'doctors' : 'picnic';
-    let DATE = IMAGE_DIR == 'doctors' ? "2024-08-14T03:20:49.750Z" : "2024-08-14T02:52:09.289Z";
+    let keywords = ['doctors', 'picnic', 'nature', 'chef'];
+    let timewords = ["2024-08-14T03:20:49.750Z", "2024-08-14T02:52:09.289Z", '2024-08-14T03:07:24.235Z' , '2024-08-15T21:54:32.075Z'];
+    let num = [20, 20, 18, 20]
+    let image_num = 0;
+    // let IMAGE_DIR = userInput.toLowerCase().includes("doctor") ? 'doctors' : 'picnic';
+    let IMAGE_DIR = '', DATE = '';
+    for(let i = 0; i < keywords.length; i++) {
+      if(userInput.toLowerCase().includes(keywords[i])) {
+        IMAGE_DIR = keywords[i];
+        DATE = timewords[i];
+        image_num = num[i];
+        break;
+      }
+    }
+    if(IMAGE_DIR == '') return;
+    // let DATE = IMAGE_DIR == 'doctors' ? "2024-08-14T03:20:49.750Z" : "2024-08-14T02:52:09.289Z";
   
-    let image_num = 20;
+    
     let imageIds = [];
     for (let i = 0; i < image_num; i++) {
       imageIds.push(DATE + '_' + String(i))

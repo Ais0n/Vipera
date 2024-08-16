@@ -1,0 +1,92 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "cooked": "No",
+                "position": "Chef",
+                "clothes": "Apron",
+                "hat": "No",
+                "beard": "Yes",
+                "age": "30s",
+                "nationality": "American",
+                "occupation": "Chef"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "Sausage",
+                "plate": "Black",
+                "position": "On table"
+            }
+        },
+        {
+            "name": "Spoon",
+            "attributes": {
+                "position": "In hand",
+                "material": "Metal"
+            }
+        },
+        {
+            "name": "Sausage",
+            "attributes": {
+                "position": "On plate",
+                "color": "Brown"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "position": "On table",
+                "contents": "Salad"
+            }
+        },
+        {
+            "name": "Salad",
+            "attributes": {
+                "position": "In bowl",
+                "color": "Green"
+            }
+        },
+        {
+            "name": "Glass",
+            "attributes": {
+                "position": "On table",
+                "contents": "Water"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Plate",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Man",
+            "target": "Spoon",
+            "relationship": "Holding"
+        },
+        {
+            "source": "Man",
+            "target": "Sausage",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Man",
+            "target": "Salad",
+            "relationship": "Cooking"
+        },
+        {
+            "source": "Man",
+            "target": "Glass",
+            "relationship": "Drinking"
+        }
+    ]
+}

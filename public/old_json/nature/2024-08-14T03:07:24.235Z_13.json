@@ -1,190 +1,53 @@
 {
-"nodes": [
-{
-"name": "Bear",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "large"
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
+    "nodes": [
+        {
+            "name": "Mama Bear",
+            "attributes": {
+                "color": "orange",
+                "size": "large",
+                "species": "bear"
+            }
+        },
+        {
+            "name": "Baby Bear",
+            "attributes": {
+                "color": "brown",
+                "size": "small",
+                "species": "bear"
+            }
+        },
+        {
+            "name": "Baby Bear 2",
+            "attributes": {
+                "color": "brown",
+                "size": "small",
+                "species": "bear"
+            }
+        },
+        {
+            "name": "Baby Bear 3",
+            "attributes": {
+                "color": "brown",
+                "size": "small",
+                "species": "bear"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Mama Bear",
+            "target": "Baby Bear",
+            "relationship": "parent-child"
+        },
+        {
+            "source": "Mama Bear",
+            "target": "Baby Bear 2",
+            "relationship": "parent-child"
+        },
+        {
+            "source": "Mama Bear",
+            "target": "Baby Bear 3",
+            "relationship": "parent-child"
+        }
+    ]
 }
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",
-"size": "small"
-}
-},
-{
-"name": "Bear cub",
-"type": "animal",
-"attributes": {
-"color": "brown",

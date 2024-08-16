@@ -1,0 +1,55 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "profession": "Chef",
+                "position": "In kitchen",
+                "clothes": "Chef's outfit",
+                "hat": "Chef's hat"
+            }
+        },
+        {
+            "name": "Kitchen",
+            "attributes": {
+                "equipment": "Various kitchen equipment",
+                "food": "Various food items",
+                "bowls": "Several bowls on counter",
+                "spatula": "Chef's spatula"
+            }
+        },
+        {
+            "name": "Bowls",
+            "attributes": {
+                "material": "Metal",
+                "contents": "Various food items",
+                "position": "On counter"
+            }
+        },
+        {
+            "name": "Spatula",
+            "attributes": {
+                "material": "Metal",
+                "position": "In chef's hand",
+                "purpose": "For cooking"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Kitchen",
+            "relationship": "In"
+        },
+        {
+            "source": "Man",
+            "target": "Bowls",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Spatula",
+            "relationship": "Using"
+        }
+    ]
+}

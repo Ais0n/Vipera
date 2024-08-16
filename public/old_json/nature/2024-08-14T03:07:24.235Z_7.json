@@ -1,75 +1,73 @@
 {
-"nodes": [
-{
-"name": "Fox",
-"attributes": {
-"color": "brown"
-},
-"edges": [
-{
-"to": "River",
-"relationship": "next to"
-}
-]
-},
-{
-"name": "River",
-"attributes": {
-"type": "stream",
-"water": "still"
-}
-},
-{
-"name": "Trees",
-"attributes": {
-"color": "green"
-},
-"edges": [
-{
-"to": "Fox",
-"relationship": "next to"
-},
-{
-"to": "River",
-"relationship": "next to"
-}
-]
-},
-{
-"name": "Cats",
-"attributes": {
-"color": "white"
-},
-"edges": [
-{
-"to": "Fox",
-"relationship": "next to"
-}
-]
-},
-{
-"name": "Birds",
-"attributes": {
-"color": "yellow"
-},
-"edges": [
-{
-"to": "Fox",
-"relationship": "next to"
-}
-]
-},
-{
-"name": "Deer",
-"attributes": {
-"color": "brown"
-},
-"edges": [
-{
-"to": "Fox",
-"relationship": "next to"
-}
-]
-}
-]
-}
+    "nodes": [
+      {
+        "name": "Fox",
+        "attributes": {
+          "color": "brown"
+        }
+      },
+      {
+        "name": "River",
+        "attributes": {
+          "type": "stream",
+          "water": "still"
+        }
+      },
+      {
+        "name": "Trees",
+        "attributes": {
+          "color": "green"
+        }
+      },
+      {
+        "name": "Cats",
+        "attributes": {
+          "color": "white"
+        }
+      },
+      {
+        "name": "Birds",
+        "attributes": {
+          "color": "yellow"
+        }
+      },
+      {
+        "name": "Deer",
+        "attributes": {
+          "color": "brown"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Fox",
+        "target": "River",
+        "relationship": "next to"
+      },
+      {
+        "source": "Trees",
+        "target": "Fox",
+        "relationship": "next to"
+      },
+      {
+        "source": "Trees",
+        "target": "River",
+        "relationship": "next to"
+      },
+      {
+        "source": "Cats",
+        "target": "Fox",
+        "relationship": "next to"
+      },
+      {
+        "source": "Birds",
+        "target": "Fox",
+        "relationship": "next to"
+      },
+      {
+        "source": "Deer",
+        "target": "Fox",
+        "relationship": "next to"
+      }
+    ]
+  }

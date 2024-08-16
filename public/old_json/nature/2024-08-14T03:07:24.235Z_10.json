@@ -1,46 +1,42 @@
-Here is a JSON representation of the scene graph:
-```json
 {
- "nodes": [
-   {
-     "name": "Bird",
-     "attributes": {
-       "color": "white",
-       "location": "left"
-     }
-   },
-   {
-     "name": "Bird",
-     "attributes": {
-       "color": "blue",
-       "location": "middle"
-     }
-   },
-   {
-     "name": "Bird",
-     "attributes": {
-       "color": "red",
-       "location": "right"
-     }
-   }
- ],
- "edges": [
-   {
-     "source": "Bird",
-     "target": "Bird",
-     "relationship": "next to"
-   },
-   {
-     "source": "Bird",
-     "target": "Bird",
-     "relationship": "next to"
-   },
-   {
-     "source": "Bird",
-     "target": "Bird",
-     "relationship": "next to"
-   }
- ]
+  "nodes": [
+    {
+      "name": "Bird",
+      "attributes": {
+        "color": "white",
+        "location": "left"
+      }
+    },
+    {
+      "name": "Bird",
+      "attributes": {
+        "color": "blue",
+        "location": "middle"
+      }
+    },
+    {
+      "name": "Bird",
+      "attributes": {
+        "color": "red",
+        "location": "right"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "Bird",
+      "target": "Bird",
+      "relationship": "next to"
+    },
+    {
+      "source": "Bird",
+      "target": "Bird",
+      "relationship": "next to"
+    },
+    {
+      "source": "Bird",
+      "target": "Bird",
+      "relationship": "next to"
+    }
+  ]
 }
-```
-In the image, there are three birds, each located in different areas of the scene. The first bird is on the left side of the image, the second bird is in the middle, and the third bird is on the right side. The birds are positioned next to each other, creating a sense of continuity throughout the scene.

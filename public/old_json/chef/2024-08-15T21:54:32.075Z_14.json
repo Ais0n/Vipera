@@ -1,0 +1,76 @@
+{
+    "nodes": [
+        {
+            "name": "Man",
+            "attributes": {
+                "profession": "Chef",
+                "position": "Head Chef",
+                "clothing": "Apron and chef's jacket",
+                "accessories": "Apron, chef's jacket, and chef's hat",
+                "action": "Cutting food with a knife"
+            }
+        },
+        {
+            "name": "Knife",
+            "attributes": {
+                "material": "Metal",
+                "color": "Silver"
+            }
+        },
+        {
+            "name": "Plate",
+            "attributes": {
+                "food": "Meat and vegetables",
+                "size": "Large"
+            }
+        },
+        {
+            "name": "Bowl",
+            "attributes": {
+                "food": "Soup",
+                "size": "Small"
+            }
+        },
+        {
+            "name": "Broccoli",
+            "attributes": {
+                "size": "Small",
+                "color": "Green"
+            }
+        },
+        {
+            "name": "Pepper",
+            "attributes": {
+                "size": "Small",
+                "color": "Red"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "Man",
+            "target": "Knife",
+            "relationship": "Using"
+        },
+        {
+            "source": "Man",
+            "target": "Plate",
+            "relationship": "Preparing"
+        },
+        {
+            "source": "Man",
+            "target": "Bowl",
+            "relationship": "Preparing"
+        },
+        {
+            "source": "Man",
+            "target": "Broccoli",
+            "relationship": "Preparing"
+        },
+        {
+            "source": "Man",
+            "target": "Pepper",
+            "relationship": "Preparing"
+        }
+    ]
+}

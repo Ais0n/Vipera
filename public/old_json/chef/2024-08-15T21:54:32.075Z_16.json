@@ -1,0 +1,121 @@
+{
+    "nodes": [
+      {
+        "name": "Chef",
+        "attributes": {
+          "position": "standing",
+          "wearing": "white and black apron",
+          "holding": "tongs"
+        }
+      },
+      {
+        "name": "Tongs",
+        "attributes": {
+          "color": "silver"
+        }
+      },
+      {
+        "name": "Plate",
+        "attributes": {
+          "position": "on counter",
+          "food": "meat and vegetables"
+        }
+      },
+      {
+        "name": "Broccoli",
+        "attributes": {
+          "position": "on plate",
+          "color": "green"
+        }
+      },
+      {
+        "name": "Bowl",
+        "attributes": {
+          "position": "on counter",
+          "contents": "meat and vegetables"
+        }
+      },
+      {
+        "name": "Meat",
+        "attributes": {
+          "position": "on plate",
+          "color": "brown"
+        }
+      },
+      {
+        "name": "Vegetables",
+        "attributes": {
+          "position": "on plate",
+          "color": "green"
+        }
+      },
+      {
+        "name": "Bowl",
+        "attributes": {
+          "position": "on counter",
+          "contents": "meat and vegetables"
+        }
+      },
+      {
+        "name": "Meat",
+        "attributes": {
+          "position": "on plate",
+          "color": "brown"
+        }
+      },
+      {
+        "name": "Vegetables",
+        "attributes": {
+          "position": "on plate",
+          "color": "green"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "Chef",
+        "target": "Tongs",
+        "relationship": "holding"
+      },
+      {
+        "source": "Plate",
+        "target": "Broccoli",
+        "relationship": "on plate"
+      },
+      {
+        "source": "Plate",
+        "target": "Bowl",
+        "relationship": "on counter"
+      },
+      {
+        "source": "Bowl",
+        "target": "Meat",
+        "relationship": "on plate"
+      },
+      {
+        "source": "Bowl",
+        "target": "Vegetables",
+        "relationship": "on counter"
+      },
+      {
+        "source": "Meat",
+        "target": "Vegetables",
+        "relationship": "on plate"
+      },
+      {
+        "source": "Meat",
+        "target": "Bowl",
+        "relationship": "on counter"
+      },
+      {
+        "source": "Bowl",
+        "target": "Meat",
+        "relationship": "on plate"
+      },
+      {
+        "source": "Bowl",
+        "target": "Vegetables",
+        "relationship": "on plate"
+      }
+    ]
+  }
