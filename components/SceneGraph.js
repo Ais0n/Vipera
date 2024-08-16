@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import style from '../styles/SceneGraph.module.css';
 
-const SceneGraph = ({ data }) => {
+const SceneGraph = ({ data, handleNodeHover, handleNodeLeave }) => {
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -90,7 +90,8 @@ const SceneGraph = ({ data }) => {
       .style('opacity', d => d.ntype == 'object' ? 1 : 0);
 
     node.on('mouseover', function (event, d) {
-      // console.log(event, d)
+      console.log(event, d)
+      handleNodeHover(d);
       d3.select(this)
         .transition()
         .duration(200)
@@ -147,6 +148,7 @@ const SceneGraph = ({ data }) => {
         .text(([label, value]) => `${label}: ${value}`);
     })
       .on('mouseout', function () {
+        handleNodeLeave();
         d3.select(this)
           .transition()
           .duration(200)

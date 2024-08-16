@@ -26,6 +26,7 @@ const Generate = () => {
   const [graphs, setGraphs] = useState([]);
   const [aggregatedGraph, setAggregatedGraph] = useState({});
   const [useSceneGraph, setUseSceneGraph] = useState(false);
+  const [badgeContents, setBadgeContents] = useState(undefined);
 
   const TRENDING_IMAGES = [
     { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
@@ -328,6 +329,13 @@ const Generate = () => {
             delete edge.relationship;
           }
         })
+        // handle nodes: name = id
+        nodes.forEach(node => {
+          if(typeof(node.name) != 'undefined') {
+            node.id = node.name;
+            delete node.name;
+          }
+        })
         return {nodes, edges};
       }
 
@@ -365,7 +373,7 @@ const Generate = () => {
           console.error(err);
         }
       }
-
+      setGraphs(_graphs);
 
       function calculateAggregatedGraph(graphs) {
         function mergeAttr(attrs, newNode) {
@@ -507,6 +515,26 @@ const Generate = () => {
     handleGenerateClick(promptStr, true);
   };
 
+  const handleNodeHover = (d) => {
+    console.log(d)
+    if(d.ntype == 'attribute') {
+      let _badgeContents = [];
+      graphs.forEach(graph => {
+        let node_id = d.id.split('_')[0];
+        let attr_id = d.id.split('_')[1];
+        let node = graph.nodes.find(node => node.id == node_id);
+        if(!node) return;
+        _badgeContents.push(typeof(node.attributes[attr_id]) == 'undefined' ? 'unknown' : node.attributes[attr_id]);
+      });
+      console.log(_badgeContents)
+      setBadgeContents(_badgeContents);
+    }
+  }
+
+  const handleNodeLeave = (d) => {
+    setBadgeContents(undefined);
+  }
+
   return (
     <div>
       <Header />
@@ -524,7 +552,7 @@ const Generate = () => {
         {useSceneGraph &&
         <div className={style.sceneGraph}>
           {!isDoneSceneGraph && <ProcessingIndicator />}
-          <SceneGraph data={aggregatedGraph}></SceneGraph>
+          <SceneGraph data={aggregatedGraph} handleNodeHover={handleNodeHover} handleNodeLeave={handleNodeLeave}></SceneGraph>
         </div>}
         <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
@@ -532,6 +560,7 @@ const Generate = () => {
             {images.map((image, index) => (
               <div key={image.id} className={style.imageItem}>
                 <img src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
+                {badgeContents && <div className={style.imageBadge}> {badgeContents[index]} </div>}
               </div>
             ))}
           </div>

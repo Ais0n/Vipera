@@ -14,7 +14,7 @@ app.prepare().then(() => {
 
     // Proxy API requests to server C
     server.use('/api', createProxyMiddleware({
-        target: 'http://10.8.11.9:5001',
+        target: 'http://10.8.11.5:5001',
         changeOrigin: true,
         // secure: false,
         pathRewrite: {
@@ -33,7 +33,7 @@ app.prepare().then(() => {
     }));
 
     server.use('/a2pi', createProxyMiddleware({
-        target: 'http://10.8.11.9:5002',
+        target: 'http://10.8.11.5:5002',
         changeOrigin: true,
         // secure: false,
         pathRewrite: {
