@@ -239,7 +239,7 @@ const Generate = () => {
     setIsDoneSceneGraph(false);
 
     setError('');
-    let keywords = ['doctors', 'picnic', 'nature', 'chef'];
+    let keywords = ['doctor', 'picnic', 'nature', 'chef'];
     let timewords = ["2024-08-14T03:20:49.750Z", "2024-08-14T02:52:09.289Z", '2024-08-14T03:07:24.235Z' , '2024-08-15T21:54:32.075Z'];
     let num = [20, 20, 18, 20]
     let image_num = 0;
