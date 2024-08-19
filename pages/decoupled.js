@@ -12,6 +12,7 @@ import axios from 'axios';
 import { testData } from '../testData.js';
 import SceneGraph from '../components/SceneGraph.js';
 import ProcessingIndicator from '../components/Processing.js';
+import { Image } from 'antd';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -573,7 +574,7 @@ const Generate = () => {
           <div className={style.imageContainer}>
             {images.map((image, index) => (
               <div key={image.id} className={style.imageItem}>
-                <img src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
+                <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
                 {badgeContents && <div className={style.imageBadge}> {badgeContents[index]} </div>}
               </div>
             ))}
