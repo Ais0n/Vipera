@@ -241,23 +241,23 @@ const Generate = () => {
 
     setError('');
     let keywords = ['doctor', 'picnic', 'nature', 'chef'];
-    let timewords = ["2024-08-14T03:20:49.750Z", "2024-08-14T02:52:09.289Z", '2024-08-14T03:07:24.235Z' , '2024-08-15T21:54:32.075Z'];
+    let timewords = ["2024-08-14T03:20:49.750Z", "2024-08-14T02:52:09.289Z", '2024-08-14T03:07:24.235Z', '2024-08-15T21:54:32.075Z'];
     let num = [20, 20, 18, 20]
     let image_num = 0;
     // let IMAGE_DIR = userInput.toLowerCase().includes("doctor") ? 'doctors' : 'picnic';
     let IMAGE_DIR = '', DATE = '';
-    for(let i = 0; i < keywords.length; i++) {
-      if(userInput.toLowerCase().includes(keywords[i])) {
+    for (let i = 0; i < keywords.length; i++) {
+      if (userInput.toLowerCase().includes(keywords[i])) {
         IMAGE_DIR = keywords[i];
         DATE = timewords[i];
         image_num = num[i];
         break;
       }
     }
-    if(IMAGE_DIR == '') return;
+    if (IMAGE_DIR == '') return;
     // let DATE = IMAGE_DIR == 'doctors' ? "2024-08-14T03:20:49.750Z" : "2024-08-14T02:52:09.289Z";
-  
-    
+
+
     let imageIds = [];
     for (let i = 0; i < image_num; i++) {
       imageIds.push(DATE + '_' + String(i))
@@ -284,13 +284,13 @@ const Generate = () => {
         setIsDoneImage(true);
       }
 
-      if(!useSceneGraph) {
+      if (!useSceneGraph) {
         setIsDoneGenerating(true);
         return;
       }
 
       let sceneGraphResponseData = [];
-      for(let imageId of imageIds) {
+      for (let imageId of imageIds) {
         const getSceneGraphUrl = `/old_json/${IMAGE_DIR}/${imageId}.json`;
         const sceneGraphResponse = await axios.get(getSceneGraphUrl);
         sceneGraphResponseData.push(sceneGraphResponse.data);
@@ -305,21 +305,21 @@ const Generate = () => {
 
       // Solve them bugs from LLaVa
       function validateGraph(graph) {
-        let {nodes, edges} = graph;
+        let { nodes, edges } = graph;
         let nodeIds = {};
         nodes.forEach(node => {
           nodeIds[node.id] = 1;
         })
         // handle non-existing source/target nodes in edges
         edges.forEach(edge => {
-          if(!nodeIds[edge.source]) {
+          if (!nodeIds[edge.source]) {
             nodes.push({
               id: edge.source,
               attributes: {},
             })
             nodeIds[edge.source] = 1;
           }
-          if(!nodeIds[edge.target]) {
+          if (!nodeIds[edge.target]) {
             nodes.push({
               id: edge.target,
               attributes: {}
@@ -328,30 +328,30 @@ const Generate = () => {
         })
         // handle nodes whose attribute values are not numerical/categorical
         nodes.forEach(node => {
-          if(!node.attributes) return;
+          if (!node.attributes) return;
           let keys = Object.keys(node.attributes);
           keys.forEach(key => {
-            if(typeof(node.attributes[key]) == 'object' ) {
-              node.attributes = {...node.attributes, ...node.attributes[key]};
+            if (typeof (node.attributes[key]) == 'object') {
+              node.attributes = { ...node.attributes, ...node.attributes[key] };
               delete node.attributes[key];
             }
           })
         })
         // handle edges: relationship = type
         edges.forEach(edge => {
-          if(typeof(edge.relationship) != 'undefined') {
+          if (typeof (edge.relationship) != 'undefined') {
             edge.type = edge.relationship;
             delete edge.relationship;
           }
         })
         // handle nodes: name = id
         nodes.forEach(node => {
-          if(typeof(node.name) != 'undefined') {
+          if (typeof (node.name) != 'undefined') {
             node.id = node.name;
             delete node.name;
           }
         })
-        return {nodes, edges};
+        return { nodes, edges };
       }
 
       let _graphs = []
@@ -440,7 +440,7 @@ const Generate = () => {
           }
         }
         console.log(nodes, edges)
-        
+
         for (let node of nodes) {
           node.ntype = "object";
         }
@@ -449,7 +449,7 @@ const Generate = () => {
         }
         // separate edges with different 'type' value
         let _edges = []
-        for(let edge of edges) {
+        for (let edge of edges) {
           if (!edge.type) continue;
           let types = Object.keys(edge.type);
           _edges.push({
@@ -457,11 +457,11 @@ const Generate = () => {
             type: types.join(',')
           })
           // for(let i = 0; i < types.length; i++) {
-            // _edges.push({
-            //   ...edge,
-            //   type: types[i],
-            //   size: edge.type[types[i]]
-            // })
+          // _edges.push({
+          //   ...edge,
+          //   type: types[i],
+          //   size: edge.type[types[i]]
+          // })
           // }
         }
         edges = _edges;
@@ -470,33 +470,33 @@ const Generate = () => {
         for (let node of nodes) {
           let attributes = node.attributes;
           let attrNames = Object.keys(attributes);
-          for(let attrName of attrNames) {
+          for (let attrName of attrNames) {
             let _size = 0;
-            for (let k in attributes[attrName]) { 
+            for (let k in attributes[attrName]) {
               _size += attributes[attrName][k];
             }
             // a metric of bias: var(p_i) / avg(p_i)
             const measureBias = (values) => {
-              if(!values) return 0;
+              if (!values) return 0;
               let keys = Object.keys(values);
-              if(keys.length <= 1) return 0;
+              if (keys.length <= 1) return 0;
               let p = [], sum = 0;
-              for(let key in values) {
+              for (let key in values) {
                 p.push(values[key]);
                 sum += values[key];
               }
               let avg_p_i = 1.0 / keys.length;
               let res = 0.0;
-              for(let _p of p) {
+              for (let _p of p) {
                 let p_i = _p / sum;
-                res += (p_i - avg_p_i) * (p_i-avg_p_i);
+                res += (p_i - avg_p_i) * (p_i - avg_p_i);
               }
               return Math.min(1.0, res / avg_p_i);
             }
             let _node = {
               id: String(node.id) + '_' + String(attrName),
               ntype: "attribute",
-              values: node.size == _size ? attributes[attrName] : {...attributes[attrName], '(unknown)': node.size - _size},
+              values: node.size == _size ? attributes[attrName] : { ...attributes[attrName], '(unknown)': node.size - _size },
               size: _size,
               bias: measureBias(attributes[attrName])
             };
@@ -532,14 +532,19 @@ const Generate = () => {
 
   const handleNodeHover = (d) => {
     console.log(d)
-    if(d.ntype == 'attribute') {
+    if (d.ntype == 'attribute') {
       let _badgeContents = [];
       graphs.forEach(graph => {
         let node_id = d.id.split('_')[0];
         let attr_id = d.id.split('_')[1];
         let node = graph.nodes.find(node => node.id == node_id);
-        if(!node) return;
-        _badgeContents.push(typeof(node.attributes[attr_id]) == 'undefined' ? 'unknown' : node.attributes[attr_id]);
+        if (!node) { 
+          _badgeContents.push(''); 
+        }
+        else {
+          _badgeContents.push(typeof (node.attributes[attr_id]) == 'undefined' ? 'unknown' : node.attributes[attr_id]);
+        }
+
       });
       console.log(_badgeContents)
       setBadgeContents(_badgeContents);
@@ -561,14 +566,14 @@ const Generate = () => {
       )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} />
 
-      
+
       {error && <p>{error}</p>}
       {isGenerating && <div className={style.analyzeView}>
         {useSceneGraph &&
-        <div className={style.sceneGraph}>
-          {!isDoneSceneGraph && <ProcessingIndicator />}
-          <SceneGraph data={aggregatedGraph} handleNodeHover={handleNodeHover} handleNodeLeave={handleNodeLeave}></SceneGraph>
-        </div>}
+          <div className={style.sceneGraph}>
+            {!isDoneSceneGraph && <ProcessingIndicator />}
+            <SceneGraph data={aggregatedGraph} handleNodeHover={handleNodeHover} handleNodeLeave={handleNodeLeave}></SceneGraph>
+          </div>}
         <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
           <div className={style.imageContainer}>
