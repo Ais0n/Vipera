@@ -8,8 +8,7 @@
   margin-top: 53px; /* Space from the header */
   margin-left: auto;
   margin-right: auto;
-  width: 80%; /* Use 100% of parent container */
-  max-width: 1350px; /* Keep the max-width to prevent it from getting too wide */
+  width: 80%;
 }
 
 .generateLabel {

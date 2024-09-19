@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
 
-function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
-  const [inputValue, setInputValue] = useState('');
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr }) {
+  // const [inputValue, setInputValue] = useState('');
   const [showPrompts, setShowPrompts] = useState(true); // show example prompts or not
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onGenerateClick(inputValue);
+    onGenerateClick(promptStr);
     setShowPrompts(false);
     ensureImagesSelected();
   };
 
   const handleExamplePromptClick = (prompt) => {
-    setInputValue(prompt);
+    setPromptStr(prompt);
   };
 
   return (
@@ -35,8 +35,8 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
             type="text"
             className={styles.searchBar}
             placeholder="Write prompt here"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            value={promptStr}
+            onChange={(e) => setPromptStr(e.target.value)}
             disabled={isGenerating}
           />
           <button type="submit" className={styles.searchButton} disabled={isGenerating}>
