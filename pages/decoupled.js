@@ -241,6 +241,7 @@ const Generate = () => {
 
 
       {error && <p>{error}</p>}
+      {!isDoneImage && <ProcessingIndicator />}
       {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
@@ -253,7 +254,6 @@ const Generate = () => {
             ))}
           </div>
         </div> */}
-        {!isDoneImage && <ProcessingIndicator />}
         <h1>Analyze</h1>
         <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts} handleSuggestionButtonClick={handleSuggestionButtonClick} />
 
