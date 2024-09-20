@@ -19,7 +19,7 @@ import * as nanoid from 'nanoid';
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDoneGenerating, setIsDoneGenerating] = useState(false);
-  const [isDoneImage, setIsDoneImage] = useState(false);
+  const [isDoneImage, setIsDoneImage] = useState(true);
   const [isDoneSceneGraph, setIsDoneSceneGraph] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
@@ -99,9 +99,9 @@ const Generate = () => {
         }
         const base64Image = arrayBufferToBase64(imageData.data);
         setImages(prevImages => [...prevImages, { batch: prompts.length + 1, id: imageId, data: base64Image }]); // Append new images
-        setIsDoneImage(true);
       }
 
+      setIsDoneImage(true);
       if (!useSceneGraph) {
         setIsGenerating(false);
         setIsDoneGenerating(true);
@@ -151,7 +151,7 @@ const Generate = () => {
             dataItem[key] = getDataItem(schema[key], imageId, dataItem[key] || {});
           } else {
             // randomly choose a value from the array
-            if(dataItem && typeof(dataItem[key]) == 'undefined') {
+            if (dataItem && typeof (dataItem[key]) == 'undefined') {
               dataItem[key] = schema[key][Math.floor(Math.random() * schema[key].length)];
             }
           }
@@ -160,10 +160,10 @@ const Generate = () => {
       }
 
       let _metaData = [];
-      for(let i = 0; i < metaData.length; i++) {
+      for (let i = 0; i < metaData.length; i++) {
         _metaData.push(getDataItem(updatedGraphSchema, "", metaData[i]));
       }
-      
+
       for (let i = 0; i < imageIds.length; i++) {
         let currentDataItem = getDataItem(updatedGraphSchema, imageIds[i], {});
         currentDataItem.batch = prompts.length;
@@ -220,9 +220,9 @@ const Generate = () => {
   const handleSuggestionButtonClick = (suggestion) => {
     let oldPrompt = prompts[prompts.length - 1];
     let newPrompt = "";
-    if(suggestion.addValue) {
+    if (suggestion.addValue) {
       newPrompt = oldPrompt + ', ' + suggestion.addValue;
-    } else if(suggestion.replaceValue) {
+    } else if (suggestion.replaceValue) {
       newPrompt = oldPrompt.replace(suggestion.replaceValue, suggestion.newValue);
     }
     setPromptStr(newPrompt);
@@ -241,7 +241,7 @@ const Generate = () => {
 
 
       {error && <p>{error}</p>}
-      {useSceneGraph && <div className={style.analyzeView}>
+      {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
           <div className={style.imageContainer}>
@@ -255,7 +255,8 @@ const Generate = () => {
         </div> */}
         {!isDoneImage && <ProcessingIndicator />}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts} handleSuggestionButtonClick={handleSuggestionButtonClick}/>
+        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts} handleSuggestionButtonClick={handleSuggestionButtonClick} />
+
       </div>}
 
 
