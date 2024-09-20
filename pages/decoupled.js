@@ -232,8 +232,8 @@ const Generate = () => {
     <div>
       <Header />
       {/* <button onClick={setUseSceneGraph}> Use Scene Graph</button> */}
-      <h1 className={style.mainTitle}>Ouroboros</h1>
-      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} />
+      {/* <h1 className={style.mainTitle}>Ouroboros</h1> */}
+      {/* <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} /> */}
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
@@ -242,7 +242,7 @@ const Generate = () => {
 
       {error && <p>{error}</p>}
       {!isDoneImage && <ProcessingIndicator />}
-      {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
+      {isDoneImage && useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
           <div className={style.imageContainer}>
