@@ -1,17 +1,50 @@
 // components/ImageSummary.js
 
 import React from 'react';
-import { Image } from 'antd';
+import { Image, Switch, Popover, Button } from 'antd';
 import TreeView from './TreeView';
 import ImageSummaryVis from './ImageSummaryVis';
+import Heatmap from './Heatmap';
 import BarChart from './BarChart';
 
 const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick }) => {
     const [selectedNode, setSelectedNode] = React.useState(null);
+    const [switchChecked, setSwitchChecked] = React.useState(true);
+
+    const content = (index) => (images && index < images.length) ? (
+        <div>
+          <Image width={200} src={`data:image/png;base64,${images[index].data}`} alt={`Image ${images[index].id}`} />
+        </div>
+      ) : "No images available";
 
     const _handleSuggestionButtonClick = () => {
         handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "addValue": "smiling" });
     }
+
+    const _handleSuggestionButtonClick2 = () => {
+        handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+    }
+
+    const dataForPromotion = [
+        { category: 'Doctor',values: { 'male': 0.8, 'female': 0.1, 'others': 0.1 } },
+        { category: 'Nurse', values: { 'male': 0.3, 'female': 0.6, 'others': 0.1 } },
+        { category: 'Firefighter', values: { 'male': 0.9, 'female': 0.05, 'others': 0.05 } },
+        { category: 'Policeman', values: { 'male': 0.9, 'female': 0.05, 'others': 0.05 } },
+    ]
+
+    const dataForComparison = [
+        { category: 'True', value: 0.3 },
+        { category: 'False', value: 0.7 },
+    ]
+
+    const dataForExternalKnowledge = [
+        { category: 'White', value: 0.5 },
+        { category: 'Black', value: 0.2 },
+        { category: 'Asian', value: 0.1 },
+        { category: 'Hispanic', value: 0.1 },
+        { category: 'Other', value: 0.1 },
+    ]
+
 
     return (
         <div className="image-summary-container">
@@ -19,14 +52,21 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                 {/* Left Column */}
                 <div className="left-column">
                     <div className="image-info">
-                        <h2>Images</h2>
-                        <div className="imageContainer">
-                            {images.map((image, index) => (
-                                <div key={index} className="imageItem">
-                                    <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
-                                </div>
-                            ))}
+                        <div style={{ "display": "flex", "gap": "15px", "margin": "15px auto", "alignItems": "center" }}>
+                            <h2 style={{ "margin": 0 }}>Images</h2>
+                            <Switch checked={switchChecked} onChange={setSwitchChecked} checkedChildren={"Summary"} unCheckedChildren={"List"} size={"large"} />
                         </div>
+                        {switchChecked ?
+                            <ImageSummaryVis images={images} data={metaData} graph={graph} setSelectedNode={setSelectedNode} />
+                            :
+                            <div className="imageContainer">
+                                {images.map((image, index) => (
+                                    <div key={index} className="imageItem">
+                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
+                                    </div>
+                                ))}
+                            </div>
+                        }
                     </div>
 
                     <div className="label-view">
@@ -45,64 +85,67 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     <div className='prompt-items'>
                         {prompts.map((prompt, index) => (
                             <p key={index} className='prompt-item'>
+                                <div></div>
+                                <div style={{"font-weight": "bold", 'display': 'inline'}}>Prompt {index + 1}: </div> 
                                 {prompt}
                             </p>
                         ))}
                     </div>
 
-                    <h2>Image Summary</h2>
-                    <ImageSummaryVis images={images} data={metaData} graph={graph} setSelectedNode={setSelectedNode} />
-
                     <h2>Suggestions</h2>
                     <div className="suggestion-items">
                         <div className="suggestion-item">
-                            <h4 className='suggestion-itemTitle'>Keywords</h4>
+                            <h4 className='suggestion-itemTitle'>Promotion</h4>
                             <div className="suggestion-text">
-                                A cinematic photo of an experienced doctor, smiling, middle-aged
+                                <p>A cinematic photo of a <b>doctor</b> -- <i>wanted to see other occupations?</i></p>
                             </div>
+                            <div className='graphNode'>Occupations / gender</div>
                             <div className="barchart">
-                                <BarChart></BarChart>
+                                <Heatmap data={dataForPromotion}></Heatmap>
                             </div>
                             <div className="suggestion-toolbar">
-                                <button className="suggestion-button">Update my prompt</button>
+                                <Button className="suggestion-button" onClick={_handleSuggestionButtonClick2} disabled={true}>Update my prompt</Button>
                             </div>
                         </div>
                         <div className="suggestion-item">
-                            <h4 className='suggestion-itemTitle'>Objects</h4>
+                            <h4 className='suggestion-itemTitle'>Comparison</h4>
                             <div className="suggestion-text">
-                                The doctor in Figure 10 is smiling.
+                                <p>The doctor in <Popover content={content(7)}><u><b>Figure 8</b></u></Popover> is smiling, while the one in <Popover content={content(0)}><u><b>Figure 1</b></u></Popover> is not.</p>
                             </div>
+                            <div className='graphNode'>Smiling?</div>
                             <div className="barchart">
-                                <BarChart></BarChart>
+                                <BarChart data={dataForComparison}></BarChart>
                             </div>
                             <div className="suggestion-toolbar">
-                                <button className="suggestion-button" onClick={_handleSuggestionButtonClick}>Update my prompt</button>
+                                <Button className="suggestion-button" type="primary" onClick={_handleSuggestionButtonClick}>Update my prompt</Button>
                             </div>
                         </div>
                         <div className="suggestion-item">
-                            <h4 className='suggestion-itemTitle'>Attributes</h4>
+                            <h4 className='suggestion-itemTitle'>External knowledge</h4>
                             <div className="suggestion-text">
                                 It is interesting to inspect the race distribution of doctors.
                             </div>
+                            <div className='graphNode'>Race</div>
                             <div className="barchart">
-                                <BarChart></BarChart>
+                                <BarChart data={dataForExternalKnowledge}></BarChart>
                             </div>
                             <div className="suggestion-toolbar">
-                                <button className="suggestion-button">Update my prompt</button>
+                                <Button className="suggestion-button" disabled={true}>Update my prompt</Button>
                             </div>
                         </div>
-                        <div className="suggestion-item">
+                        {prompts.length > 1 && <div className="suggestion-item">
                             <h4 className='suggestion-itemTitle'>Correlation</h4>
                             <div className="suggestion-text">
-                                Male doctors are more likely to be middle-aged.
+                                Female doctors are more likely to be smiling.
                             </div>
+                            <div className='graphNode'>Gender / Smiling?</div>
                             <div className="barchart">
-                                <BarChart></BarChart>
+                                <Heatmap></Heatmap>
                             </div>
                             <div className="suggestion-toolbar">
-                                <button className="suggestion-button">Update my prompt</button>
+                                <Button className="suggestion-button" disabled={true}>Update the labels</Button>
                             </div>
-                        </div>
+                        </div>}
                     </div>
                 </div>
             </div>
@@ -162,7 +205,8 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     margin-top: 10px;
                 }
                 .suggestion-button {
-                    background-color: #888;
+                    // background-color: #888;
+                    background-color: #1677ff;
                     color: #fff;
                     border: none;
                     border-radius: 5px;
@@ -192,7 +236,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     display: flex;
                     flex-direction: column;
                     // gap: 20px;
-                    height: 80px;
+                    height: 200px;
                     overflow-y: scroll;
                     padding: auto 20px;
                 }
@@ -205,7 +249,14 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                 }
                 .barchart {
                     width: 100%;
-                    height: 110px;
+                    height: 150px;
+                }
+                .graphNode {
+                    text-decoration: underline;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    font-size: 12px;
                 }
             `}</style>
         </div>

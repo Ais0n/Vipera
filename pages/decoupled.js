@@ -25,12 +25,12 @@ const Generate = () => {
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
-  const [promptStr, setPromptStr] = useState('');
+  const [promptStr, setPromptStr] = useState('A cinematic photo of a doctor');
   const [graph, setGraph] = useState({});
   const [graphSchema, setGraphSchema] = useState({});
   const [metaData, setMetaData] = useState([]);
   const [aggregatedGraph, setAggregatedGraph] = useState({});
-  const [useSceneGraph, setUseSceneGraph] = useState(false);
+  const [useSceneGraph, setUseSceneGraph] = useState(true);
   const [badgeContents, setBadgeContents] = useState(undefined);
   const [prompts, setPrompts] = useState([]);
 
@@ -219,14 +219,19 @@ const Generate = () => {
 
   const handleSuggestionButtonClick = (suggestion) => {
     let oldPrompt = prompts[prompts.length - 1];
-    let newPrompt = oldPrompt + ', ' + suggestion.addValue;
+    let newPrompt = "";
+    if(suggestion.addValue) {
+      newPrompt = oldPrompt + ', ' + suggestion.addValue;
+    } else if(suggestion.replaceValue) {
+      newPrompt = oldPrompt.replace(suggestion.replaceValue, suggestion.newValue);
+    }
     setPromptStr(newPrompt);
   }
 
   return (
     <div>
       <Header />
-      <button onClick={setUseSceneGraph}> Use Scene Graph</button>
+      {/* <button onClick={setUseSceneGraph}> Use Scene Graph</button> */}
       <h1 className={style.mainTitle}>Ouroboros</h1>
       <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} />
       {/* {images.length <= 0 && (

@@ -5,7 +5,7 @@ import styles from '../styles/SearchBar.module.css';
 
 function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr }) {
   // const [inputValue, setInputValue] = useState('');
-  const [showPrompts, setShowPrompts] = useState(true); // show example prompts or not
+  const [showPrompts, setShowPrompts] = useState(false); // show example prompts or not
 
   const handleSubmit = (event) => {
     event.preventDefault();

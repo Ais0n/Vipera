@@ -63,13 +63,13 @@ const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
             flattenData(rest, '', tmp);
             flattenedData.push(tmp);
         }
-        console.log(flattenedData)
+        // console.log(flattenedData)
         const reducedData = pca(flattenedData);
         // metadata is removed during pca, so we have to restore the information
         for (let i = 0; i < reducedData.length; i++) {
             reducedData[i].data = data[i];
         }
-        console.log(reducedData)
+        // console.log(reducedData)
 
         const jitter = (value) => {
             const jitterAmount = 0.1;
@@ -167,11 +167,11 @@ const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
                             marginRight: '8px',
                             borderRadius: '50%',
                         }} />
-                        <span>Batch {item.batch}</span>
+                        <span>Prompt {item.batch}</span>
                     </div>
                 ))}
             </div>
-            <svg id="scatterplot" width="800" height="200"></svg>
+            <svg id="scatterplot" width="600" height="200"></svg>
             <Tooltip
                 visible={tooltipData.visible}
                 x={tooltipData.x}
