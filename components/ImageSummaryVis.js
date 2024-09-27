@@ -5,7 +5,7 @@ import { PCA } from 'ml-pca';
 import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
 
-const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
+const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [legendData, setLegendData] = useState([]);
     useEffect(() => {
@@ -14,7 +14,14 @@ const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
         // PCA Implementation
         const pca = (data) => {
             const matrix = data.map(row => Object.values(row));
-            for (let i = 0; i < matrix[0].length; i++) {
+            let maxLength = 0;
+            for (let i = 0; i < matrix.length; i++) {
+                if (matrix[i].length > maxLength) {
+                    maxLength = matrix[i].length;
+                }
+            }
+
+            for (let i = 0; i < maxLength; i++) {
                 if (typeof (matrix[0][i]) !== 'number') {
                     const uniqueValues = Array.from(new Set(matrix.map(row => row[i])));
                     const valueMap = {};
@@ -56,14 +63,33 @@ const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
             }
         };
 
+        const removeRedundantFields = (data, schema) => {
+            const result = Utils.deepClone(data);
+            const traverse = (curNode, schemaNode) => {
+                if(typeof(curNode) !== 'object') return;
+                let keys = Object.keys(curNode);
+                for (let key of keys) {
+                    if (typeof(schemaNode[key]) == 'object') {
+                        traverse(curNode[key], schemaNode[key]);
+                    } else {
+                        delete curNode[key];
+                    } 
+                }
+            };
+            traverse(result, schema);
+            return result;
+        }
+
         let flattenedData = [];
+        console.log(data)
         for (let item of data) {
             let { metaData, ...rest } = item;
             let tmp = {};
+            rest = removeRedundantFields(Utils.deepClone(rest), graphSchema);
             flattenData(rest, '', tmp);
             flattenedData.push(tmp);
         }
-        // console.log(flattenedData)
+        console.log(flattenedData)
         const reducedData = pca(flattenedData);
         // metadata is removed during pca, so we have to restore the information
         for (let i = 0; i < reducedData.length; i++) {
@@ -72,7 +98,7 @@ const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
         // console.log(reducedData)
 
         const jitter = (value) => {
-            const jitterAmount = 0.1;
+            const jitterAmount = 0.5;
             return value + (Math.random() - 0.5) * jitterAmount;
         };
 
@@ -121,6 +147,7 @@ const ImageSummaryVis = ({ images, data, graph, setSelectedNode }) => {
             .attr("fill", d => color(d[2].metaData.batch))
             .attr("opacity", 0.7)
             .on("mouseover", function (event, d) {
+                console.log(event, d)
                 let _image = images.find(image => image.id === d[2].metaData.imageId && image.batch === d[2].metaData.batch);
                 if (!_image) {
                     return;

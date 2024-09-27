@@ -28,18 +28,18 @@ function calculateGraph(metaData, graphSchema) {
     const buildGraph = (data) => {
         const result = [];
         Object.keys(data).forEach((key) => {
-            const node = { name: key, children: [] };
+            const node = { name: key, children: [], count: 0 };
             result.push(node);
             const queue = [{ node, data: data[key] }];
             while (queue.length) {
                 const { node: currentNode, data: currentData } = queue.shift();
                 if (Array.isArray(currentData)) {
                     currentData.forEach((item) => {
-                        currentNode.children.push({ name: item, children: [] });
+                        currentNode.children.push({ name: item, children: [], count: 0 });
                     });
                 } else {
                     Object.keys(currentData).forEach((subKey) => {
-                        const subNode = { name: subKey, children: [] };
+                        const subNode = { name: subKey, children: [], count: 0 };
                         currentNode.children.push(subNode);
                         queue.push({ node: subNode, data: currentData[subKey] });
                     });
@@ -50,14 +50,14 @@ function calculateGraph(metaData, graphSchema) {
     };
 
     const traverseGraph = (curNode, dataItem, itemMetadata) => {
-        if(!curNode.imageInfo) {
+        if (!curNode.imageInfo) {
             curNode.imageInfo = [];
         }
 
         curNode.imageInfo.push(itemMetadata);
         curNode.count = curNode.imageInfo.length;
 
-        if (typeof(dataItem) === 'object') {
+        if (typeof (dataItem) === 'object') {
             for (let key in dataItem) {
                 if (curNode.children) {
                     let childNode = curNode.children.find(node => node.name === key);
@@ -66,11 +66,11 @@ function calculateGraph(metaData, graphSchema) {
                     }
                 }
             }
-        } else if(typeof(dataItem) != 'undefined') {
-            if(!curNode.values) {
+        } else if (typeof (dataItem) != 'undefined') {
+            if (!curNode.values) {
                 curNode.values = {};
             }
-            curNode.values[JSON.stringify({batch: itemMetadata.batch, imageId: itemMetadata.imageId})] = dataItem;
+            curNode.values[JSON.stringify({ batch: itemMetadata.batch, imageId: itemMetadata.imageId })] = dataItem;
             let childNode = curNode.children.find(node => node.name === dataItem);
             if (childNode) {
                 traverseGraph(childNode, undefined, itemMetadata);
@@ -94,17 +94,17 @@ function getMetaDatafromGraph(graph, batch, imageId) {
     let res = {};
     let curNode = graph;
     const traverseGraph = (curNode, res) => {
-        if(curNode.imageInfo) {
+        if (curNode.imageInfo) {
             let isFound = false;
             curNode.imageInfo.forEach(item => {
-                if(item.batch == batch && item.imageId == imageId) {
+                if (item.batch == batch && item.imageId == imageId) {
                     isFound = true;
                 }
             })
-            if(isFound) {
-                if(curNode.values) {
+            if (isFound) {
+                if (curNode.values) {
                     res[curNode.name] = curNode.values;
-                } else if(curNode.children) {
+                } else if (curNode.children) {
                     curNode.children.forEach(child => {
                         traverseGraph(child, res);
                     })
@@ -116,4 +116,14 @@ function getMetaDatafromGraph(graph, batch, imageId) {
     return res;
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph };
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64 };
