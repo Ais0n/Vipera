@@ -356,6 +356,7 @@ const Generate = () => {
       } else {
         newImages = await generateImages(imageIds, userInput, newImages);
       }
+      console.log(newImages)
 
       setIsDoneImage(true);
       setStepPercentage(33);
