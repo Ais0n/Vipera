@@ -101,7 +101,7 @@ const Generate = () => {
         } catch (error) {
           if (tryCount >= maxTries) {
             console.error(`Error generating images for batch: ${batch}`, error);
-            throw new Error(`Failed to generate images for batch: ${batch}`);
+            throw new Error(`Failed to generate images for batch (max tries reached): ${batch}`);
           }
         }
         tryCount++;
@@ -124,6 +124,7 @@ const Generate = () => {
 
         return Promise.all(imageDataPromises);
       } else {
+        console.error(response);
         throw new Error(`Failed to generate images for batch: ${batch}`);
       }
     });
