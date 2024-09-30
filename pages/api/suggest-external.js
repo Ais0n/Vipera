@@ -78,7 +78,7 @@ async function suggest(graphSchema) {
             }
             return output;
         } catch (error) {
-            console.error(error);
+            console.log(error);
             if (i == maxTries - 1) {
                 throw error;
             }

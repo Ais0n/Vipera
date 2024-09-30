@@ -65,7 +65,7 @@ async function generateLabel(imageData, schema) {
             modifyOutput(output);
             return output;
         } catch (error) {
-            console.error(error);
+            console.log(error);
             if(i == maxTries - 1) {
                 throw error;
             }
