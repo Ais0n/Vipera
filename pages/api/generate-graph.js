@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 }
 
 async function generateGraph(imageData) {
-    let maxTries = 5;
+    let maxTries = 10;
 
     for(let i = 0; i < maxTries; i++) {
         try {

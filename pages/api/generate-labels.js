@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 }
 
 async function generateLabel(imageData, schema) {
-    let maxTries = 5;
+    let maxTries = 10;
 
     for(let i = 0; i < maxTries; i++) {
         try {
