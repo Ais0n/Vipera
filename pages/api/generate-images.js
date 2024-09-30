@@ -8,6 +8,7 @@ const replicate = new Replicate({
 });
 
 export default async function handler(req, res) {
+    console.log(process.env)
     if (req.method === 'GET') {
         let { prompt, num_outputs } = req.query;
         console.log(num_outputs)
