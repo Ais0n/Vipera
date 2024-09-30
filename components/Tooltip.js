@@ -84,7 +84,7 @@ const Tooltip = ({ visible, x, y, image, data }) => {
                 pointerEvents: 'none',
             }}>
             <img src={`data:image/png;base64,${image}`} alt="Image" style={{ width: '100px', height: '100px' }} />
-            <svg ref={svgRef} width="200" height="100"/>
+            <svg ref={svgRef} width="200" height="110"/>
         </div>
     );
 };

@@ -34,6 +34,7 @@ const Generate = () => {
   const [badgeContents, setBadgeContents] = useState(undefined);
   const [prompts, setPrompts] = useState([]);
   const [stepPercentage, setStepPercentage] = useState(0);
+  const [imageNum, setImageNum] = useState(10);
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -49,7 +50,7 @@ const Generate = () => {
   };
 
   function generateImageIds() {
-    let image_num = 8, IMAGE_DIR = '', DATE = '';
+    let image_num = imageNum, IMAGE_DIR = '', DATE = '';
 
     let imageIds = [];
 
@@ -80,7 +81,7 @@ const Generate = () => {
   }
 
   async function generateImages(imageIds, userInput, newImages) { // newImages: array to store the images after the generation
-    const batchSize = 4; // Number of images to generate in one batch
+    const batchSize = 1; // Number of images to generate in one batch
     const imageBatches = [];
 
     // Split the imageIds into batches
@@ -97,7 +98,7 @@ const Generate = () => {
 
       do {
         try {
-          response = await axios.get(genImageUrl, {timeout: 100000});
+          response = await axios.get(genImageUrl);
         } catch (error) {
           if (tryCount >= maxTries) {
             console.error(`Error generating images for batch: ${batch}`, error);
@@ -113,7 +114,7 @@ const Generate = () => {
         // Fetch image data for each path in the batch
         const imageDataPromises = imagePaths.map(async (image_path, index) => {
           try {
-            const imageData = await axios.get(image_path, { responseType: 'arraybuffer', timeout: 100000 });
+            const imageData = await axios.get(image_path, { responseType: 'arraybuffer'});
             const base64Image = Utils.arrayBufferToBase64(imageData.data);
             return { batch: prompts.length + 1, id: batch[index], data: base64Image, path: image_path };
           } catch (error) {
@@ -167,7 +168,7 @@ const Generate = () => {
     for (let i = 0; i < sampleImages.length; i++) {
       let image = sampleImages[i];
       let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}`;
-      let response = await axios.get(genGraphUrl, { timeout: 100000 });
+      let response = await axios.get(genGraphUrl);
       console.log(response)
       sceneGraphs.push(response.data.res);
     }
@@ -250,7 +251,9 @@ const Generate = () => {
           }
         }
         if (ok) {
-          graphSchema[key].push(metaData[key]);
+          if(typeof(metaData[key]) != 'undefined') {
+            graphSchema[key].push(metaData[key]);
+          }
         }
       } else if (typeof (graphSchema[key]) === 'object' && typeof (metaData[key]) !== 'undefined') {
         updateGraphSchemaWithMetaData(graphSchema[key], metaData[key]);
@@ -293,7 +296,7 @@ const Generate = () => {
       const promises = images.map(async (image, index) => {
         console.log(index)
         let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}`;
-        let response = await axios.get(getLabelURL, { timeout: 100000 });
+        let response = await axios.get(getLabelURL);
         let data = response.data.res;
 
         const removeRedundantFields = (data, schema) => {
@@ -496,7 +499,7 @@ const Generate = () => {
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} />
+      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} />
 
 
       {error && <p>{error}</p>}

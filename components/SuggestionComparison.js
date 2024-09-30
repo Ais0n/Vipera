@@ -30,8 +30,6 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
         while (_image1Index === _image2Index) {
             _image2Index = Math.floor(Math.random() * images.length);
         }
-        setImage1Index(_image1Index);
-        setImage2Index(_image2Index);
         const path1 = images[_image1Index].path;
         const path2 = images[_image2Index].path;
         axios.post('/api/suggest-comparison', {
@@ -41,9 +39,12 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
         }).then((response) => {
             // console.log(response)
             setSuggestionMetaData(response.data.res);
+            setImage1Index(_image1Index);
+            setImage2Index(_image2Index);
         }).catch((error) => {
             console.error(error);
         });
+
     }
 
     // in useeffect, send a http request

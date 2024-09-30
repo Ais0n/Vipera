@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
 
-function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr }) {
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum }) {
   // const [inputValue, setInputValue] = useState('');
   const [showPrompts, setShowPrompts] = useState(false); // show example prompts or not
 
@@ -38,6 +38,16 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, prompt
             value={promptStr}
             onChange={(e) => setPromptStr(e.target.value)}
             disabled={isGenerating}
+          />
+          <input
+            type="number"
+            className={styles.searchNumber}
+            placeholder="Number of images"
+            disabled={isGenerating}
+            value={imageNum}
+            onChange={(e) => {
+              setImageNum(e.target.value);
+            }}
           />
           <button type="submit" className={styles.searchButton} disabled={isGenerating}>
             <span className={styles.searchButtonText}>Generate</span>

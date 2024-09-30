@@ -88,6 +88,20 @@
   line-height: 20px;
 }
 
+.searchNumber {
+  width: 50px;
+  height: 65px;
+  border: 1px solid #A4ACA8;
+  background: #FFF;
+  margin-right: 13px; /* gap with searchButton */
+  padding-left: 30px; /* inner padding for prompt input */
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 60px;
+}
+
 .searchBar::placeholder {
   color: #C9C9C9;
   font-family: 'Roboto', sans-serif;
