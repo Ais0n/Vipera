@@ -113,7 +113,7 @@ const Generate = () => {
         // Fetch image data for each path in the batch
         const imageDataPromises = imagePaths.map(async (image_path, index) => {
           try {
-            const imageData = await axios.get(image_path, { responseType: 'arraybuffer' });
+            const imageData = await axios.get(image_path, { responseType: 'arraybuffer', timeout: 40000 });
             const base64Image = Utils.arrayBufferToBase64(imageData.data);
             return { batch: prompts.length + 1, id: batch[index], data: base64Image, path: image_path };
           } catch (error) {
@@ -167,7 +167,7 @@ const Generate = () => {
     for (let i = 0; i < sampleImages.length; i++) {
       let image = sampleImages[i];
       let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}`;
-      let response = await axios.get(genGraphUrl);
+      let response = await axios.get(genGraphUrl, { timeout: 40000 });
       console.log(response)
       sceneGraphs.push(response.data.res);
     }
@@ -293,7 +293,7 @@ const Generate = () => {
       const promises = images.map(async (image, index) => {
         console.log(index)
         let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}`;
-        let response = await axios.get(getLabelURL);
+        let response = await axios.get(getLabelURL, { timeout: 40000 });
         let data = response.data.res;
 
         const removeRedundantFields = (data, schema) => {
