@@ -8,7 +8,7 @@ const replicate = new Replicate({
 });
 
 export default async function handler(req, res) {
-    console.log(process.env)
+    console.log(process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN, replicate)
     if (req.method === 'GET') {
         let { prompt, num_outputs } = req.query;
         console.log(num_outputs)
