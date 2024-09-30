@@ -97,7 +97,7 @@ const Generate = () => {
 
       do {
         try {
-          response = await axios.get(genImageUrl);
+          response = await axios.get(genImageUrl, {timeout: 40000});
         } catch (error) {
           if (tryCount >= maxTries) {
             console.error(`Error generating images for batch: ${batch}`, error);
