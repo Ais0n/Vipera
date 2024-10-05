@@ -36,7 +36,7 @@ const Generate = () => {
   const [stepPercentage, setStepPercentage] = useState(0);
   const [imageNum, setImageNum] = useState(10);
 
-  const isDebug = false;
+  const isDebug = true;
   const baseUrl = '/api';
 
   const TRENDING_IMAGES = [
@@ -49,9 +49,9 @@ const Generate = () => {
     setSelectedCategory('images');
   };
 
-  function generateImageIds() {
-    let image_num = imageNum, IMAGE_DIR = '', DATE = '';
+  let image_num = imageNum, IMAGE_DIR = '', DATE = '';
 
+  function generateImageIds(userInput) {
     let imageIds = [];
 
     if (isDebug) {
@@ -281,7 +281,7 @@ const Generate = () => {
       for (let i = 0; i < metaData.length; i++) {
         _metaData.push(getDataItem(graphSchema, "", metaData[i]));
       }
-      for (let i = 0; i < images.length; i++) {
+      for (let i = metaData.length; i < images.length; i++) {
         let currentDataItem = getDataItem(graphSchema, images[i].id, {});
         currentDataItem.batch = prompts.length + 1;
         currentDataItem.metaData = {
@@ -349,7 +349,7 @@ const Generate = () => {
 
     setError('');
 
-    let imageIds = generateImageIds();
+    let imageIds = generateImageIds(userInput);
 
     try {
       // Generate images
@@ -391,7 +391,7 @@ const Generate = () => {
 
       // calculate the graph with statistics
       let _graph = Utils.calculateGraph(newMetaData, updatedGraphSchema);
-      console.log(graph)
+      console.log(_graph)
       setGraph(_graph);
 
       setPrompts([...prompts, userInput]);

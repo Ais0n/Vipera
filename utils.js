@@ -34,9 +34,10 @@ function calculateGraph(metaData, graphSchema) {
             while (queue.length) {
                 const { node: currentNode, data: currentData } = queue.shift();
                 if (Array.isArray(currentData)) {
-                    currentData.forEach((item) => {
-                        currentNode.children.push({ name: item, children: [], count: 0 });
-                    });
+                    // currentData.forEach((item) => {
+                    //     currentNode.children.push({ name: item, children: [], count: 0 });
+                    // });
+                    currentNode.children.push({name: 'values', children: [], count: 0});
                 } else {
                     Object.keys(currentData).forEach((subKey) => {
                         const subNode = { name: subKey, children: [], count: 0 };
@@ -67,14 +68,32 @@ function calculateGraph(metaData, graphSchema) {
                 }
             }
         } else if (typeof (dataItem) != 'undefined') {
+            if (!curNode.children[0]) {
+                return;
+            }
             if (!curNode.values) {
                 curNode.values = {};
             }
             curNode.values[JSON.stringify({ batch: itemMetadata.batch, imageId: itemMetadata.imageId })] = dataItem;
-            let childNode = curNode.children.find(node => node.name === dataItem);
-            if (childNode) {
-                traverseGraph(childNode, undefined, itemMetadata);
+            if (!curNode.children[0].list) {
+                curNode.children[0].list = [];
             }
+            let ok = false;
+            curNode.children[0].list.forEach(item => {
+                if (item.batch == itemMetadata.batch && item.dataItem == dataItem) {
+                    item.count += 1;
+                    item.imageId.push(itemMetadata.imageId);
+                    ok = true;
+                }
+            })
+            if (!ok) {
+                curNode.children[0].list.push({ batch: itemMetadata.batch, imageId: [itemMetadata.imageId], dataItem: dataItem, count: 1 });
+            }
+
+            // let childNode = curNode.children.find(node => node.name === dataItem);
+            // if (childNode) {
+            //     traverseGraph(childNode, undefined, itemMetadata);
+            // }
         }
     }
 

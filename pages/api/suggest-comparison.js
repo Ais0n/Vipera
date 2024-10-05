@@ -2,6 +2,7 @@ import axios from 'axios';
 import JSON5 from 'json5';
 import { createCanvas, loadImage } from 'canvas'; // Ensure you install 'canvas' package
 import Replicate from "replicate";
+import fs from 'fs';
 
 const replicate = new Replicate({
     auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
@@ -12,6 +13,10 @@ const getImageData = async (imagePath) => {
         const response = await axios.get(imagePath, { responseType: 'arraybuffer' });
         return Buffer.from(response.data);
     } else {
+        // get current working directory
+        const cwd = process.cwd();
+        // get the image path
+        imagePath = `${cwd}/public${imagePath}`;
         return await fs.promises.readFile(imagePath);
     }
 };
@@ -81,13 +86,29 @@ async function suggestComparison(imageData, schema) {
             console.log(output);
             // Find the JSON part from the output
             let start = output.indexOf('{');
-            let end = output.lastIndexOf('}');
-            if (start === -1 || end === -1) {
+            if (start == -1) {
                 output = '{' + output + '}';
+                output = JSON5.parse(output);
             } else {
-                output = output.substring(start, end + 1);
+                for (let end = output.length - 1; end >= start; end--) {
+                    if (output[end] == '}') {
+                        let _output = output.substring(start, end + 1);
+                        try {
+                            _output = JSON5.parse(_output);
+                        } catch (error) {
+                            continue;
+                        }
+                        output = _output;
+                        break;
+                    }
+                }
             }
-            output = JSON5.parse(output);
+            // output = JSON5.parse(output);
+            
+            // check if the json has the required fields
+            if (!output.hasOwnProperty('parentNodeName') || !output.hasOwnProperty('newNodeName') || !output.hasOwnProperty('candidateValues')) {
+                throw new Error("Output does not have the required fields: " + JSON.stringify(output));
+            }
             return output;
         } catch (error) {
             console.log(error);

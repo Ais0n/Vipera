@@ -3,6 +3,7 @@
 import React from 'react';
 import { Image, Switch, Popover, Button } from 'antd';
 import TreeView from './TreeView';
+import DrawerView from './Drawer';
 import ImageSummaryVis from './ImageSummaryVis';
 import Heatmap from './Heatmap';
 import BarChart from './BarChart';
@@ -13,6 +14,7 @@ import SuggestComparison from './SuggestionComparison';
 const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick }) => {
     const [selectedNode, setSelectedNode] = React.useState(null);
     const [switchChecked, setSwitchChecked] = React.useState(true);
+    const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
 
     const _handleSuggestionButtonClick = () => {
         handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "addValue": "smiling" });
@@ -42,37 +44,40 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
         { category: 'Other', value: 0.1 },
     ]
 
+    const handleBarHover = (data) => {
+        if (!data) {
+            setHoveredImageIds([]);
+            return;
+        }
+        console.log(data.imageId);
+        setHoveredImageIds(data.imageId);
+    }
+
+    const handleNodeHover = (data) => {
+        if (!data) {
+            setHoveredImageIds([]);
+            return;
+        }
+        let imageIds = [];
+        data.forEach(item => {
+            imageIds.push(item.imageId);
+        });
+        setHoveredImageIds(imageIds);
+    }
+
 
     return (
         <div className="image-summary-container">
             <div className="content">
                 {/* Left Column */}
                 <div className="left-column">
-                    <div className="image-info">
-                        <div style={{ "display": "flex", "gap": "15px", "margin": "15px auto", "alignItems": "center" }}>
-                            <h2 style={{ "margin": 0 }}>Images</h2>
-                            <Switch checked={switchChecked} onChange={setSwitchChecked} checkedChildren={"Summary"} unCheckedChildren={"List"} size={"large"} />
-                        </div>
-                        {switchChecked ?
-                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} setSelectedNode={setSelectedNode} />
-                            :
-                            <div className="imageContainer">
-                                {images.map((image, index) => (
-                                    <div key={index} className="imageItem">
-                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
-                                    </div>
-                                ))}
-                            </div>
-                        }
-                    </div>
-
                     <div className="label-view">
                         <h2> Labels </h2>
                         {selectedNode &&
                             <h3>{selectedNode.name}</h3>
 
                         }
-                        <TreeView data={graph} />
+                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} />
                     </div>
                 </div>
 
@@ -86,6 +91,24 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                                 {prompt}
                             </div>
                         ))}
+                    </div>
+
+                    <div className="image-info">
+                        <div style={{ "display": "flex", "gap": "15px", "margin": "15px auto", "alignItems": "center" }}>
+                            <h2 style={{ "margin": 0 }}>Images</h2>
+                            <Switch checked={switchChecked} onChange={setSwitchChecked} checkedChildren={"Summary"} unCheckedChildren={"List"} size={"large"} />
+                        </div>
+                        {switchChecked ?
+                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} setSelectedNode={setSelectedNode} hoveredImageIds={hoveredImageIds} />
+                            :
+                            <div className="imageContainer">
+                                {images.map((image, index) => (
+                                    <div key={index} className="imageItem">
+                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
+                                    </div>
+                                ))}
+                            </div>
+                        }
                     </div>
 
                     <h2>Suggestions</h2>

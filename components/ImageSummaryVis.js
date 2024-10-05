@@ -5,7 +5,7 @@ import { PCA } from 'ml-pca';
 import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
 
-const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode }) => {
+const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, hoveredImageIds }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [legendData, setLegendData] = useState([]);
     useEffect(() => {
@@ -146,6 +146,8 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode }) 
             .attr("r", 5)
             .attr("fill", d => color(d[2].metaData.batch))
             .attr("opacity", 0.7)
+            // .attr("stroke", d => hoveredImageIds.includes(d[2].metaData.imageId) ? 'black' : 'none')
+            // .attr("stroke-width", 2)
             .on("mouseover", function (event, d) {
                 console.log(event, d)
                 let _image = images.find(image => image.id === d[2].metaData.imageId && image.batch === d[2].metaData.batch);
@@ -181,6 +183,14 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode }) 
                 color: color(batch),
             })));
     }, [data]);
+
+    // set stroke for hovered images
+    useEffect(() => {
+        const svg = d3.select("#scatterplot");
+        svg.selectAll("circle")
+            .attr("stroke", d => hoveredImageIds.includes(d[2].metaData.imageId) ? 'black' : 'none')
+            .attr("stroke-width", 4);
+    }, [hoveredImageIds]);
 
     return (
         <>
