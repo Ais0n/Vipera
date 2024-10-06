@@ -35,8 +35,9 @@ const Generate = () => {
   const [prompts, setPrompts] = useState([]);
   const [stepPercentage, setStepPercentage] = useState(0);
   const [imageNum, setImageNum] = useState(10);
+  const [imageIdMap, setImageIdMap] = useState({});
 
-  const isDebug = true;
+  const isDebug = false;
   const baseUrl = '/api';
 
   const TRENDING_IMAGES = [
@@ -51,36 +52,7 @@ const Generate = () => {
 
   let image_num = imageNum, IMAGE_DIR = '', DATE = '';
 
-  function generateImageIds(userInput) {
-    let imageIds = [];
-
-    if (isDebug) {
-      let keywords = ['doctor', 'picnic', 'nature', 'chef'];
-      let timewords = ["2024-08-14T03:20:49.750Z", "2024-08-14T02:52:09.289Z", '2024-08-14T03:07:24.235Z', '2024-08-15T21:54:32.075Z'];
-      let num = [5, 20, 18, 20]
-      image_num = 0;
-      IMAGE_DIR = '', DATE = '';
-      for (let i = 0; i < keywords.length; i++) {
-        if (userInput.toLowerCase().includes(keywords[i])) {
-          IMAGE_DIR = keywords[i];
-          DATE = timewords[i];
-          image_num = num[i];
-          break;
-        }
-      }
-      if (IMAGE_DIR == '') return;
-      for (let i = 0; i < image_num; i++) {
-        imageIds.push(DATE + '_' + String(i))
-      }
-    } else {
-      for (let i = 0; i < image_num; i++) {
-        imageIds.push(new Date().toISOString() + '_' + String(i))
-      }
-    }
-    return imageIds;
-  }
-
-  async function generateImages(imageIds, userInput, newImages) { // newImages: array to store the images after the generation
+  async function generateNewImages(imageIds, userInput, newImages) { // newImages: array to store the images after the generation
     const batchSize = 1; // Number of images to generate in one batch
     const imageBatches = [];
 
@@ -90,7 +62,7 @@ const Generate = () => {
     }
 
     const imagePromises = imageBatches.map(async (batch) => {
-      const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&num_outputs=${batch.length}`;
+      const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&num_outputs=${batch.length}&image_ids=${batch.join('|')}`;
 
       let response;
       const maxTries = 10;
@@ -143,9 +115,9 @@ const Generate = () => {
     return newImages;
   }
 
-  async function generateImagesForDebug(imageIds, newImages) {
+  async function getExistingImages(imageIds, newImages) {
     for (let imageId of imageIds) {
-      const genImageUrl = `/temp_images/${IMAGE_DIR}/${imageId}.png`;
+      const genImageUrl = `${IMAGE_DIR}/${imageId}.png`;
       const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
       console.log(imageData)
       const base64Image = Utils.arrayBufferToBase64(imageData.data);
@@ -349,16 +321,49 @@ const Generate = () => {
 
     setError('');
 
-    let imageIds = generateImageIds(userInput);
+    IMAGE_DIR = '/temp_images/' + userInput.toLowerCase().replace(/ /g, '_');
+    let imageIds = [];
+    // check if there are already images in IMAGE_DIR
+    let isImagesExist = false;
+    let checkUrl = `${baseUrl}/check-images?path=${IMAGE_DIR}`;
+    let response = await axios.get(checkUrl);
+    if (response.data.res) {
+      imageIds = response.data.res.map(item => {
+        return item.substring(0, item.length - 4); // remove the suffix .png
+      });
+      if(imageIdMap[userInput] == undefined) {
+        imageIds = imageIds.slice(0, image_num);
+        let tmp = {...imageIdMap};
+        tmp[userInput] = image_num;
+        setImageIdMap(tmp);
+      } else {
+        imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num);
+        let tmp = {...imageIdMap};
+        tmp[userInput] += image_num;
+        setImageIdMap(tmp);
+      }
+    }
+
+    isImagesExist = (imageIds.length == image_num);
+
+    if(!isImagesExist) {
+      imageIds = [];
+      for(let i = 0; i < image_num; i++) {
+        imageIds.push(userInput.replace(/ /g, '_') + '_' + String(i));
+      }
+    }
+    
+
+    // let imageIds = generateImageIds(userInput);
 
     try {
       // Generate images
       let newImages = Utils.deepClone(images);
 
-      if (isDebug) {
-        newImages = await generateImagesForDebug(imageIds, newImages);
+      if (isImagesExist) {
+        newImages = await getExistingImages(imageIds, newImages);
       } else {
-        newImages = await generateImages(imageIds, userInput, newImages);
+        newImages = await generateNewImages(imageIds, userInput, newImages);
       }
       console.log(newImages)
 

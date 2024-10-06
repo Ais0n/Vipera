@@ -8,8 +8,8 @@ const TreeView = ({ data, handleBarHover, handleNodeHover }) => {
     const svgRef = useRef();
 
     const createTree = () => {
-        const width = 600;
-        const height = 1150;
+        const width = 700;
+        const height = 850;
         const barHeight = 60; // Fixed height for the bar chart area
 
         // Clear previous SVG content
@@ -203,7 +203,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover }) => {
             });
 
         const zoom = d3.zoom()
-            .scaleExtent([0.5, 3])
+            .scaleExtent([0.25, 2])
             .on('zoom', (event) => {
                 g.attr('transform', event.transform);
             });
