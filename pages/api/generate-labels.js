@@ -72,7 +72,7 @@ async function generateLabel(imageData, schema, candidateValues) {
                     image: imageData,
                     top_p: 1,
                     // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
-                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label that describes the object or attribute in the image, and replace the value "..." with the generated label (only numbers, strings, or boolean values accepted${candidateValues ? '. You are required to choose from the following values: ' + candidateValues : ''}). Output the results in JSON. Schema: ${schema}`,
+                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the value "..." with the generated label (only numbers, strings, or boolean values accepted${candidateValues ? '. You are required to choose from the following values: ' + candidateValues : ', undefined'}). Output the results in JSON. Schema: ${schema}`,
                     max_tokens: 1024,
                     temperature: 0.6
                   }

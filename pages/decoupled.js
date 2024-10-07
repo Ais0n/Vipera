@@ -414,7 +414,7 @@ const Generate = () => {
       // }
 
       // calculate the graph with statistics
-      let _graph = Utils.calculateGraph([], updatedGraphSchema);
+      let _graph = Utils.calculateGraph([], updatedGraphSchema, graph);
       console.log(_graph)
       setGraph(_graph);
 
@@ -446,9 +446,34 @@ const Generate = () => {
     updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
-    let _graph = Utils.calculateGraph(metaData, _graphSchema);
-    console.log(_graph)
+    let updateGraph = (graph, suggestion) => {
+      if(!graph || !graph.children) return;
+      for(let child of graph.children) {
+        if(child.name == suggestion.oldNodeName) {
+          let newNode = Utils.deepClone(child);
+          newNode.name = suggestion.newNodeName;
+          const traverseGraph = (curNode) => {
+            if(!curNode || !curNode.children) return;
+            for(let i = 0; i < curNode.children.length; i++) {
+              if(curNode.children[i].type == "attribute") {
+                curNode.children[i] = {name: curNode.children[i].name, type: "attribute", count: 0, children: []};
+              } else {
+                traverseGraph(curNode[i]);
+              }
+            }
+          }
+          traverseGraph(newNode);
+          graph.children.push(newNode);
+          break;
+        } else {
+          updateGraph(child, suggestion);
+        }
+      }
+    }
+    let _graph = Utils.deepClone(graph);
+    updateGraph(_graph, suggestion);
     setGraph(_graph);
+    console.log("updatedGraph", _graph);
   }
 
   const handleExternal = async (suggestion) => {

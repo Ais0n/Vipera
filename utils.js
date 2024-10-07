@@ -101,7 +101,7 @@ function calculateGraph(metaData, graphSchema, graph) {
         }
     }
 
-    if(!graph) {
+    if(!graph || !graph.children) {
         graph = { 
             name: 'root',
             children: buildGraph(graphSchema),
