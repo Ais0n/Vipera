@@ -11,9 +11,8 @@ import SuggestPromotion from './SuggestPromotion';
 import SuggestExternal from './SuggestExternal';
 import SuggestComparison from './SuggestionComparison';
 
-const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick }) => {
+const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd }) => {
     const [selectedNode, setSelectedNode] = React.useState(null);
-    const [switchChecked, setSwitchChecked] = React.useState(true);
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
 
     const _handleSuggestionButtonClick = () => {
@@ -77,7 +76,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             <h3>{selectedNode.name}</h3>
 
                         }
-                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} />
+                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd}/>
                     </div>
                 </div>
 

@@ -24,11 +24,11 @@ function deepClone(target) {
 }
 
 // calculate statistics
-function calculateGraph(metaData, graphSchema) {
+function calculateGraph(metaData, graphSchema, graph) {
     const buildGraph = (data) => {
         const result = [];
         Object.keys(data).forEach((key) => {
-            const node = { name: key, children: [], count: 0 };
+            const node = { name: key, children: [], count: 0, type: "object" };
             result.push(node);
             const queue = [{ node, data: data[key] }];
             while (queue.length) {
@@ -37,10 +37,10 @@ function calculateGraph(metaData, graphSchema) {
                     // currentData.forEach((item) => {
                     //     currentNode.children.push({ name: item, children: [], count: 0 });
                     // });
-                    currentNode.children.push({name: 'values', children: [], count: 0});
+                    currentNode.children.push({name: 'values', type: "values", children: [], count: 0});
                 } else {
                     Object.keys(currentData).forEach((subKey) => {
-                        const subNode = { name: subKey, children: [], count: 0 };
+                        const subNode = { name: subKey, children: [], count: 0, type: "object" };
                         currentNode.children.push(subNode);
                         queue.push({ node: subNode, data: currentData[subKey] });
                     });
@@ -55,7 +55,9 @@ function calculateGraph(metaData, graphSchema) {
             curNode.imageInfo = [];
         }
 
-        curNode.imageInfo.push(itemMetadata);
+        if(!curNode.imageInfo.find(item => item.batch == itemMetadata.batch && item.imageId == itemMetadata.imageId)) {
+            curNode.imageInfo.push(itemMetadata);
+        }
         curNode.count = curNode.imageInfo.length;
 
         if (typeof (dataItem) === 'object') {
@@ -68,18 +70,18 @@ function calculateGraph(metaData, graphSchema) {
                 }
             }
         } else if (typeof (dataItem) != 'undefined') {
-            if (!curNode.children[0]) {
+            if(curNode.type != 'attribute') {
                 return;
             }
             if (!curNode.values) {
                 curNode.values = {};
             }
             curNode.values[JSON.stringify({ batch: itemMetadata.batch, imageId: itemMetadata.imageId })] = dataItem;
-            if (!curNode.children[0].list) {
-                curNode.children[0].list = [];
+            if (!curNode.list) {
+                curNode.list = [];
             }
             let ok = false;
-            curNode.children[0].list.forEach(item => {
+            curNode.list.forEach(item => {
                 if (item.batch == itemMetadata.batch && item.dataItem == dataItem) {
                     item.count += 1;
                     item.imageId.push(itemMetadata.imageId);
@@ -87,7 +89,7 @@ function calculateGraph(metaData, graphSchema) {
                 }
             })
             if (!ok) {
-                curNode.children[0].list.push({ batch: itemMetadata.batch, imageId: [itemMetadata.imageId], dataItem: dataItem, count: 1 });
+                curNode.list.push({ batch: itemMetadata.batch, imageId: [itemMetadata.imageId], dataItem: dataItem, count: 1 });
             }
 
             // let childNode = curNode.children.find(node => node.name === dataItem);
@@ -97,9 +99,11 @@ function calculateGraph(metaData, graphSchema) {
         }
     }
 
-    let graph = {
-        name: 'root',
-        children: buildGraph(graphSchema),
+    if(!graph) {
+        graph = { 
+            name: 'root',
+            children: buildGraph(graphSchema),
+        } 
     }
     metaData.forEach(item => {
         let itemMetadata = item.metaData;
@@ -145,4 +149,63 @@ function arrayBufferToBase64(buffer) {
     return window.btoa(binary);
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64 };
+function processSceneGraph(graph) {
+    // // remove all leaf nodes (set null value)
+    // const removeLeafNodes = (node, depth) => {
+    //     if(depth >= 2) return {};
+    //     let keys = Object.keys(node);
+    //     if (keys.length == 0) {
+    //         return {};
+    //     } else {
+    //         for(let key of keys) {
+    //             if(!node[key] || typeof(node[key]) != 'object') {
+    //                 node[key] = {};
+    //                 continue;
+    //             }
+    //             node[key] = removeLeafNodes(node[key], depth + 1);
+    //         }
+    //         return node;
+    //     }
+    // };
+    // graph = removeLeafNodes(graph, 0);
+    // return graph;
+    let {Foreground, Background} = graph;
+    let res = {Foreground: {}, Background: {}};
+    Foreground.forEach(item => {
+        res["Foreground"][item] = {};
+    });
+    Background.forEach(item => {
+        res["Background"][item] = {};
+    });
+    return res;
+}
+
+const mergeMetadata = (oldMetadata, newMetadata) => {
+    const mergeDeep = (target, source) => {
+        for (const key in source) {
+            if (source[key] instanceof Object && key in target) {
+                target[key] = mergeDeep(target[key], source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        }
+        return target;
+    };
+    return mergeDeep(oldMetadata, newMetadata);
+}
+
+const isObjectSubset = (obj1, obj2) => {
+    if (typeof obj1 != 'object' || typeof obj2 != 'object' || obj1 == null || obj2 == null) {
+        return true;
+    }
+    for (let key in obj2) {
+        if (obj1[key] == undefined) {
+            return false;
+        } else {
+            return isObjectSubset(obj1[key], obj2[key]);
+        }
+    }
+    return true;
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset };

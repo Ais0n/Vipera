@@ -4,6 +4,7 @@ import numeric from 'numeric';
 import { PCA } from 'ml-pca';
 import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
+import { Empty } from 'antd';
 
 const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, hoveredImageIds }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
@@ -48,8 +49,9 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
                 })
             );
 
+            console.log(standardizedMatrix);
             const pca = new PCA(standardizedMatrix);
-            const result = pca.predict(standardizedMatrix, { nComponents: 2 });
+            const result = pca.predict(standardizedMatrix);
             return result.data;
         };
 
@@ -66,14 +68,14 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
         const removeRedundantFields = (data, schema) => {
             const result = Utils.deepClone(data);
             const traverse = (curNode, schemaNode) => {
-                if(typeof(curNode) !== 'object') return;
+                if (typeof (curNode) !== 'object') return;
                 let keys = Object.keys(curNode);
                 for (let key of keys) {
-                    if (typeof(schemaNode[key]) == 'object') {
+                    if (typeof (schemaNode[key]) == 'object') {
                         traverse(curNode[key], schemaNode[key]);
                     } else {
                         delete curNode[key];
-                    } 
+                    }
                 }
             };
             traverse(result, schema);
@@ -176,12 +178,12 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
                 setTooltipData(prev => ({ ...prev, visible: false }));
             });
 
-            // Set legend data
-            const uniqueBatches = Array.from(new Set(data.map(d => d.metaData.batch)));
-            setLegendData(uniqueBatches.map(batch => ({
-                batch,
-                color: color(batch),
-            })));
+        // Set legend data
+        const uniqueBatches = Array.from(new Set(data.map(d => d.metaData.batch)));
+        setLegendData(uniqueBatches.map(batch => ({
+            batch,
+            color: color(batch),
+        })));
     }, [data]);
 
     // set stroke for hovered images
@@ -194,7 +196,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
 
     return (
         <>
-            <div id="legend" style={{ display: 'flex', flexDirection: 'row',  gap: '20px', justifyContent: 'right', marginRight: '20px' }}>
+            <div id="legend" style={{ display: 'flex', flexDirection: 'row', gap: '20px', justifyContent: 'right', marginRight: '20px' }}>
                 {legendData.map((item, index) => (
                     <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={{
@@ -208,7 +210,9 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
                     </div>
                 ))}
             </div>
-            <svg id="scatterplot" width="600" height="200"></svg>
+            {(!data || !Array.isArray(data) || data.length === 0)
+                ? <Empty description={"You need to first add an attribute to an object for this visualization."}/>
+                : <svg id="scatterplot" width="600" height="200"></svg>}
             <Tooltip
                 visible={tooltipData.visible}
                 x={tooltipData.x}

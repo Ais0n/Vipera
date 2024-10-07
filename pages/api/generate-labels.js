@@ -3,6 +3,8 @@ import Replicate from "replicate";
 import path from 'path';
 import axios from 'axios';
 import JSON5 from 'json5';
+import * as Utils from '../../utils.js';
+import fs from 'fs';
 
 const replicate = new Replicate({
     auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
@@ -12,6 +14,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
         let _path = req.query.path;
         let schema = req.query.schema;
+        let label_dir = req.query.label_dir;
         try {
             let image, imageBase64;
             // check if the path is a local path or a url
@@ -23,6 +26,28 @@ export default async function handler(req, res) {
             }
             let imageData = `data:image/jpeg;base64,${imageBase64}`;
             let result = await generateLabel(imageData, schema);
+
+            // save result to label_dir
+            if(label_dir) {
+                let promise = new Promise(async (resolve, reject) => {
+                    let file_path = path.join(process.cwd(), 'public', label_dir);
+                    // read the existing file
+                    let data = {};
+                    if (fs.existsSync(file_path)) {
+                        data = await readFile(file_path, 'utf-8');
+                        data = JSON5.parse(data);
+                    } else {
+                        fs.mkdirSync(path.dirname(file_path), { recursive: true });
+                    }
+                    let contents = Utils.mergeMetadata(data, result);
+                    fs.writeFileSync(file_path, JSON.stringify(contents));
+                    resolve();
+                });
+                promise.then(() => {
+                    console.log('Saved label to label_dir');
+                });
+            }
+
             return res.status(200).json({ res: result});
         } catch (error) {
             console.error(error);
@@ -45,7 +70,8 @@ async function generateLabel(imageData, schema) {
                   input: {
                     image: imageData,
                     top_p: 1,
-                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
+                    // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
+                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label that describes the object or attribute in the image, and replace the value "..." with the generated label (only numbers, strings, or boolean values accepted). Output the results in JSON. Schema: ${schema}`,
                     max_tokens: 1024,
                     temperature: 0.6
                   }

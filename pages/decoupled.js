@@ -36,6 +36,7 @@ const Generate = () => {
   const [stepPercentage, setStepPercentage] = useState(0);
   const [imageNum, setImageNum] = useState(10);
   const [imageIdMap, setImageIdMap] = useState({});
+  const [switchChecked, setSwitchChecked] = React.useState(false);
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -117,7 +118,7 @@ const Generate = () => {
 
   async function getExistingImages(imageIds, newImages) {
     for (let imageId of imageIds) {
-      const genImageUrl = `${IMAGE_DIR}/${imageId}.png`;
+      const genImageUrl = `/temp_images${IMAGE_DIR}/${imageId}.png`;
       const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
       console.log(imageData)
       const base64Image = Utils.arrayBufferToBase64(imageData.data);
@@ -132,17 +133,27 @@ const Generate = () => {
     // randomly sample images
     let sampleImages = [];
     for (let i = 0; i < sample_size; i++) {
-      sampleImages.push(images[Math.floor(Math.random() * images.length)]);
+      // sampleImages.push(images[Math.floor(Math.random() * images.length)]);
+      sampleImages.push(images[i]);
+    }
+
+    // check if the scene graph is already generated
+    let checkGraphUrl = `${baseUrl}/check-graph?path=/temp_graphs${IMAGE_DIR}.json`;
+    let response = await axios.get(checkGraphUrl);
+    console.log(response)
+    if (response.data.res) {
+      return Utils.processSceneGraph(response.data.res);
     }
 
     // get Scene Graph for each image
     let sceneGraphs = [];
     for (let i = 0; i < sampleImages.length; i++) {
       let image = sampleImages[i];
-      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}`;
+      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs'+IMAGE_DIR+'.json'}`;
       let response = await axios.get(genGraphUrl);
       console.log(response)
-      sceneGraphs.push(response.data.res);
+      let metaGraph = response.data.res;
+      sceneGraphs.push(Utils.processSceneGraph(metaGraph));
     }
 
     // aggregate the scene graphs, merge leaf values as a list
@@ -182,7 +193,6 @@ const Generate = () => {
     // }
     // addOthers(aggregatedGraph);
 
-    console.log(aggregatedGraph);
     return aggregatedGraph;
   }
 
@@ -266,10 +276,21 @@ const Generate = () => {
     } else {
       console.log("newImages", images);
       const promises = images.map(async (image, index) => {
-        console.log(index)
-        let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}`;
-        let response = await axios.get(getLabelURL);
-        let data = response.data.res;
+        let labelFilePath = image.path.replace('temp_images', 'temp_labels');
+        labelFilePath = labelFilePath.slice(0, labelFilePath.length - 4) + '.json';
+        let checkLabelURL = `${baseUrl}/check-labels?path=${labelFilePath}`;
+        let response = await axios.get(checkLabelURL);
+        let data, isGenerateNeeded = true;
+        if (response.data.res) {
+          data = response.data.res;
+          isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
+        }
+        
+        if(isGenerateNeeded) {
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}`;
+          response = await axios.get(getLabelURL);
+          data = response.data.res;
+        }
 
         const removeRedundantFields = (data, schema) => {
           const result = Utils.deepClone(data);
@@ -277,10 +298,10 @@ const Generate = () => {
             if (typeof (curNode) !== 'object') return;
             let keys = Object.keys(curNode);
             for (let key of keys) {
-              if (typeof (schemaNode[key]) == 'object') {
-                traverse(curNode[key], schemaNode[key]);
-              } else {
+              if(typeof(schemaNode[key]) == 'undefined') {
                 delete curNode[key];
+              } else {
+                traverse(curNode[key], schemaNode[key]);
               }
             }
           };
@@ -321,11 +342,11 @@ const Generate = () => {
 
     setError('');
 
-    IMAGE_DIR = '/temp_images/' + userInput.toLowerCase().replace(/ /g, '_');
+    // Generate image IDs
+    IMAGE_DIR = '/' + userInput.toLowerCase().replace(/ /g, '_');
     let imageIds = [];
-    // check if there are already images in IMAGE_DIR
-    let isImagesExist = false;
-    let checkUrl = `${baseUrl}/check-images?path=${IMAGE_DIR}`;
+    let isImagesExist = false;  // check if there are already images in IMAGE_DIR
+    let checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
     let response = await axios.get(checkUrl);
     if (response.data.res) {
       imageIds = response.data.res.map(item => {
@@ -352,9 +373,6 @@ const Generate = () => {
         imageIds.push(userInput.replace(/ /g, '_') + '_' + String(i));
       }
     }
-    
-
-    // let imageIds = generateImageIds(userInput);
 
     try {
       // Generate images
@@ -376,26 +394,27 @@ const Generate = () => {
       }
 
       // Generate Scene Graph (Graph Schema)
-      let currentGraphSchema = Utils.deepClone(graphSchema);
-      console.log(currentGraphSchema)
-      let updatedGraphSchema = (Object.keys(currentGraphSchema).length == 0) ? (await generateGraphSchema(newImages)) : updateGraphSchemaWithPrompt(currentGraphSchema, userInput);
-      setGraphSchema(updatedGraphSchema);
-      console.log("updatedGraphSchema", updatedGraphSchema);
+      let updatedGraphSchema = Utils.deepClone(graphSchema);
+      if(Object.keys(graphSchema).length == 0) {
+        updatedGraphSchema = await generateGraphSchema(newImages);
+        setGraphSchema(updatedGraphSchema);
+        console.log("updatedGraphSchema", updatedGraphSchema);
+      }
       setStepPercentage(66);
 
-      // Generate Meta Data
-      let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
-      setMetaData(newMetaData);
-      console.log("newMetaData", newMetaData);
-      setStepPercentage(99);
+      // // Generate Meta Data
+      // let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+      // setMetaData(newMetaData);
+      // console.log("newMetaData", newMetaData);
+      // setStepPercentage(99);
 
-      // update the graph schema with metaData
-      for (let item of newMetaData) {
-        updateGraphSchemaWithMetaData(updatedGraphSchema, item);
-      }
+      // // update the graph schema with metaData
+      // for (let item of newMetaData) {
+      //   updateGraphSchemaWithMetaData(updatedGraphSchema, item);
+      // }
 
       // calculate the graph with statistics
-      let _graph = Utils.calculateGraph(newMetaData, updatedGraphSchema);
+      let _graph = Utils.calculateGraph([], updatedGraphSchema);
       console.log(_graph)
       setGraph(_graph);
 
@@ -492,7 +511,113 @@ const Generate = () => {
     } else if (type == 'external') {
       handleExternal(suggestion);
     }
+  }
 
+  const handleNodeEdit = (dataObj, newNodeName) => {
+    // calculate the path to the root
+    let pathToRoot = [];
+    let curNode = dataObj;
+    while(curNode.data.name != 'root') {
+      pathToRoot.push(curNode.data.name);
+      curNode = curNode.parent;
+    }
+    pathToRoot = pathToRoot.reverse();
+    // update the schema
+    let _graphSchema = Utils.deepClone(graphSchema);
+    curNode = _graphSchema;
+    for(let i = 0; i < pathToRoot.length - 1; i++) {
+      curNode = curNode[pathToRoot[i]];
+    }
+    curNode[newNodeName] = Utils.deepClone(curNode[pathToRoot[pathToRoot.length - 1]]);
+    delete curNode[pathToRoot[pathToRoot.length - 1]];
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+    // update the graph
+    let _graph = Utils.deepClone(graph);
+    curNode = _graph;
+    for(let i = 0; i < pathToRoot.length; i++) {
+      curNode = curNode.children.find(node => node.name === pathToRoot[i]);
+    }
+    curNode.name = newNodeName;
+    setGraph(_graph);
+    console.log("updatedGraph", _graph);
+  }
+
+  const handleNodeAdd = (dataObj, newNode) => {
+    let {nodeName: newNodeName, nodeType: newNodeType} = newNode;
+    // calculate the path to the root
+    let pathToRoot = [];
+    let curNode = dataObj;
+    while(curNode.data.name != 'root') {
+      pathToRoot.push(curNode.data.name);
+      curNode = curNode.parent;
+    }
+    pathToRoot = pathToRoot.reverse();
+    // update the schema
+    let _graphSchema = Utils.deepClone(graphSchema);
+    curNode = _graphSchema;
+    for(let i = 0; i < pathToRoot.length; i++) {
+      curNode = curNode[pathToRoot[i]];
+    }
+    curNode[newNodeName] = {};
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+    // update the graph
+    let _graph = Utils.deepClone(graph);
+    curNode = _graph;
+    for(let i = 0; i < pathToRoot.length; i++) {
+      curNode = curNode.children.find(node => node.name === pathToRoot[i]);
+    }
+    curNode.children.push({ name: newNodeName, children: [], count: 0, type: newNodeType });
+    setGraph(_graph);
+    console.log("updatedGraph", _graph);
+
+    if(newNodeType == 'attribute') {
+      // update labels if the new node is an attribute
+      let partialSchema = {}; // The schema for the new node
+      curNode = partialSchema;
+      for(let i = 0; i < pathToRoot.length; i++) {
+        curNode[pathToRoot[i]] = {};
+        curNode = curNode[pathToRoot[i]];
+      }
+      curNode[newNodeName] = "...";
+      console.log("partialSchema", partialSchema);
+      // Generate Meta Data
+      generateMetaData(images, partialSchema).then(labeledSchema => {
+        setIsGenerating(true);
+        setIsDoneGenerating(false);
+        setStepPercentage(50);
+        console.log("labeledSchema", labeledSchema);
+        // update the metadata
+        let newMetaData = Utils.deepClone(metaData);
+        images.forEach((image, index) => {
+          let item = labeledSchema[index];
+          let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.id);
+          if(oldMetaData == undefined) {
+            oldMetaData = {};
+          }
+          let res = Utils.mergeMetadata(oldMetaData, item);
+          let idx = newMetaData.findIndex(item => item.metaData.imageId == image.id);
+          if(idx != -1) {
+            newMetaData[idx] = res;
+          } else {
+            newMetaData.push(res);
+          }
+        })
+
+        setMetaData(newMetaData);
+        console.log("newMetaData", newMetaData);
+
+        _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
+        console.log("newgraph", _graph)
+        // setTimeout(() => {
+          setGraph(_graph);
+        // }, 2000);
+
+        setIsGenerating(false);
+        setIsDoneGenerating(true);
+      })
+    }
   }
 
   return (
@@ -522,7 +647,7 @@ const Generate = () => {
           </div>
         </div> */}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts} handleSuggestionButtonClick={handleSuggestionButtonClick} />
+        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts}  switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd}/>
 
       </div>}
 
