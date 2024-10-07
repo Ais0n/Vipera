@@ -6,7 +6,7 @@ import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
 import { Empty } from 'antd';
 
-const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, hoveredImageIds }) => {
+const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, hoveredImageIds, colorScale }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [legendData, setLegendData] = useState([]);
     useEffect(() => {
@@ -137,7 +137,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
         //     .attr("class", "y-axis")
         //     .call(d3.axisLeft(y));
 
-        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 
         g.selectAll("circle")
@@ -146,7 +146,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
             .attr("cx", d => x(d[0]))
             .attr("cy", d => y(d[1]))
             .attr("r", 5)
-            .attr("fill", d => color(d[2].metaData.batch))
+            .attr("fill", d => { return colorScale(d[2].metaData.batch)})
             .attr("opacity", 0.7)
             // .attr("stroke", d => hoveredImageIds.includes(d[2].metaData.imageId) ? 'black' : 'none')
             // .attr("stroke-width", 2)
@@ -182,7 +182,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
         const uniqueBatches = Array.from(new Set(data.map(d => d.metaData.batch)));
         setLegendData(uniqueBatches.map(batch => ({
             batch,
-            color: color(batch),
+            color: colorScale(batch),
         })));
     }, [data]);
 
@@ -202,7 +202,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
                         <div style={{
                             width: '18px',
                             height: '18px',
-                            backgroundColor: item.color,
+                            backgroundcolorScale: item.colorScale,
                             marginRight: '8px',
                             borderRadius: '50%',
                         }} />

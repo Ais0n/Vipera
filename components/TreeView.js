@@ -5,7 +5,7 @@ import ModalTreeEdit from './ModalTreeEdit.js';
 import ModalTreeAdd from './ModalTreeAdd.js';
 import { Skeleton } from 'antd';
 
-const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd }) => {
+const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -111,7 +111,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         const contextMenu = d3.select(contextMenuRef.current);
         rects.filter(d => d.data.type != 'attribute')
             .on('mouseover', function (event, d) {
-                console.log(d);
+                // console.log(d);
                 handleNodeHover(d.data.imageInfo);
             })
             .on('mouseout', function (event, d) {
@@ -166,7 +166,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         nodes.filter(d => d.data.type == 'attribute')
             .each(function (d) {
 
-                // console.log(d)
+                console.log(d)
                 if (!d.data.list) {
                     d3.select(this).append('text')
                         .attr('x', 20)
@@ -187,9 +187,6 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 // Create a group for the chart
                 const chartGroup = g.append('g')
                     .attr('transform', `translate(${margin.left},${margin.top})`);
-
-                // Set up color scale based on batch
-                const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
                 // Create scales
                 const xScale = d3.scaleBand()
@@ -220,6 +217,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 for(let key in dataItemMap) {
                     let yOffset = -25;
                     dataItemMap[key].forEach(dataItem => {
+                        console.log(dataItem.batch, colorScale, colorScale(dataItem.batch))
                         let height = dataItem.count / maxCount * (chartHeight - 15);
                         yOffset += height;
                         chartGroup.append('rect')

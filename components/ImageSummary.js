@@ -10,10 +10,13 @@ import BarChart from './BarChart';
 import SuggestPromotion from './SuggestPromotion';
 import SuggestExternal from './SuggestExternal';
 import SuggestComparison from './SuggestionComparison';
+import * as d3 from 'd3';
 
 const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd }) => {
     const [selectedNode, setSelectedNode] = React.useState(null);
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
+
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
     const _handleSuggestionButtonClick = () => {
         handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "addValue": "smiling" });
@@ -76,7 +79,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             <h3>{selectedNode.name}</h3>
 
                         }
-                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd}/>
+                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} colorScale={colorScale}/>
                     </div>
                 </div>
 
@@ -98,7 +101,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             <Switch checked={switchChecked} onChange={setSwitchChecked} checkedChildren={"Summary"} unCheckedChildren={"List"} size={"large"} />
                         </div>
                         {switchChecked ?
-                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} setSelectedNode={setSelectedNode} hoveredImageIds={hoveredImageIds} />
+                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} setSelectedNode={setSelectedNode} hoveredImageIds={hoveredImageIds} colorScale={colorScale}/>
                             :
                             <div className="imageContainer">
                                 {images.map((image, index) => (
@@ -112,15 +115,15 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
 
                     <h2>Suggestions</h2>
                     <div className="suggestion-items">
-                        <div className="suggestion-item">
+                        {/* <div className="suggestion-item">
                             <SuggestComparison images={images} graphSchema={graphSchema} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestComparison>
-                        </div>
+                        </div> */}
                         <div className="suggestion-item">
                             <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
                         </div>
-                        <div className="suggestion-item">
+                        {/* <div className="suggestion-item">
                             <SuggestExternal prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} dataForExternalKnowledge={dataForExternalKnowledge} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestExternal>
-                        </div>
+                        </div> */}
                         {/* {prompts.length > 1 && <div className="suggestion-item">
                             <h4 className='suggestion-itemTitle'>Correlation</h4>
                             <div className="suggestion-text">

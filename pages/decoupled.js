@@ -106,7 +106,6 @@ const Generate = () => {
     try {
       const allImages = await Promise.all(imagePromises);
       const flattenedImages = allImages.flat(); // Flatten the array of arrays
-      setImages(prevImages => [...prevImages, ...flattenedImages]); // Append new images
       newImages = [...newImages, ...flattenedImages];
     } catch (error) {
       console.error(error);
@@ -122,7 +121,6 @@ const Generate = () => {
       const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
       console.log(imageData)
       const base64Image = Utils.arrayBufferToBase64(imageData.data);
-      setImages(prevImages => [...prevImages, { batch: prompts.length + 1, id: imageId, data: base64Image, path: genImageUrl }]);
       newImages.push({ batch: prompts.length + 1, id: imageId, data: base64Image, path: genImageUrl });
     }
     return newImages;
@@ -283,7 +281,8 @@ const Generate = () => {
         let data, isGenerateNeeded = true;
         if (response.data.res) {
           data = response.data.res;
-          isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
+          // isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
+          isGenerateNeeded = false;
         }
         
         if(isGenerateNeeded) {
@@ -376,7 +375,7 @@ const Generate = () => {
 
     try {
       // Generate images
-      let newImages = Utils.deepClone(images);
+      let newImages = [], allImages = Utils.deepClone(images);
 
       if (isImagesExist) {
         newImages = await getExistingImages(imageIds, newImages);
@@ -384,6 +383,8 @@ const Generate = () => {
         newImages = await generateNewImages(imageIds, userInput, newImages);
       }
       console.log(newImages)
+      allImages = [...allImages, ...newImages];
+      setImages(allImages);
 
       setIsDoneImage(true);
       setStepPercentage(33);
@@ -402,11 +403,14 @@ const Generate = () => {
       }
       setStepPercentage(66);
 
-      // // Generate Meta Data
-      // let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
-      // setMetaData(newMetaData);
-      // console.log("newMetaData", newMetaData);
-      // setStepPercentage(99);
+        // Generate Meta Data
+        let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+        let allMetaData = Utils.deepClone(metaData); 
+        allMetaData = [...allMetaData, ...newMetaData];
+        setMetaData(allMetaData);
+        console.log("newMetaData", allMetaData);
+        setStepPercentage(99);
+      
 
       // // update the graph schema with metaData
       // for (let item of newMetaData) {
@@ -414,7 +418,7 @@ const Generate = () => {
       // }
 
       // calculate the graph with statistics
-      let _graph = Utils.calculateGraph([], updatedGraphSchema, graph);
+      let _graph = Utils.calculateGraph(allMetaData, updatedGraphSchema, Utils.deepClone(graph));
       console.log(_graph)
       setGraph(_graph);
 
@@ -635,12 +639,11 @@ const Generate = () => {
 
         _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
         console.log("newgraph", _graph)
-        // setTimeout(() => {
-          setGraph(_graph);
-        // }, 2000);
+        setGraph(_graph);
 
         setIsGenerating(false);
         setIsDoneGenerating(true);
+        setSwitchChecked(true);
       })
     }
   }
