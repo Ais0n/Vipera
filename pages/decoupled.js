@@ -257,7 +257,7 @@ const Generate = () => {
     return dataItem;
   }
 
-  const generateMetaData = async (images, graphSchema) => {
+  const generateMetaData = async (images, graphSchema, candidateValues) => {
     let _metaData = [];
     if (isDebug) {
       for (let i = 0; i < metaData.length; i++) {
@@ -287,7 +287,7 @@ const Generate = () => {
         }
         
         if(isGenerateNeeded) {
-          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}`;
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
           response = await axios.get(getLabelURL);
           data = response.data.res;
         }
@@ -544,7 +544,7 @@ const Generate = () => {
   }
 
   const handleNodeAdd = (dataObj, newNode) => {
-    let {nodeName: newNodeName, nodeType: newNodeType} = newNode;
+    let {nodeName: newNodeName, nodeType: newNodeType, candidateValues} = newNode;
     // calculate the path to the root
     let pathToRoot = [];
     let curNode = dataObj;
@@ -583,7 +583,7 @@ const Generate = () => {
       curNode[newNodeName] = "...";
       console.log("partialSchema", partialSchema);
       // Generate Meta Data
-      generateMetaData(images, partialSchema).then(labeledSchema => {
+      generateMetaData(images, partialSchema, candidateValues).then(labeledSchema => {
         setIsGenerating(true);
         setIsDoneGenerating(false);
         setStepPercentage(50);

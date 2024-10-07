@@ -83,8 +83,10 @@ function calculateGraph(metaData, graphSchema, graph) {
             let ok = false;
             curNode.list.forEach(item => {
                 if (item.batch == itemMetadata.batch && item.dataItem == dataItem) {
-                    item.count += 1;
-                    item.imageId.push(itemMetadata.imageId);
+                    if(!item.imageId.includes(itemMetadata.imageId)) {
+                        item.count += 1;
+                        item.imageId.push(itemMetadata.imageId);
+                    }
                     ok = true;
                 }
             })

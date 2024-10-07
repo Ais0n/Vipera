@@ -15,6 +15,7 @@ export default async function handler(req, res) {
         let _path = req.query.path;
         let schema = req.query.schema;
         let label_dir = req.query.label_dir;
+        let candidateValues = req.query.candidate_values;
         try {
             let image, imageBase64;
             // check if the path is a local path or a url
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
                 imageBase64 = (await readFile(path.join(process.cwd(), 'public', _path))).toString('base64');
             }
             let imageData = `data:image/jpeg;base64,${imageBase64}`;
-            let result = await generateLabel(imageData, schema);
+            let result = await generateLabel(imageData, schema, candidateValues);
 
             // save result to label_dir
             if(label_dir) {
@@ -59,7 +60,7 @@ export default async function handler(req, res) {
     }
 }
 
-async function generateLabel(imageData, schema) {
+async function generateLabel(imageData, schema, candidateValues) {
     let maxTries = 10;
 
     for(let i = 0; i < maxTries; i++) {
@@ -71,7 +72,7 @@ async function generateLabel(imageData, schema) {
                     image: imageData,
                     top_p: 1,
                     // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
-                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label that describes the object or attribute in the image, and replace the value "..." with the generated label (only numbers, strings, or boolean values accepted). Output the results in JSON. Schema: ${schema}`,
+                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label that describes the object or attribute in the image, and replace the value "..." with the generated label (only numbers, strings, or boolean values accepted${candidateValues ? '. You are required to choose from the following values: ' + candidateValues : ''}). Output the results in JSON. Schema: ${schema}`,
                     max_tokens: 1024,
                     temperature: 0.6
                   }

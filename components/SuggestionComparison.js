@@ -50,7 +50,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
     // in useeffect, send a http request
     useEffect(() => {
         updateSuggestion();
-    }, []);
+    }, [graphSchema]);
 
     return (
         <>

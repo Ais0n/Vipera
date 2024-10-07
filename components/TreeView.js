@@ -27,7 +27,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
 
     const createTree = () => {
         const width = 700;
-        const height = 850;
+        const height = 650;
         const barHeight = 60; // Fixed height for the bar chart area
 
         // Clear previous SVG content
@@ -169,8 +169,8 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 // console.log(d)
                 if (!d.data.list) {
                     d3.select(this).append('text')
-                        .attr('x', 0)
-                        .attr('y', 40)
+                        .attr('x', 20)
+                        .attr('y', 70)
                         .text('Loading...')
                         .attr('fill', 'black')
                         .attr('font-size', '18px')
