@@ -101,7 +101,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     <h2>Prompts</h2>
                     <div className='prompt-items'>
                         {prompts.map((prompt, index) => (
-                            <div key={index} className='prompt-item' style={{'background-color': colorScale(index + 1)}} onClick={(e) => handlePromptClick(index + 1)}>
+                            <div key={index} className='prompt-item' style={{'backgroundColor': colorScale(index + 1)}} onClick={(e) => handlePromptClick(index + 1)}>
                                 <div style={{"fontWeight": "bold", 'display': 'inline'}}>Prompt {index + 1}:</div> 
                                 {prompt}
                             </div>
@@ -144,7 +144,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                 {/* Right Column */}
                 <div className="right-column">
                     <div className="image-info">
-                        <div style={{ "display": "flex", "gap": "15px", "margin": "15px auto", "alignItems": "center", "justify-content": "space-between" }}>
+                        <div style={{ "display": "flex", "gap": "15px", "margin": "15px auto", "alignItems": "center", "justifyContent": "space-between" }}>
                             <h2 style={{ "margin": 0 }}>Images</h2>
                             <i>Comparison mode: <Switch checked={switchChecked} onChange={setSwitchChecked} checkedChildren={"On"} unCheckedChildren={"Off"} size={"large"} />
                             </i>
@@ -162,7 +162,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                         }
                     </div>
                     <div className="label-view">
-                        <div style={{ "display": "flex", "alignItems": "center", "justify-content": "space-between" }}>
+                        <div style={{ "display": "flex", "alignItems": "center", "justifyContent": "space-between" }}>
                             <h2 style={{ "margin": 0 }}>Scene Graph</h2>
                             <i>Generated using LLaVA v1.6 and may contain errors.</i>
                         </div>

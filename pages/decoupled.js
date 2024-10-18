@@ -283,7 +283,7 @@ const Generate = () => {
           data = response.data.res;
           console.log(data, graphSchema)
           isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
-          isGenerateNeeded = false;
+          // isGenerateNeeded = false;
         }
         
         if(isGenerateNeeded) {
@@ -507,8 +507,21 @@ const Generate = () => {
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
 
-    // calculate the graph with statistics
-    let _graph = Utils.calculateGraph(metaData, _graphSchema);
+    // update the graph (loading)
+    const updateGraph = (graph, suggestion) => {
+      if(!graph || !graph.children) return;
+      for(let child of graph.children) {
+        if(child.name == suggestion.parentNodeName) {
+          let newNode = {name: suggestion.newNodeName, children: [], count: 0, type: "attribute"};
+          child.children.push(newNode);
+          break;
+        } else {
+          updateGraph(child, suggestion);
+        }
+      }
+    }
+    let _graph = Utils.deepClone(graph);
+    updateGraph(_graph, suggestion);
     console.log(_graph)
     setGraph(_graph);
 
@@ -527,7 +540,7 @@ const Generate = () => {
     console.log("updatedGraphSchema", _graphSchema);
 
     // calculate the graph with statistics
-    _graph = Utils.calculateGraph(newMetaData, _graphSchema);
+    _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
     console.log(_graph)
     setGraph(_graph);
 
