@@ -283,7 +283,7 @@ const Generate = () => {
           data = response.data.res;
           isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
           console.log(data, graphSchema, isGenerateNeeded);
-          isGenerateNeeded = false;
+          // isGenerateNeeded = false;
         }
         
         if(isGenerateNeeded) {
