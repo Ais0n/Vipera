@@ -27,6 +27,8 @@ export default async function handler(req, res) {
             }
             let imageData = `data:image/jpeg;base64,${imageBase64}`;
             let result = await generateLabel(imageData, schema, candidateValues);
+            // change result to lower case
+            result = JSON.parse(JSON.stringify(result).toLowerCase());
 
             // save result to label_dir
             if(label_dir) {
@@ -36,7 +38,7 @@ export default async function handler(req, res) {
                     let data = {};
                     if (fs.existsSync(file_path)) {
                         data = await readFile(file_path, 'utf-8');
-                        data = JSON5.parse(data);
+                        data = JSON5.parse(data.toLowerCase());
                     } else {
                         fs.mkdirSync(path.dirname(file_path), { recursive: true });
                     }

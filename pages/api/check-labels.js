@@ -19,7 +19,7 @@ export default async function handler(req, res) {
                 return res.status(200).json({ res: null });
             } else {
                 let data = await readFile(file_path, 'utf-8');
-                return res.status(200).json({ res: JSON5.parse(data) });
+                return res.status(200).json({ res: JSON5.parse(data.toLowerCase()) });
             }
         } catch (error) {
             console.error(error);
