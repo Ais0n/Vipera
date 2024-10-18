@@ -70,7 +70,7 @@ function calculateGraph(metaData, graphSchema, graph) {
                     }
                 }
             }
-        } else if (typeof (dataItem) != 'undefined') {
+        } else if (typeof (dataItem) != 'undefined' && dataItem != "") {
             if(curNode.type != 'attribute') {
                 return;
             }
@@ -205,7 +205,8 @@ const isObjectSubset = (obj1, obj2) => {
         if (obj1[key] == undefined) {
             return false;
         } else {
-            return isObjectSubset(obj1[key], obj2[key]);
+            let res = isObjectSubset(obj1[key], obj2[key]);
+            if(!res) return false;
         }
     }
     return true;

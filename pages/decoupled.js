@@ -281,9 +281,9 @@ const Generate = () => {
         let data, isGenerateNeeded = true;
         if (response.data.res) {
           data = response.data.res;
-          console.log(data, graphSchema)
           isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
-          // isGenerateNeeded = false;
+          console.log(data, graphSchema, isGenerateNeeded);
+          isGenerateNeeded = false;
         }
         
         if(isGenerateNeeded) {
