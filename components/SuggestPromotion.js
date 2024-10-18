@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Heatmap from './Heatmap';
 import BarChart from './BarChart';
+import HighlightedText from './HighlightedText';
 import { Image, Switch, Popover, Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -32,26 +33,32 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
 
     return (
         <>
-            <div>
-                <h4 className='suggestion-itemTitle' style={{"display": "inline-block"}}>Promotion</h4>
-                <SyncOutlined onClick={updateSuggestion} style={{"display": "inline-block", "margin": "auto 5px", "cursor": "pointer"}}/>
-            </div>
             {Object.keys(suggestionMetaData).length === 0 ? <div>Loading...</div> :
                 <>
+
                     <div className="suggestion-text">
-                        <p><i>Want to see the results of <b> {suggestionMetaData.newNodeName} </b> apart from <b>{suggestionMetaData.oldNodeName}</b>?</i></p>
+                        <div className="suggestion-text-left">
+                            <SyncOutlined onClick={updateSuggestion} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
+                        </div>
+                        <div className="suggestion-text-right">
+                            <p><i>Want to see the results of <b> {suggestionMetaData.newNodeName} </b> apart from <b>{suggestionMetaData.oldNodeName}</b>?</i></p>
+                        </div>
                     </div>
                     {/* <div className='graphNode'>Occupations / gender</div>
                     <div className="barchart">
                         <Heatmap data={dataForPromotion} />
                     </div> */}
+                    <div className="suggestion-preview">
+                        <div> <b> <i> New prompt:</i>  </b> </div>
+                        <HighlightedText raw={prompt} oldWord={suggestionMetaData.oldNodeName} newWord={suggestionMetaData.newNodeName} />
+                    </div>
                     <div className="suggestion-toolbar">
                         <Button
                             className="suggestion-button"
                             onClick={_handleSuggestionButtonClick2}
                             type="primary"
                         >
-                            Update my prompt
+                            Try out this prompt
                         </Button>
                     </div>
                 </>}
@@ -80,14 +87,28 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
                 }
                 .suggestion-text {
                     overflow-y: auto;
-                    height: 100px;
                     display: flex;
                     align-items: center;
+                }
+                .suggestion-text-left {
+                    display: inline-block;
+                    width: 20px;
+                    margin-right: 10px;
+                }
+                .suggestion-text-right {
+                    display: inline-block;
+                    width: calc(100% - 30px);
+                }
+                .suggestion-preview {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 10px 0;
                 }
                 .suggestion-toolbar {
                     display: flex;
                     justify-content: center;
-                    margin-top: 10px;
+                    margin-top: 15px;
                 }
                 .suggestion-button {
                     // background-color: #888;

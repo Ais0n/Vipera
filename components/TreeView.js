@@ -4,8 +4,10 @@ import * as Utils from '../utils.js';
 import ModalTreeEdit from './ModalTreeEdit.js';
 import ModalTreeAdd from './ModalTreeAdd.js';
 import { Skeleton } from 'antd';
+import { BookOutlined } from '@ant-design/icons';
 
-const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale }) => {
+
+const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -26,8 +28,8 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
     }
 
     const createTree = () => {
-        const width = 700;
-        const height = 650;
+        const width = 880;
+        const height = 600;
         const barHeight = 60; // Fixed height for the bar chart area
 
         // Clear previous SVG content
@@ -197,14 +199,6 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 // group by batch and calculate the maximum count
                 let maxCount = 0;
                 let dataItemMap = {}, dataItemCount = {};
-                // d.data.list.forEach(dataItem => {
-                //     if (!dataItemMap[dataItem.dataItem]) {
-                //         dataItemMap[dataItem.dataItem] = 0;
-                //     }
-                //     dataItemMap[dataItem.dataItem] += dataItem.count;
-                //     maxCount = Math.max(maxCount, dataItemMap[dataItem.dataItem]);
-                // });
-                // console.log(d.data.list, maxCount)
                 d.data.list.forEach(dataItem => {
                     dataItemMap[dataItem.dataItem] = dataItemMap[dataItem.dataItem] || [];
                     dataItemMap[dataItem.dataItem].push(dataItem);
@@ -214,7 +208,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 maxCount = Math.max(...Object.values(dataItemCount));
 
                 // Stack the data for the bars
-                for(let key in dataItemMap) {
+                for (let key in dataItemMap) {
                     let yOffset = -25;
                     dataItemMap[key].forEach(dataItem => {
                         console.log(dataItem.batch, colorScale, colorScale(dataItem.batch))
@@ -235,7 +229,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                                 event.stopPropagation();
                                 handleBarHover(null);
                             });
-    
+
                         // Add count labels on top of each bar
                         chartGroup.append('text')
                             .attr('x', xScale(dataItem.dataItem) + xScale.bandwidth() / 2) // Center label
@@ -244,7 +238,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                             .text(dataItem.count);
                     });
                 }
-                
+
 
                 // Add x-axis labels (no axis)
                 chartGroup.selectAll('.x-axis-label')
@@ -255,6 +249,31 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     .attr('y', chartHeight + 37) // Position below the bars
                     .attr('text-anchor', 'middle')
                     .text(d => d.dataItem);
+
+                // Add the "Store" button
+                const storeButton = g.append('g')
+                    .attr('transform', `translate(${chartWidth - 20}, ${20})`)
+                    // pointer
+                    .style('cursor', 'pointer')
+                    .on('click', () => {
+                        // Store the raw data when clicked
+                        const chartData = d.data.list.map(item => ({
+                            dataItem: item.dataItem,
+                            count: item.count,
+                            batch: item.batch
+                        }));
+                        addBookmarkedChart({
+                            type: "bar",
+                            data: chartData
+                        });
+                    });
+
+                // Load and append the local SVG
+                d3.xml('/bookmark.svg').then(svgData => {
+                    const importedNode = document.importNode(svgData.documentElement, true);
+                    const svg = d3.select(importedNode).attr('width', 20).attr('height', 20);
+                    storeButton.node().appendChild(importedNode);
+                });
             });
 
         const zoom = d3.zoom()
@@ -282,16 +301,16 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 <div className="context-menu-item" onClick={() => { setIsAddModalOpen(true); }}>Add a child</div>
                 <div className="context-menu-item">Delete</div>
             </div>
-            <ModalTreeEdit 
-                isOpen={isEditModalOpen} 
-                onClose={() => setIsEditModalOpen(false)} 
-                onSave={handleEdit} 
-                nodeData={contextMenuData} 
+            <ModalTreeEdit
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSave={handleEdit}
+                nodeData={contextMenuData}
             />
-            <ModalTreeAdd 
-                isOpen={isAddModalOpen} 
-                onClose={() => setIsAddModalOpen(false)} 
-                onSave={handleAdd} 
+            <ModalTreeAdd
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onSave={handleAdd}
             />
             <style jsx>{`
                 .context-menu {

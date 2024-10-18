@@ -11,9 +11,9 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
 
     const content = (index) => (images && index < images.length) ? (
         <div>
-          <Image width={200} src={`data:image/png;base64,${images[index].data}`} alt={`Image ${images[index].id}`} />
+            <Image width={200} src={`data:image/png;base64,${images[index].data}`} alt={`Image ${images[index].id}`} />
         </div>
-      ) : "No images available";
+    ) : "No images available";
 
     const _handleSuggestionButtonClick2 = () => {
         // handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
@@ -23,7 +23,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
-        if(images.length <= 1) return;
+        if (images.length <= 1) return;
         // randomly choose two different images
         let _image1Index = Math.floor(Math.random() * images.length);
         let _image2Index = Math.floor(Math.random() * images.length);
@@ -54,14 +54,21 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
 
     return (
         <>
-            <div>
-                <h4 className='suggestion-itemTitle' style={{"display": "inline-block"}}>Comparison</h4>
-                <SyncOutlined onClick={updateSuggestion} style={{"display": "inline-block", "margin": "auto 5px", "cursor": "pointer"}}/>
-            </div>
             {Object.keys(suggestionMetaData).length === 0 ? <div>Loading...</div> :
                 <>
                     <div className="suggestion-text">
-                        <p><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to the <b>{suggestionMetaData.newNodeName}</b> of the <b>{suggestionMetaData.parentNodeName}</b>.</i></p>
+                        <div className="suggestion-text-left">
+                            <SyncOutlined onClick={updateSuggestion} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
+                        </div>
+                        <div className="suggestion-text-right">
+                            <div><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to the <b>{suggestionMetaData.newNodeName}</b> of the <b>{suggestionMetaData.parentNodeName}</b>.</i></div>
+                        </div>
+                    </div>
+                    <div className="suggestion-preview">
+                        <div> <b><i> Add: </i></b> </div>
+                        <div className='node'> {suggestionMetaData.parentNodeName} </div>
+                        <div> &#x2192; </div>
+                        <div className='node'> {suggestionMetaData.newNodeName} </div>
                     </div>
                     {/* <div className='graphNode'>Smiling?</div>
                     <div className="barchart">
@@ -73,7 +80,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
                             onClick={_handleSuggestionButtonClick2}
                             type="primary"
                         >
-                            Update the labels
+                            Apply to the scene graph
                         </Button>
                     </div>
                 </>}
@@ -102,14 +109,34 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
                 }
                 .suggestion-text {
                     overflow-y: auto;
-                    height: 100px;
                     display: flex;
                     align-items: center;
+                }
+                .suggestion-text-left {
+                    display: inline-block;
+                    width: 20px;
+                    margin-right: 10px;
+                }
+                .suggestion-text-right {
+                    display: inline-block;
+                    width: calc(100% - 30px);
+                }
+                .suggestion-preview {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 10px 0;
+                }
+                .node {
+                    border: 1px solid #000;
+                    border-radius: 5px;
+                    padding: 0 5px;
+                    margin: 0 10px;
                 }
                 .suggestion-toolbar {
                     display: flex;
                     justify-content: center;
-                    margin-top: 10px;
+                    margin-top: 15px;
                 }
                 .suggestion-button {
                     // background-color: #888;

@@ -281,7 +281,8 @@ const Generate = () => {
         let data, isGenerateNeeded = true;
         if (response.data.res) {
           data = response.data.res;
-          // isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
+          console.log(data, graphSchema)
+          isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
           isGenerateNeeded = false;
         }
         
@@ -403,13 +404,13 @@ const Generate = () => {
       }
       setStepPercentage(66);
 
-        // Generate Meta Data
-        let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
-        let allMetaData = Utils.deepClone(metaData); 
-        allMetaData = [...allMetaData, ...newMetaData];
-        setMetaData(allMetaData);
-        console.log("newMetaData", allMetaData);
-        setStepPercentage(99);
+      // Generate Meta Data
+      let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+      let allMetaData = Utils.deepClone(metaData); 
+      allMetaData = [...allMetaData, ...newMetaData];
+      setMetaData(allMetaData);
+      console.log("newMetaData", allMetaData);
+      setStepPercentage(99);
       
 
       // // update the graph schema with metaData
@@ -502,6 +503,15 @@ const Generate = () => {
     console.log("updatedGraphSchema", _graphSchema);
     setStepPercentage(50);
 
+    // store the new schema
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+
+    // calculate the graph with statistics
+    let _graph = Utils.calculateGraph(metaData, _graphSchema);
+    console.log(_graph)
+    setGraph(_graph);
+
     // use the new schema to relabel the images (get new metadata)
     let newMetaData = await generateMetaData(images, _graphSchema);
     setMetaData(newMetaData);
@@ -517,7 +527,7 @@ const Generate = () => {
     console.log("updatedGraphSchema", _graphSchema);
 
     // calculate the graph with statistics
-    let _graph = Utils.calculateGraph(newMetaData, _graphSchema);
+    _graph = Utils.calculateGraph(newMetaData, _graphSchema);
     console.log(_graph)
     setGraph(_graph);
 

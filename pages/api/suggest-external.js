@@ -68,9 +68,9 @@ async function suggest(graphSchema) {
                         output = _output;
                         break;
                     }
-                    if(typeof output === 'string') {
-                        output = JSON5.parse(output);
-                    }
+                }
+                if(typeof output === 'string') {
+                    output = JSON5.parse(output);
                 }
             }
             // output = JSON5.parse(output);

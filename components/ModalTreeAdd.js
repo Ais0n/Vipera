@@ -9,6 +9,9 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave }) => {
     const handleSave = () => {
         onSave({ nodeName, nodeType, candidateValues });
         onClose();
+        setNodeName('');
+        setNodeType("attribute");
+        setCandidateValues("");
     };
 
     return (

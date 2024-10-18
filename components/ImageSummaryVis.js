@@ -6,9 +6,22 @@ import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
 import { Empty } from 'antd';
 
-const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, hoveredImageIds, colorScale }) => {
+const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, addBookmarkedChart, colorScale }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [legendData, setLegendData] = useState([]);
+    const [currentJitteredData, setCurrentJitteredData] = useState([]);
+    const checkDataValid = (data) => {
+        if (!data || !Array.isArray(data) || data.length === 0) { return false; }
+        const matrix = data.map(row => Object.values(row));
+        let maxLength = 0;
+        for (let i = 0; i < matrix.length; i++) {
+            if (matrix[i].length > maxLength) {
+                maxLength = matrix[i].length;
+            }
+        }
+        return maxLength > 0;
+    }
+
     useEffect(() => {
         if (!data || !Array.isArray(data) || data.length === 0) { return; }
 
@@ -22,6 +35,8 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
                 }
             }
 
+            console.log(data)
+
             for (let i = 0; i < maxLength; i++) {
                 if (typeof (matrix[0][i]) !== 'number') {
                     const uniqueValues = Array.from(new Set(matrix.map(row => row[i])));
@@ -31,6 +46,9 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
                     });
                     matrix.forEach(row => {
                         row[i] = valueMap[row[i]];
+                        // if(uniqueValues.length == 1) {
+                        //     row[i] += Math.random();
+                        // }
                     });
                 }
             }
@@ -92,15 +110,27 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
             flattenedData.push(tmp);
         }
         console.log(flattenedData)
+        if (!checkDataValid(flattenedData)) {
+            d3.select("#scatterplot").append("text")
+                .attr("x", 200)
+                .attr("y", 100)
+                .text("You need to first add an attribute to an object for this visualization.")
+                .style("font-size", "15px")
+                .style("font-weight", "bold");
+            return;
+        }
+        flattenedData = flattenedData.map((r) => { return { ...r } });
         const reducedData = pca(flattenedData);
         // metadata is removed during pca, so we have to restore the information
         for (let i = 0; i < reducedData.length; i++) {
             reducedData[i].data = data[i];
+            delete reducedData[i].random;
         }
-        // console.log(reducedData)
+        console.log(reducedData)
 
         const jitter = (value) => {
-            const jitterAmount = 0.5;
+            if (!value) value = 0;
+            const jitterAmount = 0.1;
             return value + (Math.random() - 0.5) * jitterAmount;
         };
 
@@ -109,12 +139,15 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
             jitter(point[1]),
             point.data
         ]);
+        console.log(jitteredData)
+        setCurrentJitteredData(jitteredData);
 
         const svg = d3.select("#scatterplot");
+        let svgWidth = svg.node().getBoundingClientRect().width;
+        let svgHeight = svg.node().getBoundingClientRect().height;
         const margin = { top: 20, right: 30, bottom: 30, left: 40 };
-        const width = +svg.attr("width") - margin.left - margin.right;
-        const height = +svg.attr("height") - margin.top - margin.bottom;
-
+        const width = svgWidth - margin.left - margin.right;
+        const height = svgHeight - margin.top - margin.bottom;
         const x = d3.scaleLinear()
             .domain(d3.extent(jitteredData, d => d[0])).nice()
             .range([0, width]);
@@ -137,7 +170,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
         //     .attr("class", "y-axis")
         //     .call(d3.axisLeft(y));
 
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        // const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 
         g.selectAll("circle")
@@ -146,7 +179,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
             .attr("cx", d => x(d[0]))
             .attr("cy", d => y(d[1]))
             .attr("r", 5)
-            .attr("fill", d => { return colorScale(d[2].metaData.batch)})
+            .attr("fill", d => { return colorScale(d[2].metaData.batch) })
             .attr("opacity", 0.7)
             // .attr("stroke", d => hoveredImageIds.includes(d[2].metaData.imageId) ? 'black' : 'none')
             // .attr("stroke-width", 2)
@@ -180,7 +213,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
 
         // Set legend data
         const uniqueBatches = Array.from(new Set(data.map(d => d.metaData.batch)));
-        setLegendData(uniqueBatches.map(batch => ({
+        setLegendData(uniqueBatches.map(batch => (colorScale(batch) != 'gray' && {
             batch,
             color: colorScale(batch),
         })));
@@ -194,25 +227,37 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, setSelectedNode, ho
             .attr("stroke-width", 4);
     }, [hoveredImageIds]);
 
+    // reset color when color scale changes
+    useEffect(() => {
+        const svg = d3.select("#scatterplot");
+        svg.selectAll("circle")
+            .attr("fill", d => { return colorScale(d[2].metaData.batch) });
+        // reset legend data
+        const uniqueBatches = Array.from(new Set(data.map(d => d.metaData.batch)));
+        setLegendData(uniqueBatches.map(batch => (colorScale(batch) != 'gray' && {
+            batch,
+            color: colorScale(batch),
+        })));
+    }, [colorScale]);
+
     return (
         <>
             <div id="legend" style={{ display: 'flex', flexDirection: 'row', gap: '20px', justifyContent: 'right', marginRight: '20px' }}>
-                {legendData.map((item, index) => (
+                {legendData.map((item, index) => (item &&
                     <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={{
                             width: '18px',
                             height: '18px',
-                            backgroundcolorScale: item.colorScale,
+                            backgroundColor: item.color,
                             marginRight: '8px',
                             borderRadius: '50%',
                         }} />
                         <span>Prompt {item.batch}</span>
                     </div>
                 ))}
+                <img src='/bookmark.svg' style={{ width: '20px', height: '20px', 'cursor': 'pointer' }} onClick={() => { addBookmarkedChart({ "type": "scatterplot", "data": currentJitteredData }) }}></img>
             </div>
-            {(!data || !Array.isArray(data) || data.length === 0)
-                ? <Empty description={"You need to first add an attribute to an object for this visualization."}/>
-                : <svg id="scatterplot" width="600" height="200"></svg>}
+            <svg id="scatterplot" width="100%" height="200"></svg>
             <Tooltip
                 visible={tooltipData.visible}
                 x={tooltipData.x}

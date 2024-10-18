@@ -69,9 +69,9 @@ async function suggest(prompt, graphSchema) {
                         break;
                     }
                 }
-                if(typeof output === 'string') {
-                    output = JSON5.parse(output);
-                }
+            }
+            if(typeof output === 'string') {
+                output = JSON5.parse(output);
             }
             // output = JSON5.parse(output);
             

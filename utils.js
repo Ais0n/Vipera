@@ -37,7 +37,8 @@ function calculateGraph(metaData, graphSchema, graph) {
                     // currentData.forEach((item) => {
                     //     currentNode.children.push({ name: item, children: [], count: 0 });
                     // });
-                    currentNode.children.push({name: 'values', type: "values", children: [], count: 0});
+                    // currentNode.children.push({name: 'values', type: "attribute", children: [], count: 0});
+                    currentNode.type = "attribute";
                 } else {
                     Object.keys(currentData).forEach((subKey) => {
                         const subNode = { name: subKey, children: [], count: 0, type: "object" };

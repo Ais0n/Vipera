@@ -75,7 +75,7 @@ async function suggestComparison(imageData, schema) {
                     input: {
                         image: imageData,
                         top_p: 1,
-                        prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that is not in the tree and can be added to the children of an existing node in the tree (the two images should be different in terms of the additional node).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...]}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
+                        prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that is NOT already in the tree and can be added to the children of an existing node in the tree (the two images should be different in terms of the additional node).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...]}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
                         max_tokens: 1024,
                         temperature: 0.6
                     }
@@ -101,9 +101,9 @@ async function suggestComparison(imageData, schema) {
                         output = _output;
                         break;
                     }
-                    if(typeof output === 'string') {
-                        output = JSON5.parse(output);
-                    }
+                }
+                if(typeof output === 'string') {
+                    output = JSON5.parse(output);
                 }
             }
             // output = JSON5.parse(output);
