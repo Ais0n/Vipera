@@ -1,6 +1,6 @@
 [
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -11,7 +11,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -22,7 +22,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -33,7 +33,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -44,7 +44,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -55,7 +55,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -66,7 +66,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -77,7 +77,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -88,7 +88,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -99,7 +99,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -110,7 +110,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -121,7 +121,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -132,7 +132,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -143,7 +143,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -154,7 +154,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -165,7 +165,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -176,7 +176,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -187,7 +187,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -198,7 +198,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -209,7 +209,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -220,7 +220,7 @@
         "batch": 1
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -231,7 +231,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -242,7 +242,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -253,7 +253,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -264,7 +264,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -275,7 +275,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -286,7 +286,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -297,7 +297,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -308,7 +308,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -319,7 +319,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -330,7 +330,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -341,7 +341,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -352,7 +352,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -363,7 +363,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -374,7 +374,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -385,7 +385,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -396,7 +396,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -407,7 +407,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {
@@ -418,7 +418,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": true
         },
         "Doctor": {
@@ -429,7 +429,7 @@
         "batch": 2
     },
     {
-        "Background": {
+        "background": {
             "Cinematic": false
         },
         "Doctor": {

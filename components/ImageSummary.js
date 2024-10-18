@@ -44,11 +44,11 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
     };
 
     const _handleSuggestionButtonClick = () => {
-        handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "addValue": "smiling" });
+        handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "addValue": "smiling" });
     }
 
     const _handleSuggestionButtonClick2 = () => {
-        handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+        handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
     }
 
     const dataForPromotion = [

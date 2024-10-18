@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handleSuggestionButtonClick }) => {
     const _handleSuggestionButtonClick2 = () => {
-        // handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+        // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, "external");
     }
 

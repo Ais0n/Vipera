@@ -16,7 +16,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
     ) : "No images available";
 
     const _handleSuggestionButtonClick2 = () => {
-        // handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+        // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, 'external');
     }
 

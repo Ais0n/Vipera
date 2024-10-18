@@ -172,13 +172,13 @@ function processSceneGraph(graph) {
     // };
     // graph = removeLeafNodes(graph, 0);
     // return graph;
-    let {Foreground, Background} = graph;
-    let res = {Foreground: {}, Background: {}};
-    Foreground.forEach(item => {
-        res["Foreground"][item] = {};
+    let {foreground, background} = graph;
+    let res = {foreground: {}, background: {}};
+    foreground.forEach(item => {
+        res["foreground"][item] = {};
     });
-    Background.forEach(item => {
-        res["Background"][item] = {};
+    background.forEach(item => {
+        res["background"][item] = {};
     });
     return res;
 }

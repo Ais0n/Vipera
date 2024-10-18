@@ -196,22 +196,22 @@ const Generate = () => {
 
   const updateGraphSchemaWithPrompt = (graphSchema, prompt) => {
     // // hard code here
-    // if (typeof (graphSchema.Foreground) === 'undefined') {
-    //   graphSchema.Foreground = {
+    // if (typeof (graphSchema.foreground) === 'undefined') {
+    //   graphSchema.foreground = {
     //     'doctor': {
     //       'gender': ["male", "female", "others"]
     //     }
     //   }
     // } else {
-    //   graphSchema.Foreground = {
+    //   graphSchema.foreground = {
     //     'doctor': {
     //       'gender': ["male", "female", "others"],
     //       'smiling?': [true, false]
     //     }
     //   }
     // }
-    // if (typeof (graphSchema.Background) === 'undefined') {
-    //   graphSchema.Background = {
+    // if (typeof (graphSchema.background) === 'undefined') {
+    //   graphSchema.background = {
     //     'cinematic?': [true, false]
     //   }
     // }

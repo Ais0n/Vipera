@@ -1,1 +1,1 @@
-{"Foreground":{"patient":{"age":"older","attire":"sweatshirt and sweatpants","posture":"standing","expression":"serious","purpose":"waiting for appointment"}},"Background":{"office":{"chairs":"several","chair-type":"white","chairs-arrangement":"rows"}}}
+{"foreground":{"patient":{"age":"older","attire":"sweatshirt and sweatpants","posture":"standing","expression":"serious","purpose":"waiting for appointment"}},"background":{"office":{"chairs":"several","chair-type":"white","chairs-arrangement":"rows"}}}

@@ -8,7 +8,7 @@ import axios from 'axios';
 
 const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick }) => {
     const _handleSuggestionButtonClick2 = () => {
-        // handleSuggestionButtonClick({ "path": ["Foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+        // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, 'promote');
     }
 

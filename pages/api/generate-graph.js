@@ -57,10 +57,10 @@ async function generateGraph(imageData) {
                   input: {
                     image: imageData,
                     top_p: 1,
-                    prompt: "What physical objects are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"Foreground\":[\"obj1\", \"obj2\", ...],\"Background\":[\"obj1\", ...]}",
+                    prompt: "What physical objects are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}",
                     max_tokens: 1024,
                     temperature: 0.6
-                    // "Extract descriptive objects from the image, and organize them as a tree. Output the tree as a JSON string. The root node should contain only two children 'Foreground' and 'Background'. Do not include more than 5 objects in the response. Example: {\"Foreground\":{obj1, obj2, ...},\"Background\":{obj1, ...}}"
+                    // "Extract descriptive objects from the image, and organize them as a tree. Output the tree as a JSON string. The root node should contain only two children 'foreground' and 'background'. Do not include more than 5 objects in the response. Example: {\"foreground\":{obj1, obj2, ...},\"background\":{obj1, ...}}"
                   }
                 }
               );
@@ -91,7 +91,7 @@ async function generateGraph(imageData) {
             }
 
             // check the schema
-            if (!output.hasOwnProperty('Foreground') || !output.hasOwnProperty('Background') || !Array.isArray(output.Foreground) || !Array.isArray(output.Background)) {
+            if (!output.hasOwnProperty('foreground') || !output.hasOwnProperty('background') || !Array.isArray(output.foreground) || !Array.isArray(output.background)) {
                 throw new Error("Output does not have the required fields: " + JSON.stringify(output));
             }
             return output;

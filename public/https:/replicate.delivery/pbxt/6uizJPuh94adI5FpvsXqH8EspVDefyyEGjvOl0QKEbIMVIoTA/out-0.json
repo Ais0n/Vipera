@@ -1,1 +1,1 @@
-{"Foreground":{"doctor":{"age":"old","gender":"male","attire":"white jacket"}},"Background":{"office":{"lighting":"bright","size":"large"}},"mirror":{"reflection":"wall"},"medical equipment":{"location":"office"}}
+{"foreground":{"doctor":{"age":"old","gender":"male","attire":"white jacket"}},"background":{"office":{"lighting":"bright","size":"large"}},"mirror":{"reflection":"wall"},"medical equipment":{"location":"office"}}

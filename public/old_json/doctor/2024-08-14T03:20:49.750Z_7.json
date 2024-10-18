@@ -33,7 +33,7 @@
         }
       },
       {
-        "id": "Background",
+        "id": "background",
         "attributes": {
           "color": "blue",
           "pattern": "stripes"
@@ -63,7 +63,7 @@
       },
       {
         "source": "Doctor",
-        "target": "Background",
+        "target": "background",
         "relationship": "posing in front of"
       }
     ]
