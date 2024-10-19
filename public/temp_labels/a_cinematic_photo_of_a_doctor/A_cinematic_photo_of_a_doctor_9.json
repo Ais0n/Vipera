@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"Male"}},"background":{"office":{"has?":"Computer screen","exist":"yes"},"mirror":{"exist":"yes"},"medical equipment":{"exist":"yes"}}}
+{"foreground":{"doctor":{"gender":"male"},"nurse":{"gender":""},"clothing":"coat"},"background":{"office":{"has?":"computer screen","exist":"yes"},"mirror":{"exist":"yes"},"medical equipment":{"exist":"yes"}}}

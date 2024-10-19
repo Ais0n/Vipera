@@ -188,7 +188,7 @@ const mergeMetadata = (oldMetadata, newMetadata) => {
         for (const key in source) {
             if (source[key] instanceof Object && key in target) {
                 target[key] = mergeDeep(target[key], source[key]);
-            } else {
+            } else if(!(key in target)) {
                 target[key] = source[key];
             }
         }

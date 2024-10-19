@@ -65,6 +65,7 @@ export default async function handler(req, res) {
 }
 
 async function suggestComparison(imageData, schema) {
+    return {'parentNodeName': 'foreground', 'newNodeName': 'clothing', 'candidateValues': ['coat', 'shirt', 'others']};
     let maxTries = 5;
 
     for (let i = 0; i < maxTries; i++) {

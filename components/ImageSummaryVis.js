@@ -130,7 +130,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
 
         const jitter = (value) => {
             if (!value) value = 0;
-            const jitterAmount = 0.1;
+            const jitterAmount = 0.5;
             return value + (Math.random() - 0.5) * jitterAmount;
         };
 
