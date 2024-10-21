@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 // deep clone an object
 function deepClone(target) {
     let result;
@@ -212,4 +213,17 @@ const isObjectSubset = (obj1, obj2) => {
     return true;
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset };
+const getColorScale = (index) => {
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    let colors = [];
+    for(let i = 0; i < 10; i++) {
+        colors.push(colorScale(i));
+    }
+    if (index == undefined || index < 0) {
+        return 'gray';
+    } else {
+        return colors[index % 10];
+    }
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale };

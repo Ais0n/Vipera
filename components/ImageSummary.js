@@ -11,6 +11,7 @@ import SuggestPromotion from './SuggestPromotion';
 import SuggestExternal from './SuggestExternal';
 import SuggestComparison from './SuggestionComparison';
 import BookmarkedCharts from './BookmarkedCharts';
+import { getColorScale } from '../utils';
 import * as d3 from 'd3';
 
 const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd }) => {
@@ -18,7 +19,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
 
-    const defaultColorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const defaultColorScale = getColorScale;
 
     const colorScale = (batch) => { 
         if(unselectedPrompts.includes(batch)) {
