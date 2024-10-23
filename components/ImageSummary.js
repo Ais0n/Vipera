@@ -11,15 +11,23 @@ import SuggestPromotion from './SuggestPromotion';
 import SuggestExternal from './SuggestExternal';
 import SuggestComparison from './SuggestionComparison';
 import BookmarkedCharts from './BookmarkedCharts';
-import { getColorScale } from '../utils';
+import * as Utils from '../utils';
 import * as d3 from 'd3';
+import Tooltip from './Tooltip';
+import ModalLabelEdit from './ModalLabelEdit';
 
-const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd }) => {
+const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleLabelEditSave }) => {
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
+    const [highlightTreeNodes, setHighlightTreeNodes] = React.useState([]);
+    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+    const [contextMenuPos, setContextMenuPos] = React.useState(null);
+    const [contextMenuData, setContextMenuData] = React.useState({});
+    const [isLabelModalOpen, setIsLabelModalOpen] = React.useState(false);
+    const [imageTooltip, setImageTooltip] = React.useState({ visible: false, x: 0, y: 0, image: '', data: {} });
 
-    const defaultColorScale = getColorScale;
+    const defaultColorScale = Utils.getColorScale;
 
     const colorScale = (batch) => { 
         if(unselectedPrompts.includes(batch)) {
@@ -50,6 +58,50 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
 
     const _handleSuggestionButtonClick2 = () => {
         handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+    }
+
+    const handleImageHover = (e, d) => {
+        console.log(e, d);
+        let graphMetadata = Utils.getMetaDatafromGraph(graph, d.batch, d.id);
+        console.log(graphMetadata);
+        let imageMetadata = {};
+        for (let key in graphMetadata) {
+            let values = Object.values(graphMetadata[key]);
+            let imageValue = graphMetadata[key][JSON.stringify({ batch: d.batch, imageId: d.id })];
+            imageMetadata[key] = {
+                value: `${key}: ${imageValue}`,
+                percentage: values.filter(val => val === imageValue).length / values.length
+            }
+        }
+        setImageTooltip({
+            visible: true,
+            x: e.pageX + 15,
+            y: e.pageY - 28,
+            image: d.data,
+            data: imageMetadata
+        });
+        setHighlightTreeNodes({batch: d.batch, imageId: d.id});
+    }
+
+    const handleImageHoverLeave = () => {
+        setImageTooltip({
+            visible: false,
+            x: 0,
+            y: 0,
+            image: '',
+            data: {}
+        });
+        setHighlightTreeNodes({});
+    }
+
+    const openContextMenu = (e, index) => {
+        e.preventDefault();
+        setContextMenuPos({ top: e.pageY, left: e.pageX });
+        setContextMenuData({index, data: images[index], metaData: metaData[index]});
+    }
+
+    const closeContextMenu = () => {
+        setContextMenuPos(null);
     }
 
     const dataForPromotion = [
@@ -95,7 +147,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
 
 
     return (
-        <div className="image-summary-container">
+        <div className="image-summary-container" onClick={closeContextMenu}>
             <div className="content">
                 {/* Left Column */}
                 <div className="left-column">
@@ -151,14 +203,20 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             </i>
                         </div>
                         {switchChecked ?
-                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale}/>
+                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} setHighlightTreeNodes={setHighlightTreeNodes}/>
                             :
                             <div className="imageContainer">
                                 {images.map((image, index) => (
-                                    <div key={index} className="imageItem">
-                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
+                                    <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.id) ? ' hoveredImage' : '')} style={{'borderTop': '7px solid ' + colorScale(image.batch)}}>
+                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} onMouseEnter={(e)=>{handleImageHover(e, image)}} onMouseLeave={handleImageHoverLeave} onContextMenu={(e)=>openContextMenu(e,index)}/>
                                     </div>
                                 ))}
+                                <Tooltip {...imageTooltip} />
+                                { contextMenuPos && <div className="context-menu" style={contextMenuPos}>
+                                    <div className="context-menu-item" onClick={() => {setIsLabelModalOpen(true)}}>Edit</div>
+                                </div> }
+                                <ModalLabelEdit isOpen={isLabelModalOpen} onClose={() => setIsLabelModalOpen(false)}
+                                onSave={handleLabelEditSave} nodeData={contextMenuData} />
                             </div>
                         }
                     </div>
@@ -167,7 +225,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             <h2 style={{ "margin": 0 }}>Scene Graph</h2>
                             <i>Generated using LLaVA v1.6 and may contain errors.</i>
                         </div>
-                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale}/>
+                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} highlightTreeNodes={highlightTreeNodes}/>
                     </div>
                 </div>
             </div>
@@ -296,6 +354,23 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     flex-direction: row;
                     justify-content: center;
                     font-size: 12px;
+                }
+                .hoveredImage {
+                    box-shadow:  0 0 0 4px #1677ff;
+                }
+                .context-menu {
+                    position: absolute;
+                    background-color: white;
+                    border: 1px solid #ccc;
+                    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+                    z-index: 10;
+                }
+                .context-menu-item {
+                    padding: 8px 12px;
+                    cursor: pointer;
+                }
+                .context-menu-item:hover {
+                    background-color: #f0f0f0;
                 }
             `}</style>
         </div>

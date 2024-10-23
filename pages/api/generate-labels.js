@@ -74,23 +74,55 @@ async function generateLabel(imageData, schema, candidateValues) {
                     image: imageData,
                     top_p: 1,
                     // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
-                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the value "..." with the generated label (only numbers, strings, or boolean values accepted${candidateValues ? '. You are required to choose from the following values: ' + candidateValues : ', undefined'}). Output the results in JSON. Schema: ${schema}`,
+                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the value "..." with the generated label. All labels must be strings, and should NOT be numbers, booleans, or arrays. (${candidateValues ? 'You are required to choose from the following values: ' + candidateValues : ''}) If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Schema: ${schema}`,
                     max_tokens: 1024,
-                    temperature: 0.6
+                    temperature: 0.8
                   }
                 }
               );
             output = output.join("");
             console.log(output);
-            // find the json part from the output
+            // Find the JSON part from the output
             let start = output.indexOf('{');
-            let end = output.lastIndexOf('}');
-            if(start == -1 || end == -1) {
+            if (start == -1) {
                 output = '{' + output + '}';
+                output = JSON5.parse(output);
             } else {
-                output = output.substring(start, end + 1);
+                // find the last '}'
+                let lastIndex = output.lastIndexOf('}');
+                output = output.substring(start, lastIndex + 1);
+                // count the number of '{' and '}'
+                let countLeft = 0, countRight = 0;
+                for(let j = 0; j < output.length; j++) {
+                    if(output[j] == '{') {
+                        countLeft++;
+                    } else if(output[j] == '}') {
+                        countRight++;
+                    }
+                }
+                if(countLeft > countRight) {
+                    let diff = countLeft - countRight;
+                    for(let j = 0; j < diff; j++) {
+                        output += '}';
+                    }
+                }
+                // parse the output
+                for (let end = output.length - 1; end >= start; end--) {
+                    if (output[end] == '}') {
+                        let _output = output.substring(start, end + 1);
+                        try {
+                            _output = JSON5.parse(_output);
+                        } catch (error) {
+                            continue;
+                        }
+                        output = _output;
+                        break;
+                    }
+                }
+                if(typeof output === 'string') {
+                    output = JSON5.parse(output);
+                }
             }
-            output = JSON5.parse(output);
             modifyOutput(output);
             return output;
         } catch (error) {

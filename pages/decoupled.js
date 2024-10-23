@@ -671,6 +671,17 @@ const Generate = () => {
     }
   }
 
+  const handleLabelEditSave = (newData) => {
+    console.log(newData);
+    let newMetaData = Utils.deepClone(metaData);
+    newMetaData[newData.index] = {...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data};
+    setMetaData(newMetaData);
+    console.log('newMetaData', newMetaData);
+    let _graph = Utils.calculateGraph(newMetaData, graphSchema, Utils.deepClone(graph));
+    console.log('_graph', _graph);
+    setGraph(_graph);
+  }
+
   return (
     <div>
       <Header />
@@ -698,7 +709,7 @@ const Generate = () => {
           </div>
         </div> */}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts}  switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd}/>
+        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts}  switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave}/>
 
       </div>}
 

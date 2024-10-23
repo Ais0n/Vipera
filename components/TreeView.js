@@ -7,7 +7,7 @@ import { Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart }) => {
+const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -167,7 +167,6 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         // stacked bar chart
         nodes.filter(d => d.data.type == 'attribute')
             .each(function (d) {
-
                 console.log(d)
                 if (!d.data.list) {
                     d3.select(this).append('text')
@@ -180,6 +179,19 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     return;
                 }
                 const g = d3.select(this);
+
+                // Highlight Tree Nodes
+                let isHighlighted = false;
+                d.data.imageInfo.forEach(item => {
+                    if(item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {
+                        isHighlighted = true;
+                    }
+                })
+                if(isHighlighted) {
+                    g.attr('stroke-width', 4)
+                } else {
+                    g.attr('stroke-width', 1)
+                }
 
                 // Define dimensions based on the container size
                 const chartWidth = getNodeWidth(d) // Adjust based on your layout
@@ -235,6 +247,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                             .attr('x', xScale(dataItem.dataItem) + xScale.bandwidth() / 2) // Center label
                             .attr('y', chartHeight - yOffset + height / 2 + 5) // Position label above the bar
                             .attr('text-anchor', 'middle')
+                            .attr('pointer-events', 'none')
                             .text(dataItem.count);
                     });
                 }
@@ -248,6 +261,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     .attr('x', d => xScale(d.dataItem) + xScale.bandwidth() / 2) // Center label
                     .attr('y', chartHeight + 37) // Position below the bars
                     .attr('text-anchor', 'middle')
+                    .attr('pointer-events', 'none')
                     .text(d => d.dataItem);
 
                 // Add the "Store" button
@@ -292,6 +306,26 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
     useEffect(() => {
         createTree();
     }, [data]);
+
+    // update the rects when highlightTreeNodes changes
+    useEffect(() => {
+        if (!data || data == {}) { return null; }
+        const g = d3.select(svgRef.current).select('g');
+        g.selectAll('.node').filter(d => d.data.type == 'attribute')
+            .each(function (d) {
+                let isHighlighted = false;
+                d.data.imageInfo.forEach(item => {
+                    if(item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {
+                        isHighlighted = true;
+                    }
+                })
+                if(isHighlighted) {
+                    d3.select(this).attr('stroke-width', 4)
+                } else {
+                    d3.select(this).attr('stroke-width', 1)
+                }
+            });
+    }, [highlightTreeNodes]);
 
     return (
         <>

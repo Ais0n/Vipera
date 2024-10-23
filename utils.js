@@ -53,13 +53,7 @@ function calculateGraph(metaData, graphSchema, graph) {
     };
 
     const traverseGraph = (curNode, dataItem, itemMetadata) => {
-        if (!curNode.imageInfo) {
-            curNode.imageInfo = [];
-        }
-
-        if(!curNode.imageInfo.find(item => item.batch == itemMetadata.batch && item.imageId == itemMetadata.imageId)) {
-            curNode.imageInfo.push(itemMetadata);
-        }
+        curNode.imageInfo.push(itemMetadata);
         curNode.count = curNode.imageInfo.length;
 
         if (typeof (dataItem) === 'object') {
@@ -109,6 +103,20 @@ function calculateGraph(metaData, graphSchema, graph) {
             children: buildGraph(graphSchema),
         } 
     }
+    // recursively make node.imageInfo = []
+    const makeNodeImageInfo = (node) => {
+        node.imageInfo = [];
+        if(node.type == "attribute") {
+            node.list = [];
+        }
+        if(node.children) {
+            node.children.forEach(child => {
+                makeNodeImageInfo(child);
+            });
+        }
+    }
+    makeNodeImageInfo(graph);
+
     metaData.forEach(item => {
         let itemMetadata = item.metaData;
         traverseGraph(graph, item, itemMetadata);
@@ -118,9 +126,9 @@ function calculateGraph(metaData, graphSchema, graph) {
 
 // get metadata for an image from the graph
 function getMetaDatafromGraph(graph, batch, imageId) {
-    let res = {};
+    let res = [];
     let curNode = graph;
-    const traverseGraph = (curNode, res) => {
+    const traverseGraph = (curNode, res, path) => {
         if (curNode.imageInfo) {
             let isFound = false;
             curNode.imageInfo.forEach(item => {
@@ -130,17 +138,59 @@ function getMetaDatafromGraph(graph, batch, imageId) {
             })
             if (isFound) {
                 if (curNode.values) {
-                    res[curNode.name] = curNode.values;
+                    res.push({name: curNode.name, values: curNode.values, path: (path == "") ? curNode.name :  path + "." + curNode.name});
                 } else if (curNode.children) {
                     curNode.children.forEach(child => {
-                        traverseGraph(child, res);
+                        traverseGraph(child, res, (path == "") ? curNode.name : path + "." + curNode.name);
                     })
                 }
             }
         }
     }
-    traverseGraph(curNode, res);
-    return res;
+    traverseGraph(curNode, res, "");
+    const extendName = (path, name) => {
+        let nodes = path.split("."), tmpName = "";
+        for(let i = nodes.length - 1; i >= 0; i--) {
+            tmpName = (tmpName == "") ? nodes[i] : nodes[i] + "." + tmpName;
+            if(tmpName == name) {
+                tmpName = nodes[i-1] + "." + tmpName;
+                break;
+            }
+        }
+        return tmpName;
+    }
+    // make sure each node has a unique name
+    let group = {};
+    res.forEach(item => {
+        if (!group[item.name]) {
+            group[item.name] = [];
+        }
+        group[item.name].push(item);
+    });
+    let queue = Object.keys(group);
+    while(queue.length > 0) {
+        let name = queue.shift();
+        let items = group[name];
+        if(items.length > 1) {
+            items.forEach(item => {
+                item.name = extendName(item.path, item.name);
+                if(!group[item.name]) {
+                    group[item.name] = [];
+                    queue.push(item.name);
+                }
+                group[item.name].push(item);
+            });
+            group[name] = undefined;
+        }
+    }
+    let ans = {};
+    res.forEach(item => {
+        if(!ans[item.name]) {
+            ans[item.name] = {};
+        }
+        ans[item.name] = item.values;
+    });
+    return ans;
 }
 
 function arrayBufferToBase64(buffer) {
@@ -186,6 +236,9 @@ function processSceneGraph(graph) {
 
 const mergeMetadata = (oldMetadata, newMetadata) => {
     const mergeDeep = (target, source) => {
+        if(!(target instanceof Object) || !(source instanceof Object)) {
+            return source;
+        }
         for (const key in source) {
             if (source[key] instanceof Object && key in target) {
                 target[key] = mergeDeep(target[key], source[key]);
@@ -199,10 +252,11 @@ const mergeMetadata = (oldMetadata, newMetadata) => {
 }
 
 const isObjectSubset = (obj1, obj2) => {
-    if (typeof obj1 != 'object' || typeof obj2 != 'object' || obj1 == null || obj2 == null) {
+    if (typeof obj1 != 'object' || typeof obj2 != 'object' || obj1 == null || obj2 == null || obj1['EXIST'] == false || obj1['exist'] == false || obj1['EXIST'] == 'no' || obj1['exist'] == 'no') {
         return true;
     }
     for (let key in obj2) {
+        if(key == 'exist' || key == 'EXIST') continue;
         if (obj1[key] == undefined) {
             return false;
         } else {

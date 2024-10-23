@@ -6,7 +6,7 @@ import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
 import { Empty } from 'antd';
 
-const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, addBookmarkedChart, colorScale }) => {
+const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, addBookmarkedChart, colorScale, setHighlightTreeNodes }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [legendData, setLegendData] = useState([]);
     const [currentJitteredData, setCurrentJitteredData] = useState([]);
@@ -189,6 +189,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
                 if (!_image) {
                     return;
                 }
+                setHighlightTreeNodes(d[2].metaData);
                 let graphMetadata = Utils.getMetaDatafromGraph(graph, d[2].metaData.batch, d[2].metaData.imageId);
                 let imageMetadata = {};
                 for (let key in graphMetadata) {
@@ -208,6 +209,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
                 });
             })
             .on("mouseout", function (d) {
+                setHighlightTreeNodes({});
                 setTooltipData(prev => ({ ...prev, visible: false }));
             });
 
