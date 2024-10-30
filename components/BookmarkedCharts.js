@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-const BookmarkedCharts = ({ bookmarkedCharts, colorScale }) => {
-    const [comments, setComments] = useState({}); // State to hold comments for each chart
-
+const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments }) => {
     useEffect(() => {
         if (bookmarkedCharts.length > 0) {
             renderBookmarkedCharts();
@@ -116,6 +114,7 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale }) => {
                     {bookmarkedCharts.map((data, index) => (
                         <tr key={index}>
                             <td className='bookmarked-cell'>
+                                {data.title && <b>{data.title}</b>}
                                 <div className='charts' id={`chart-${index}`} style={{ width: '100%', height: '220px' }}></div>
                             </td>
                             <td className='bookmarked-cell'>

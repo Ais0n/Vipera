@@ -1,7 +1,7 @@
 // components/ImageSummary.js
 
 import React from 'react';
-import { Image, Switch, Popover, Button } from 'antd';
+import { Image, Switch, Popover, Button, Input } from 'antd';
 import TreeView from './TreeView';
 import DrawerView from './Drawer';
 import ImageSummaryVis from './ImageSummaryVis';
@@ -26,12 +26,16 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
     const [contextMenuData, setContextMenuData] = React.useState({});
     const [isLabelModalOpen, setIsLabelModalOpen] = React.useState(false);
     const [imageTooltip, setImageTooltip] = React.useState({ visible: false, x: 0, y: 0, image: '', data: {} });
+    const [customColors, setCustomColors] = React.useState({});
+    const [comments, setComments] = React.useState({}); // State to hold comments for each chart
 
     const defaultColorScale = Utils.getColorScale;
 
-    const colorScale = (batch) => { 
-        if(unselectedPrompts.includes(batch)) {
+    const colorScale = (batch) => {
+        if (unselectedPrompts.includes(batch)) {
             return 'gray';
+        } else if (customColors[batch]) {
+            return customColors[batch];
         } else {
             return defaultColorScale(batch - 1);
         }
@@ -80,7 +84,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
             image: d.data,
             data: imageMetadata
         });
-        setHighlightTreeNodes({batch: d.batch, imageId: d.id});
+        setHighlightTreeNodes({ batch: d.batch, imageId: d.id });
     }
 
     const handleImageHoverLeave = () => {
@@ -97,7 +101,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
     const openContextMenu = (e, index) => {
         e.preventDefault();
         setContextMenuPos({ top: e.pageY, left: e.pageX });
-        setContextMenuData({index, data: images[index], metaData: metaData[index]});
+        setContextMenuData({ index, data: images[index], metaData: metaData[index] });
     }
 
     const closeContextMenu = () => {
@@ -105,7 +109,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
     }
 
     const dataForPromotion = [
-        { category: 'Doctor',values: { 'male': 0.8, 'female': 0.1, 'others': 0.1 } },
+        { category: 'Doctor', values: { 'male': 0.8, 'female': 0.1, 'others': 0.1 } },
         { category: 'Nurse', values: { 'male': 0.3, 'female': 0.6, 'others': 0.1 } },
         { category: 'Firefighter', values: { 'male': 0.9, 'female': 0.05, 'others': 0.05 } },
         { category: 'Policeman', values: { 'male': 0.9, 'female': 0.05, 'others': 0.05 } },
@@ -145,6 +149,52 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
         setHoveredImageIds(imageIds);
     }
 
+    const changeColor = (color, index) => {
+        console.log(color, index);
+        setCustomColors(prev => {
+            let newColors = { ...prev };
+            newColors[index] = color;
+            return newColors;
+        });
+    }
+
+    const exportToHTML = () => {
+        const chartsHTML = bookmarkedCharts.map((_data, index) => {
+            const title = _data.title ? `<h3>${_data.title}</h3>` : '';
+            const svg = document.getElementById(`chart-${index}`).innerHTML;
+            const comment = comments[index] ? `<p>${comments[index]}</p>` : '';
+            return `<div>${title}<div>${svg}</div>${comment}</div>`;
+        }).join('');
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Exported Charts</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    h3 { margin: 20px 0 10px; }
+                    p { margin: 0 0 20px; }
+                    div { margin-bottom: 40px; }
+                </style>
+            </head>
+            <body>
+                ${chartsHTML}
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'exported_charts.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div className="image-summary-container" onClick={closeContextMenu}>
@@ -154,9 +204,10 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     <h2>Prompts</h2>
                     <div className='prompt-items'>
                         {prompts.map((prompt, index) => (
-                            <div key={index} className='prompt-item' style={{'backgroundColor': colorScale(index + 1)}} onClick={(e) => handlePromptClick(index + 1)}>
-                                <div style={{"fontWeight": "bold", 'display': 'inline'}}>Prompt {index + 1}:</div> 
-                                {prompt}
+                            <div key={index} className='prompt-item'>
+                                <input className='prompt-item-color' type="color" value={colorScale(index + 1)} onChange={(e)=>{changeColor(e.target.value, index+1)}}></input>
+                                <div className='prompt-item-text' style={{ 'backgroundColor': colorScale(index + 1) }}  onClick={(e) => handlePromptClick(index + 1)}>Prompt {index + 1}: {' '}
+                                {prompt}</div>
                             </div>
                         ))}
                     </div>
@@ -203,20 +254,20 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             </i>
                         </div>
                         {switchChecked ?
-                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} setHighlightTreeNodes={setHighlightTreeNodes}/>
+                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} setHighlightTreeNodes={setHighlightTreeNodes} />
                             :
                             <div className="imageContainer">
                                 {images.map((image, index) => (
-                                    <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.id) ? ' hoveredImage' : '')} style={{'borderTop': '7px solid ' + colorScale(image.batch)}}>
-                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} onMouseEnter={(e)=>{handleImageHover(e, image)}} onMouseLeave={handleImageHoverLeave} onContextMenu={(e)=>openContextMenu(e,index)}/>
+                                    <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.id) ? ' hoveredImage' : '')} style={{ 'borderTop': '7px solid ' + colorScale(image.batch) }}>
+                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} onMouseEnter={(e) => { handleImageHover(e, image) }} onMouseLeave={handleImageHoverLeave} onContextMenu={(e) => openContextMenu(e, index)} />
                                     </div>
                                 ))}
                                 <Tooltip {...imageTooltip} />
-                                { contextMenuPos && <div className="context-menu" style={contextMenuPos}>
-                                    <div className="context-menu-item" onClick={() => {setIsLabelModalOpen(true)}}>Edit</div>
-                                </div> }
+                                {contextMenuPos && <div className="context-menu" style={contextMenuPos}>
+                                    <div className="context-menu-item" onClick={() => { setIsLabelModalOpen(true) }}>Edit</div>
+                                </div>}
                                 <ModalLabelEdit isOpen={isLabelModalOpen} onClose={() => setIsLabelModalOpen(false)}
-                                onSave={handleLabelEditSave} nodeData={contextMenuData} />
+                                    onSave={handleLabelEditSave} nodeData={contextMenuData} />
                             </div>
                         }
                     </div>
@@ -225,14 +276,17 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             <h2 style={{ "margin": 0 }}>Scene Graph</h2>
                             <i>Generated using LLaVA v1.6 and may contain errors.</i>
                         </div>
-                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} highlightTreeNodes={highlightTreeNodes}/>
+                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} highlightTreeNodes={highlightTreeNodes} />
                     </div>
                 </div>
             </div>
 
             <div className="notebook">
-                <h2 style={{ "margin": 0 }}>Notes</h2>
-                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} />
+                <div>
+                    <h2 style={{ "margin": 0, 'display': 'inline-block' }}>Notes</h2>
+                    <Button style={{'display': 'inline-block', 'marginLeft': '15px'}} onClick={exportToHTML}> Export </Button>
+                </div>
+                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} />
             </div>
 
             <style jsx>{`
@@ -341,8 +395,33 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                     color: white;
                     border-radius: 5px;
                     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-                    display: flex;
+                    position: relative;
                     cursor: pointer;
+                }
+                .prompt-item-color {
+                    display: inline-block;
+                    width: 18px;
+                    height: 20px;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    appearance: none;
+                    background-color: transparent;
+                    border: none;
+                    cursor: pointer;
+                    margin-right: 5px;
+                }
+                .prompt-item-color::-webkit-color-swatch {
+                    border-radius: 50%;
+                }
+                .prompt-item-color::-moz-color-swatch {
+                    border-radius: 50%;
+                }
+                .prompt-item-text {
+                    font-weight: bold; 
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                    width: calc(100% - 45px);
+                    display: inline-block;
                 }
                 .barchart {
                     width: 100%;

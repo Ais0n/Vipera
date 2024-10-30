@@ -270,15 +270,22 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     // pointer
                     .style('cursor', 'pointer')
                     .on('click', () => {
+                        console.log(d);
                         // Store the raw data when clicked
                         const chartData = d.data.list.map(item => ({
                             dataItem: item.dataItem,
                             count: item.count,
                             batch: item.batch
                         }));
+                        let pathStr = "", curNode = d;
+                        while (curNode && curNode.data.name != 'root') {
+                            pathStr = (pathStr == "") ? curNode.data.name : curNode.data.name + '.' + pathStr;
+                            curNode = curNode.parent;
+                        }
                         addBookmarkedChart({
                             type: "bar",
-                            data: chartData
+                            data: chartData,
+                            title: pathStr
                         });
                     });
 
@@ -313,6 +320,8 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         const g = d3.select(svgRef.current).select('g');
         g.selectAll('.node').filter(d => d.data.type == 'attribute')
             .each(function (d) {
+                console.log(d);
+                if(!d || !d.data || !d.data.imageInfo) return;
                 let isHighlighted = false;
                 d.data.imageInfo.forEach(item => {
                     if(item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {

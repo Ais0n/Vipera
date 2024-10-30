@@ -109,6 +109,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
             flattenData(rest, '', tmp);
             flattenedData.push(tmp);
         }
+        console.log("graphSchema", graphSchema)
         console.log(flattenedData)
         if (!checkDataValid(flattenedData)) {
             d3.select("#scatterplot").append("text")
