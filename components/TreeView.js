@@ -7,7 +7,7 @@ import { Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes }) => {
+const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes, groups }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -27,143 +27,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         handleNodeAdd(contextMenuData, newName);
     }
 
-    const createTree = () => {
-        const width = 880;
-        const height = 600;
-        const barHeight = 60; // Fixed height for the bar chart area
-
-        // Clear previous SVG content
-        d3.select(svgRef.current).selectAll('*').remove();
-
-        const svg = d3.select(svgRef.current)
-            .attr('width', width)
-            .attr('height', height);
-
-        const g = svg.append('g').attr('transform', 'translate(40,20)');
-        const rectHeight = 30;
-        let _data = Utils.deepClone(data);
-        const root = d3.hierarchy(_data);
-        const treeLayout = d3.tree().size([height, width - 20]);
-
-        treeLayout(root);
-
-        const linkGenerator = d3.linkVertical()
-            .x(d => d.y)
-            .y(d => d.x);
-
-        g.selectAll('.link')
-            .data(root.links())
-            .enter().append('path')
-            .attr('class', 'link')
-            .attr('d', d => {
-                let sourceY = d.source.y;
-                let targetY = d.target.y;
-
-                if (d.source.data.type == 'attribute') {
-                    sourceY += 30;
-                }
-                if (d.target.data.type == 'attribute') {
-                    targetY += 30;
-                }
-
-                const sourceX = d.source.x + 15;
-                const targetX = d.target.x + 15;
-
-                return linkGenerator({
-                    source: { x: sourceX, y: sourceY },
-                    target: { x: targetX, y: targetY }
-                });
-            })
-            .attr('fill', 'none')
-            .attr('stroke', '#ccc')
-            .attr('stroke-width', '2');
-
-        const nodes = g.selectAll('.node')
-            .data(root.descendants())
-            .enter().append('g')
-            .attr('class', 'node')
-            .attr('transform', d => {
-                const rectWidth = d.depth == 0 ? 20 : getTextWidth(d.data.name) + 20;
-                let rectHeight = d.data.type == 'attribute' ? 60 : 30;
-                return `translate(${d.y - rectWidth / 2},${d.x - rectHeight / 2})`;
-            });
-
-        function getTextWidth(text) {
-            const textElement = document.createElement('span');
-            textElement.textContent = text;
-            document.body.appendChild(textElement);
-            const width = textElement.offsetWidth;
-            document.body.removeChild(textElement);
-            return width + 30;
-        }
-
-        function getNodeWidth(d) {
-            return d.depth == 0 ? 30 : d.data.type == 'object' ? getTextWidth(d.data.name) : 120;
-        }
-
-        let rects = nodes.append('rect')
-            .attr('width', d => getNodeWidth(d))
-            .attr('height', d => d.data.type == 'attribute' ? 80 : rectHeight)
-            .attr('fill', d => (d.depth === 0 ? 'grey' : '#fff'))
-            .attr('stroke', '#333')
-            .attr('rx', 5)
-            .attr('ry', 5)
-            .attr('transform', `translate(0,${rectHeight / 2})`)
-
-        const contextMenu = d3.select(contextMenuRef.current);
-        rects.filter(d => d.data.type != 'attribute')
-            .on('mouseover', function (event, d) {
-                // console.log(d);
-                handleNodeHover(d.data.imageInfo);
-            })
-            .on('mouseout', function (event, d) {
-                handleNodeHover(null);
-            })
-            .on('contextmenu', function (event, d) {
-                event.preventDefault();
-                // Get the position of the rectangle
-                const rectBounds = this.getBoundingClientRect();
-
-                // Set the position of the context menu near the rectangle
-                contextMenu.style("left", `${rectBounds.left + window.scrollX}px`) // Right side of the rectangle
-                    .style("top", `${rectBounds.bottom + window.scrollY}px`) // Aligned with the top of the rectangle
-                    .style("display", "block");
-
-                setContextMenuData(d);
-            });
-
-        d3.select("body").on("click", function () {
-            contextMenu.style("display", "none");
-        });
-
-        // rects.filter(d => d.data.type == 'attribute')
-        //     .on('mouseover', function (event, d) {
-        //         console.log(d);
-        //         let imageIds = [];
-        //         d.data.list.forEach(dataItem => {
-        //             imageIds.push(...dataItem.imageId);
-        //         });
-        //         handleBarHover({ imageId: imageIds });
-        //     })
-        //     .on('mouseout', function (event, d) {
-        //         handleNodeHover(null);
-        //     });
-
-        nodes.append('text')
-            .attr('dy', '1.2em')
-            .attr('x', d => {
-                const rectWidth = getNodeWidth(d);
-                return rectWidth / 2;
-            })
-            .attr('y', rectHeight / 2)
-            .style('text-anchor', 'middle')
-            .text(d => {
-                if (d.depth === 0) return '';
-                const text = `${d.data.name}`;
-                return text //+ ` (${d.data.count})`;
-            })
-            .attr('pointer-events', 'none')
-
+    const createStackedBarchart = (nodes) => {
         // stacked bar chart
         nodes.filter(d => d.data.type == 'attribute')
             .each(function (d) {
@@ -183,11 +47,11 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 // Highlight Tree Nodes
                 let isHighlighted = false;
                 d.data.imageInfo.forEach(item => {
-                    if(item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {
+                    if (item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {
                         isHighlighted = true;
                     }
                 })
-                if(isHighlighted) {
+                if (isHighlighted) {
                     g.attr('stroke-width', 4)
                 } else {
                     g.attr('stroke-width', 1)
@@ -195,11 +59,12 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
 
                 // Define dimensions based on the container size
                 const chartWidth = getNodeWidth(d) // Adjust based on your layout
-                const chartHeight = 50; // Adjust as needed
+                const chartHeight = getNodeHeight(d) - 30; // Adjust as needed
                 const margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
                 // Create a group for the chart
                 const chartGroup = g.append('g')
+                    .classed('chart-group', true)
                     .attr('transform', `translate(${margin.left},${margin.top})`);
 
                 // Create scales
@@ -212,21 +77,46 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 let maxCount = 0;
                 let dataItemMap = {}, dataItemCount = {};
                 d.data.list.forEach(dataItem => {
-                    dataItemMap[dataItem.dataItem] = dataItemMap[dataItem.dataItem] || [];
-                    dataItemMap[dataItem.dataItem].push(dataItem);
-                    dataItemCount[dataItem.dataItem] = dataItemCount[dataItem.dataItem] || 0;
-                    dataItemCount[dataItem.dataItem] += dataItem.count;
+                    let key = dataItem.dataItem;
+                    dataItemMap[key] = dataItemMap[dataItem.dataItem] || [];
+                    dataItemMap[key].push(dataItem);
+                    dataItemCount[key] = dataItemCount[dataItem.dataItem] || 0;
+                    dataItemCount[key] += dataItem.count;
                 });
+                // for each bucket, merge dataItems whose batch are in the same group
+                // you can calculate group by batch, using Utils.getGroupId = (groups, batch)
+                for(let key in dataItemMap) {
+                    let newMap = {};
+                    dataItemMap[key].forEach(dataItem => {
+                        let groupId = Utils.getGroupId(groups, dataItem.batch - 1);
+                        groupId = (groupId == -1) ? `b${dataItem.batch}` : groupId;
+                        newMap[groupId] = newMap[groupId] || [];
+                        newMap[groupId].push(dataItem);
+                    });
+                    dataItemMap[key] = [];
+                    for(let groupId in newMap) {
+                        let count = 0, newImageIds = [], _batch = 0; // _batch is any batch value within the group, only used to decide the color
+                        newMap[groupId].forEach(dataItem => {
+                            count += dataItem.count;
+                            newImageIds = [...newImageIds, ...dataItem.imageId];
+                            _batch = dataItem.batch;
+                        });
+                        dataItemMap[key].push({ dataItem: key, count: count, batch: _batch, imageId: newImageIds });
+                    }
+                }
+
                 maxCount = Math.max(...Object.values(dataItemCount));
 
                 // Stack the data for the bars
+                console.log(dataItemMap);
                 for (let key in dataItemMap) {
                     let yOffset = -25;
                     dataItemMap[key].forEach(dataItem => {
-                        console.log(dataItem.batch, colorScale, colorScale(dataItem.batch))
                         let height = dataItem.count / maxCount * (chartHeight - 15);
                         yOffset += height;
                         chartGroup.append('rect')
+                            .data([dataItem])
+                            .classed('bar', true)
                             .attr('x', xScale(dataItem.dataItem)) // Use xScale to position bars
                             .attr('y', chartHeight - yOffset) // Position bars
                             .attr('width', xScale.bandwidth())
@@ -296,6 +186,150 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     storeButton.node().appendChild(importedNode);
                 });
             });
+    }
+
+    function getTextWidth(text) {
+        const textElement = document.createElement('span');
+        textElement.textContent = text;
+        document.body.appendChild(textElement);
+        const width = textElement.offsetWidth;
+        document.body.removeChild(textElement);
+        return width + 30;
+    }
+
+    function getNodeWidth(d) {
+        return d.depth == 0 ? 30 : d.data.type == 'object' ? getTextWidth(d.data.name) : 140;
+    }
+
+    function getNodeHeight(d) {
+        return d.data.type == 'attribute' ? 100 : 30;
+    }
+
+    const createTree = () => {
+        const width = 880;
+        const height = 600;
+        const barHeight = 60; // Fixed height for the bar chart area
+
+        // Clear previous SVG content
+        d3.select(svgRef.current).selectAll('*').remove();
+
+        const svg = d3.select(svgRef.current)
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g').attr('transform', 'translate(40,20)');
+        const rectHeight = 30;
+        let _data = Utils.deepClone(data);
+        const root = d3.hierarchy(_data);
+        const treeLayout = d3.tree().size([height, width - 20]);
+
+        treeLayout(root);
+
+        const linkGenerator = d3.linkVertical()
+            .x(d => d.y)
+            .y(d => d.x);
+
+        g.selectAll('.link')
+            .data(root.links())
+            .enter().append('path')
+            .attr('class', 'link')
+            .attr('d', d => {
+                let sourceY = d.source.y;
+                let targetY = d.target.y;
+
+                if (d.source.data.type == 'attribute') {
+                    sourceY += 30;
+                }
+                if (d.target.data.type == 'attribute') {
+                    targetY += 30;
+                }
+
+                const sourceX = d.source.x + 15;
+                const targetX = d.target.x + 15;
+
+                return linkGenerator({
+                    source: { x: sourceX, y: sourceY },
+                    target: { x: targetX, y: targetY }
+                });
+            })
+            .attr('fill', 'none')
+            .attr('stroke', '#ccc')
+            .attr('stroke-width', '2');
+
+        const nodes = g.selectAll('.node')
+            .data(root.descendants())
+            .enter().append('g')
+            .attr('class', 'node')
+            .attr('transform', d => {
+                const rectWidth = d.depth == 0 ? 20 : getTextWidth(d.data.name) + 20;
+                let rectHeight = d.data.type == 'attribute' ? 80 : 30;
+                return `translate(${d.y - rectWidth / 2},${d.x - rectHeight / 2})`;
+            });
+
+        let rects = nodes.append('rect')
+            .attr('width', d => getNodeWidth(d))
+            .attr('height', d => getNodeHeight(d))
+            .attr('fill', d => (d.depth === 0 ? 'grey' : '#fff'))
+            .attr('stroke', '#333')
+            .attr('rx', 5)
+            .attr('ry', 5)
+            .attr('transform', `translate(0,${rectHeight / 2})`)
+
+        const contextMenu = d3.select(contextMenuRef.current);
+        rects.filter(d => d.data.type != 'attribute')
+            .on('mouseover', function (event, d) {
+                // console.log(d);
+                handleNodeHover(d.data.imageInfo);
+            })
+            .on('mouseout', function (event, d) {
+                handleNodeHover(null);
+            })
+            .on('contextmenu', function (event, d) {
+                event.preventDefault();
+                // Get the position of the rectangle
+                const rectBounds = this.getBoundingClientRect();
+
+                // Set the position of the context menu near the rectangle
+                contextMenu.style("left", `${rectBounds.left + window.scrollX}px`) // Right side of the rectangle
+                    .style("top", `${rectBounds.bottom + window.scrollY}px`) // Aligned with the top of the rectangle
+                    .style("display", "block");
+
+                setContextMenuData(d);
+            });
+
+        d3.select("body").on("click", function () {
+            contextMenu.style("display", "none");
+        });
+
+        // rects.filter(d => d.data.type == 'attribute')
+        //     .on('mouseover', function (event, d) {
+        //         console.log(d);
+        //         let imageIds = [];
+        //         d.data.list.forEach(dataItem => {
+        //             imageIds.push(...dataItem.imageId);
+        //         });
+        //         handleBarHover({ imageId: imageIds });
+        //     })
+        //     .on('mouseout', function (event, d) {
+        //         handleNodeHover(null);
+        //     });
+
+        nodes.append('text')
+            .attr('dy', '1.2em')
+            .attr('x', d => {
+                const rectWidth = getNodeWidth(d);
+                return rectWidth / 2;
+            })
+            .attr('y', rectHeight / 2)
+            .style('text-anchor', 'middle')
+            .text(d => {
+                if (d.depth === 0) return '';
+                const text = `${d.data.name}`;
+                return text //+ ` (${d.data.count})`;
+            })
+            .attr('pointer-events', 'none')
+
+        createStackedBarchart(nodes);
 
         const zoom = d3.zoom()
             .scaleExtent([0.25, 2])
@@ -321,20 +355,31 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         g.selectAll('.node').filter(d => d.data.type == 'attribute')
             .each(function (d) {
                 console.log(d);
-                if(!d || !d.data || !d.data.imageInfo) return;
+                if (!d || !d.data || !d.data.imageInfo) return;
                 let isHighlighted = false;
                 d.data.imageInfo.forEach(item => {
-                    if(item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {
+                    if (item.batch == highlightTreeNodes.batch && item.imageId == highlightTreeNodes.imageId) {
                         isHighlighted = true;
                     }
                 })
-                if(isHighlighted) {
+                if (isHighlighted) {
                     d3.select(this).attr('stroke-width', 4)
                 } else {
                     d3.select(this).attr('stroke-width', 1)
                 }
             });
     }, [highlightTreeNodes]);
+
+    // update the stacked bar chart when groups change
+    useEffect(() => {
+        if (!data || data == {}) { return null; }
+        const g = d3.select(svgRef.current).select('g');
+        let nodes = g.selectAll('.node');
+        const chartGroup = d3.select(svgRef.current).selectAll('.chart-group');
+        if (!chartGroup) return;
+        chartGroup.selectAll('*').remove();
+        createStackedBarchart(nodes);
+    }, [groups, colorScale]);
 
     return (
         <>

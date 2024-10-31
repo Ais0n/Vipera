@@ -11,7 +11,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
 
     const content = (index) => (images && index < images.length) ? (
         <div>
-            <Image width={200} src={`data:image/png;base64,${images[index].data}`} alt={`Image ${images[index].id}`} />
+            <Image width={200} src={`data:image/png;base64,${images[index].data}`} alt={`Image ${images[index].imageId}`} />
         </div>
     ) : "No images available";
 

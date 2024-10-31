@@ -9,7 +9,7 @@ const ModalLabelEdit = ({ isOpen, onClose, onSave, nodeData }) => {
             let {batch, metaData, ...initialFormData} = nodeData.metaData;
             setFormData(initialFormData);
         }
-    }, [nodeData]);
+    }, [nodeData, isOpen]);
 
     const handleInputChange = (key, value) => {
         const keys = key.split('.');

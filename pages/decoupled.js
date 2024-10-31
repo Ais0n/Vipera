@@ -37,6 +37,7 @@ const Generate = () => {
   const [imageNum, setImageNum] = useState(10);
   const [imageIdMap, setImageIdMap] = useState({});
   const [switchChecked, setSwitchChecked] = React.useState(false);
+  const [groups, setGroups] = React.useState([]);
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -89,7 +90,7 @@ const Generate = () => {
           try {
             const imageData = await axios.get(image_path, { responseType: 'arraybuffer'});
             const base64Image = Utils.arrayBufferToBase64(imageData.data);
-            return { batch: prompts.length + 1, id: batch[index], data: base64Image, path: image_path };
+            return { batch: prompts.length + 1, imageId: batch[index], data: base64Image, path: image_path };
           } catch (error) {
             console.error(`Error fetching image data for ID: ${batch[index]}`, error);
             throw new Error(`Failed to fetch image data for ID: ${batch[index]}`);
@@ -121,7 +122,7 @@ const Generate = () => {
       const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
       console.log(imageData)
       const base64Image = Utils.arrayBufferToBase64(imageData.data);
-      newImages.push({ batch: prompts.length + 1, id: imageId, data: base64Image, path: genImageUrl });
+      newImages.push({ batch: prompts.length + 1, imageId: imageId, data: base64Image, path: genImageUrl });
     }
     return newImages;
   }
@@ -194,31 +195,6 @@ const Generate = () => {
     return aggregatedGraph;
   }
 
-  const updateGraphSchemaWithPrompt = (graphSchema, prompt) => {
-    // // hard code here
-    // if (typeof (graphSchema.foreground) === 'undefined') {
-    //   graphSchema.foreground = {
-    //     'doctor': {
-    //       'gender': ["male", "female", "others"]
-    //     }
-    //   }
-    // } else {
-    //   graphSchema.foreground = {
-    //     'doctor': {
-    //       'gender': ["male", "female", "others"],
-    //       'smiling?': [true, false]
-    //     }
-    //   }
-    // }
-    // if (typeof (graphSchema.background) === 'undefined') {
-    //   graphSchema.background = {
-    //     'cinematic?': [true, false]
-    //   }
-    // }
-    // return graphSchema;
-    return graphSchema;
-  }
-
   const updateGraphSchemaWithMetaData = (graphSchema, metaData) => {
     let keys = Object.keys(graphSchema);
     for (let key of keys) {
@@ -262,10 +238,10 @@ const Generate = () => {
         _metaData.push(getDataItem(graphSchema, "", metaData[i]));
       }
       for (let i = metaData.length; i < images.length; i++) {
-        let currentDataItem = getDataItem(graphSchema, images[i].id, {});
+        let currentDataItem = getDataItem(graphSchema, images[i].imageId, {});
         currentDataItem.batch = prompts.length + 1;
         currentDataItem.metaData = {
-          imageId: images[i].id,
+          imageId: images[i].imageId,
           batch: prompts.length + 1,
         }
         // currentDataItem.id = i;
@@ -312,7 +288,7 @@ const Generate = () => {
         data = removeRedundantFields(data, graphSchema);
         data.batch = image.batch || prompts.length + 1;
         data.metaData = {
-          imageId: image.id,
+          imageId: image.imageId,
           batch: image.batch || prompts.length + 1
         };
 
@@ -611,7 +587,7 @@ const Generate = () => {
     for(let i = 0; i < pathToRoot.length; i++) {
       curNode = curNode[pathToRoot[i]];
     }
-    curNode[newNodeName] = {};
+    curNode[newNodeName] = candidateValues == '' ? [] : candidateValues.split(',');
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
     // update the graph
@@ -644,12 +620,12 @@ const Generate = () => {
         let newMetaData = Utils.deepClone(metaData);
         images.forEach((image, index) => {
           let item = labeledSchema[index];
-          let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.id);
+          let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.imageId);
           if(oldMetaData == undefined) {
             oldMetaData = {};
           }
           let res = Utils.mergeMetadata(oldMetaData, item);
-          let idx = newMetaData.findIndex(item => item.metaData.imageId == image.id);
+          let idx = newMetaData.findIndex(item => item.metaData.imageId == image.imageId);
           if(idx != -1) {
             newMetaData[idx] = res;
           } else {
@@ -659,7 +635,7 @@ const Generate = () => {
 
         setMetaData(newMetaData);
         console.log("newMetaData", newMetaData);
-
+        // update the graph
         _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
         console.log("newgraph", _graph)
         setGraph(_graph);
@@ -709,7 +685,7 @@ const Generate = () => {
           </div>
         </div> */}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} graphSchema={graphSchema} prompts={prompts}  switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave}/>
+        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts}  switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups}/>
 
       </div>}
 

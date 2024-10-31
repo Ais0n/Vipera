@@ -6,7 +6,7 @@ import * as Utils from '../utils.js';
 import Tooltip from './Tooltip';
 import { Empty } from 'antd';
 
-const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, addBookmarkedChart, colorScale, setHighlightTreeNodes }) => {
+const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, addBookmarkedChart, colorScale, setHighlightTreeNodes, setIsLabelModalOpen, setContextMenuData }) => {
     const [tooltipData, setTooltipData] = useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [legendData, setLegendData] = useState([]);
     const [currentJitteredData, setCurrentJitteredData] = useState([]);
@@ -89,10 +89,17 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
                 if (typeof (curNode) !== 'object') return;
                 let keys = Object.keys(curNode);
                 for (let key of keys) {
-                    if (typeof (schemaNode[key]) == 'object') {
-                        traverse(curNode[key], schemaNode[key]);
+                    if (key == 'exist' || key == 'EXIST') continue;
+                    if (typeof (curNode[key]) == 'object') {
+                        if (typeof (schemaNode[key]) == 'object') {
+                            traverse(curNode[key], schemaNode[key]);
+                        } else {
+                            delete curNode[key];
+                        }
                     } else {
-                        delete curNode[key];
+                        if (!(schemaNode[key] instanceof Array)) {
+                            delete curNode[key];
+                        }
                     }
                 }
             };
@@ -103,7 +110,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
         let flattenedData = [];
         console.log(data)
         for (let item of data) {
-            let { metaData, ...rest } = item;
+            let { metaData, batch, ...rest } = item;
             let tmp = {};
             rest = removeRedundantFields(Utils.deepClone(rest), graphSchema);
             flattenData(rest, '', tmp);
@@ -125,9 +132,17 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
         // metadata is removed during pca, so we have to restore the information
         for (let i = 0; i < reducedData.length; i++) {
             reducedData[i].data = data[i];
-            delete reducedData[i].random;
+            // delete reducedData[i].random;
         }
         console.log(reducedData)
+        // special case: check if all elements are the same
+        let allSame = true;
+        for (let i = 0; i < reducedData.length - 1; i++) {
+            if (reducedData[i][0] !== reducedData[i + 1][0] || reducedData[i][1] !== reducedData[i + 1][1]) {
+                allSame = false;
+                break;
+            }  
+        }
 
         const jitter = (value) => {
             if (!value) value = 0;
@@ -150,11 +165,11 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
         const width = svgWidth - margin.left - margin.right;
         const height = svgHeight - margin.top - margin.bottom;
         const x = d3.scaleLinear()
-            .domain(d3.extent(jitteredData, d => d[0])).nice()
+            .domain(allSame ? [d3.min(jitteredData.map(d => d[0])) * 10, d3.max(jitteredData.map(d => d[0])) * 10] : d3.extent(jitteredData, d => d[0])).nice()
             .range([0, width]);
 
         const y = d3.scaleLinear()
-            .domain(d3.extent(jitteredData, d => d[1])).nice()
+            .domain(allSame ? [d3.min(jitteredData.map(d => d[1])) * 5, d3.max(jitteredData.map(d => d[1])) * 5] : d3.extent(jitteredData, d => d[1])).nice()
             .range([height, 0]);
 
         svg.selectAll("*").remove();
@@ -186,7 +201,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
             // .attr("stroke-width", 2)
             .on("mouseover", function (event, d) {
                 console.log(event, d)
-                let _image = images.find(image => image.id === d[2].metaData.imageId && image.batch === d[2].metaData.batch);
+                let _image = images.find(image => image.imageId === d[2].metaData.imageId && image.batch === d[2].metaData.batch);
                 if (!_image) {
                     return;
                 }
@@ -212,6 +227,16 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
             .on("mouseout", function (d) {
                 setHighlightTreeNodes({});
                 setTooltipData(prev => ({ ...prev, visible: false }));
+            })
+            .on("click", function (event, d) {
+                console.log(event, d)
+                const index = data.findIndex(item => item.metaData.imageId === d[2].metaData.imageId && item.metaData.batch === d[2].metaData.batch);
+                console.log('index', index);
+                if (index === -1) {
+                    return;
+                }
+                setContextMenuData({ index, data: images[index], metaData: d[2] });
+                setIsLabelModalOpen(true);
             });
 
         // Set legend data

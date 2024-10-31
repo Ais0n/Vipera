@@ -15,13 +15,14 @@ import * as Utils from '../utils';
 import * as d3 from 'd3';
 import Tooltip from './Tooltip';
 import ModalLabelEdit from './ModalLabelEdit';
+import PromptManager from './PromptManager';
 
-const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleLabelEditSave }) => {
+const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleLabelEditSave, groups, setGroups }) => {
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
     const [highlightTreeNodes, setHighlightTreeNodes] = React.useState([]);
-    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+    const [isGroupModalOpen, setIsGroupModalOpen] = React.useState(false);
     const [contextMenuPos, setContextMenuPos] = React.useState(null);
     const [contextMenuData, setContextMenuData] = React.useState({});
     const [isLabelModalOpen, setIsLabelModalOpen] = React.useState(false);
@@ -37,9 +38,15 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
         } else if (customColors[batch]) {
             return customColors[batch];
         } else {
-            return defaultColorScale(batch - 1);
+            // Check if the prompt is part of a group
+            const groupIndex = groups.findIndex(group => group.items.includes(batch - 1));
+            if (groupIndex !== -1) {
+                return groups[groupIndex].color;
+            } else {
+                return defaultColorScale(batch - 1);
+            }
         }
-    }
+    };
 
     const handlePromptClick = (promptIndex) => {
         console.log('Prompt clicked:', promptIndex);
@@ -66,12 +73,12 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
 
     const handleImageHover = (e, d) => {
         console.log(e, d);
-        let graphMetadata = Utils.getMetaDatafromGraph(graph, d.batch, d.id);
+        let graphMetadata = Utils.getMetaDatafromGraph(graph, d.batch, d.imageId);
         console.log(graphMetadata);
         let imageMetadata = {};
         for (let key in graphMetadata) {
             let values = Object.values(graphMetadata[key]);
-            let imageValue = graphMetadata[key][JSON.stringify({ batch: d.batch, imageId: d.id })];
+            let imageValue = graphMetadata[key][JSON.stringify({ batch: d.batch, imageId: d.imageId })];
             imageMetadata[key] = {
                 value: `${key}: ${imageValue}`,
                 percentage: values.filter(val => val === imageValue).length / values.length
@@ -84,7 +91,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
             image: d.data,
             data: imageMetadata
         });
-        setHighlightTreeNodes({ batch: d.batch, imageId: d.id });
+        setHighlightTreeNodes({ batch: d.batch, imageId: d.imageId });
     }
 
     const handleImageHoverLeave = () => {
@@ -201,16 +208,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
             <div className="content">
                 {/* Left Column */}
                 <div className="left-column">
-                    <h2>Prompts</h2>
-                    <div className='prompt-items'>
-                        {prompts.map((prompt, index) => (
-                            <div key={index} className='prompt-item'>
-                                <input className='prompt-item-color' type="color" value={colorScale(index + 1)} onChange={(e)=>{changeColor(e.target.value, index+1)}}></input>
-                                <div className='prompt-item-text' style={{ 'backgroundColor': colorScale(index + 1) }}  onClick={(e) => handlePromptClick(index + 1)}>Prompt {index + 1}: {' '}
-                                {prompt}</div>
-                            </div>
-                        ))}
-                    </div>
+                    <PromptManager prompts={prompts} colorScale={colorScale} changeColor={changeColor} handlePromptClick={handlePromptClick} groups={groups} setGroups={setGroups} />
                     <div><i>Features below are powered by LLaVA v1.6 and may contain errors.</i></div>
                     <h2>Audit Analysis Support</h2>
                     <div className="suggestion-items">
@@ -254,29 +252,29 @@ const ImageSummary = ({ images, metaData, prompts, graph, graphSchema, handleSug
                             </i>
                         </div>
                         {switchChecked ?
-                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} setHighlightTreeNodes={setHighlightTreeNodes} />
+                            <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} setHighlightTreeNodes={setHighlightTreeNodes} setContextMenuData={setContextMenuData} setIsLabelModalOpen={setIsLabelModalOpen} />
                             :
                             <div className="imageContainer">
                                 {images.map((image, index) => (
-                                    <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.id) ? ' hoveredImage' : '')} style={{ 'borderTop': '7px solid ' + colorScale(image.batch) }}>
-                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} onMouseEnter={(e) => { handleImageHover(e, image) }} onMouseLeave={handleImageHoverLeave} onContextMenu={(e) => openContextMenu(e, index)} />
+                                    <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.imageId) ? ' hoveredImage' : '')} style={{ 'borderTop': '7px solid ' + colorScale(image.batch) }}>
+                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.imageId}`} onMouseEnter={(e) => { handleImageHover(e, image) }} onMouseLeave={handleImageHoverLeave} onContextMenu={(e) => openContextMenu(e, index)} />
                                     </div>
                                 ))}
                                 <Tooltip {...imageTooltip} />
                                 {contextMenuPos && <div className="context-menu" style={contextMenuPos}>
                                     <div className="context-menu-item" onClick={() => { setIsLabelModalOpen(true) }}>Edit</div>
                                 </div>}
-                                <ModalLabelEdit isOpen={isLabelModalOpen} onClose={() => setIsLabelModalOpen(false)}
-                                    onSave={handleLabelEditSave} nodeData={contextMenuData} />
                             </div>
                         }
+                        <ModalLabelEdit isOpen={isLabelModalOpen} onClose={() => setIsLabelModalOpen(false)}
+                            onSave={handleLabelEditSave} nodeData={contextMenuData} />
                     </div>
                     <div className="label-view">
                         <div style={{ "display": "flex", "alignItems": "center", "justifyContent": "space-between" }}>
                             <h2 style={{ "margin": 0 }}>Scene Graph</h2>
-                            <i>Generated using LLaVA v1.6 and may contain errors.</i>
+                            <i>Generated by LLaVA v1.6 and may contain errors.</i>
                         </div>
-                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} highlightTreeNodes={highlightTreeNodes} />
+                        <TreeView data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} highlightTreeNodes={highlightTreeNodes} groups={groups} />
                     </div>
                 </div>
             </div>

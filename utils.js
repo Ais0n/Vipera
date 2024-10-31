@@ -280,4 +280,13 @@ const getColorScale = (index) => {
     }
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale };
+const getGroupId = (groups, batch) => {
+    for(let i = 0; i < groups.length; i++) {
+        if(groups[i].items.includes(batch)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId };
