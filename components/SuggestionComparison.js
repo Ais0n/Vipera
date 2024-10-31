@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Heatmap from './Heatmap';
 import BarChart from './BarChart';
-import { Image, Switch, Popover, Button } from 'antd';
-import { SyncOutlined } from '@ant-design/icons';
+import { Image, Switch, Popover, Button, Tooltip } from 'antd';
+import { SyncOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick }) => {
@@ -61,7 +61,9 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
                             <SyncOutlined onClick={updateSuggestion} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
                         </div>
                         <div className="suggestion-text-right">
-                            <div><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to the <b>{suggestionMetaData.newNodeName}</b> of the <b>{suggestionMetaData.parentNodeName}</b>.</i></div>
+                            <div><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to the <b>{suggestionMetaData.newNodeName}</b> of the <b>{suggestionMetaData.parentNodeName}</b>.</i> 
+                                {suggestionMetaData.explanations && <Tooltip title={suggestionMetaData.explanations}><InfoCircleOutlined style={{color: 'grey'}}/></Tooltip>}
+                            </div>
                         </div>
                     </div>
                     <div className="suggestion-preview">

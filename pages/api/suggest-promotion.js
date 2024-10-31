@@ -12,8 +12,11 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
         let prompt = req.body.prompt;
         let schema = req.body.schema;
+        let priorPrompts = req.body.priorPrompts;
         try {
             let result = await suggest(prompt, schema);
+            let suggestedPrompt = await suggestPrompt(prompt, result, priorPrompts);
+            result = {...result, newPrompt: suggestedPrompt};
             return res.status(200).json({ res: result });
         } catch (error) {
             console.error(error);
@@ -32,8 +35,75 @@ async function suggest(prompt, graphSchema) {
             const input = {
                 top_k: 0,
                 top_p: 0.9,
-                prompt: `You are a helpful assistant. Given a user's prompt and a tree describing the objects and attributes in the generated images, suggest an additional node that can be added to the same level of one existing node, and provide a revised prompt. Output in the JSON form: {'oldNodeName': '...', 'newNodeName': '...', 'newPrompt': '...'}. For example, if the user mentions tigers and there is a 'tiger' node in the tree, you can suggest to add the node 'zebra' and revise the prompt by replacing the word 'tiger' with 'zebra'. \nUser's prompt: ${prompt}\nSchema: ${JSON5.stringify(graphSchema)}\nYour suggestion (JSON):`,
+                prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in the generated images, suggest an additional node that is NOT in the tree and can be added to the same level of one existing node. Output in the JSON form: {'oldNodeName': '...', 'newNodeName': '...'}. For example, if there is a 'tiger' node in the tree, you can suggest to add the node 'zebra' and revise the prompt by replacing the word 'tiger' with 'zebra'. \nSchema: ${JSON5.stringify(graphSchema)}\nYour suggestion (JSON):`,
                 max_tokens: 512,
+                min_tokens: 0,
+                temperature: 0.4,
+                length_penalty: 1,
+                stop_sequences: "<|end_of_text|>",
+                prompt_template: "{prompt}",
+                presence_penalty: 1.15,
+                log_performance_metrics: false
+              };
+
+            let output = "";
+            for await (const event of replicate.stream("meta/meta-llama-3-70b", { input })) {
+                output += event.toString();
+            };
+
+            console.log("input: ", input.prompt)
+            console.log("output: ", output);
+
+            // check if the output is valid
+            let start = output.indexOf('{');
+            if (start == -1) {
+                output = '{' + output + '}';
+                output = JSON5.parse(output);
+            } else {
+                for (let end = output.length - 1; end >= start; end--) {
+                    if (output[end] == '}') {
+                        let _output = output.substring(start, end + 1);
+                        try {
+                            _output = JSON5.parse(_output);
+                        } catch (error) {
+                            continue;
+                        }
+                        output = _output;
+                        break;
+                    }
+                }
+            }
+            if(typeof output === 'string') {
+                output = JSON5.parse(output);
+            }
+            // output = JSON5.parse(output);
+            
+            // check if the json has the required fields
+            if (!output.hasOwnProperty('oldNodeName') || !output.hasOwnProperty('newNodeName')) {
+                throw new Error("Output does not have the required fields: " + JSON.stringify(output));
+            }
+            console.log("return: ", output);
+            return output;
+        } catch (error) {
+            console.log(error);
+            if (i == maxTries - 1) {
+                throw error;
+            }
+        }
+    }
+
+
+}
+
+async function suggestPrompt(prompt, suggestion, priorPrompts) {
+    let maxTries = 5;
+    for (let i = 0; i < maxTries; i++) {
+        try {
+            const input = {
+                top_k: 0,
+                top_p: 0.9,
+                prompt: `You are a helpful assistant. Given the user's prompt: "${prompt}"\nNow the user wants to explore more about "${suggestion.newNodeName}" apart from "${suggestion.oldNodeName}". Suggest a new prompt for the user, and the new prompt should be different from the users' prior prompts. \nPrior prompts: ${priorPrompts.join(", ")}\nOutput the new prompt in the format: {'newPrompt': '...'}.\nYour suggestion (JSON, don't include explanations):`,
+                max_tokens: 200,
                 min_tokens: 0,
                 temperature: 0.6,
                 length_penalty: 1,
@@ -76,10 +146,10 @@ async function suggest(prompt, graphSchema) {
             // output = JSON5.parse(output);
             
             // check if the json has the required fields
-            if (!output.hasOwnProperty('oldNodeName') || !output.hasOwnProperty('newNodeName') || !output.hasOwnProperty('newPrompt')) {
+            if (!output.hasOwnProperty('newPrompt')) {
                 throw new Error("Output does not have the required fields: " + JSON.stringify(output));
             }
-            return output;
+            return output.newPrompt;
         } catch (error) {
             console.log(error);
             if (i == maxTries - 1) {
@@ -90,7 +160,6 @@ async function suggest(prompt, graphSchema) {
 
 
 }
-
 
 
 

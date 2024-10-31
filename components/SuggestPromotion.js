@@ -6,7 +6,7 @@ import { Image, Switch, Popover, Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
-const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick }) => {
+const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts }) => {
     const _handleSuggestionButtonClick2 = () => {
         // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, 'promote');
@@ -17,7 +17,8 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     const updateSuggestion = () => {
         axios.post('/api/suggest-promotion', {
             prompt: prompt,
-            schema: graphSchema
+            schema: graphSchema,
+            priorPrompts: priorPrompts,
         }).then((response) => {
             // console.log(response)
             setSuggestionMetaData(response.data.res);
@@ -29,7 +30,7 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     // in useeffect, send a http request
     useEffect(() => {
         updateSuggestion();
-    }, []);
+    }, [priorPrompts]);
 
     return (
         <>
@@ -50,7 +51,7 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
                     </div> */}
                     <div className="suggestion-preview">
                         <div> <b> <i> New prompt:</i>  </b> </div>
-                        <HighlightedText raw={prompt} oldWord={suggestionMetaData.oldNodeName} newWord={suggestionMetaData.newNodeName} />
+                        <HighlightedText raw={suggestionMetaData.newPrompt} oldWord={suggestionMetaData.oldNodeName} newWord={suggestionMetaData.newNodeName} />
                     </div>
                     <div className="suggestion-toolbar">
                         <Button

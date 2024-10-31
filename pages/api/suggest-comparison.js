@@ -65,26 +65,40 @@ export default async function handler(req, res) {
 }
 
 async function suggestComparison(imageData, schema) {
-    return {'parentNodeName': 'foreground', 'newNodeName': 'clothing', 'candidateValues': ['coat', 'shirt', 'others']};
+    // return {'parentNodeName': 'foreground', 'newNodeName': 'clothing', 'candidateValues': ['coat', 'shirt', 'others']};
     let maxTries = 5;
 
     for (let i = 0; i < maxTries; i++) {
         try {
+            const input = {
+                image: imageData,
+                top_p: 1,
+                prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that is NOT already in the tree and can be added to the children of an existing node in the tree (the two images should be different in terms of the additional node).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...], 'explanations': "..."}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
+                max_tokens: 1024,
+                temperature: 0.6
+            };
             let output = await replicate.run(
-                "yorickvp/llava-13b:80537f9eead1a5bfa72d5ac6ea6414379be41d4d4f6679fd776e9535d1eb58bb",
-                {
-                    input: {
-                        image: imageData,
-                        top_p: 1,
-                        prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that is NOT already in the tree and can be added to the children of an existing node in the tree (the two images should be different in terms of the additional node).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...]}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
-                        max_tokens: 1024,
-                        temperature: 0.6
-                    }
-                }
+                "yorickvp/llava-v1.6-34b:41ecfbfb261e6c1adf3ad896c9066ca98346996d7c4045c5bc944a79d430f174",
+                { input }
             );
 
+            // const input = {
+            //     image: imageData,
+            //     caption: false,
+            //     question: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that is NOT already in the tree and can be added to the children of an existing node in the tree (the two images should be different in terms of the additional node).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...]}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
+            //     temperature: 0.6,
+            //     use_nucleus_sampling: false
+            // }
+            // let output = await replicate.run(
+            //     "andreasjansson/blip-2:f677695e5e89f8b236e52ecd1d3f01beb44c34606419bcc19345e046d8f786f9",
+            //     {
+            //       input
+            //     }
+            // );
+
             output = output.join("");
-            console.log(output);
+            console.log("input: ", input.prompt)
+            console.log("output: ", output);
             // Find the JSON part from the output
             let start = output.indexOf('{');
             if (start == -1) {

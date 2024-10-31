@@ -238,7 +238,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                     <h2>Prompt Suggestion</h2>
                     <div className="suggestion-items">
                         <div className="suggestion-item">
-                            <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
+                            <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} priorPrompts={prompts} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
                         </div>
                     </div>
                 </div>
