@@ -7,7 +7,7 @@ import { Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes, groups }) => {
+const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -123,7 +123,6 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                             .attr('height', height)
                             .attr('fill', colorScale(dataItem.batch))
                             .on('mouseover', function (event, d) {
-                                console.log(dataItem);
                                 event.stopPropagation();
                                 handleBarHover(dataItem);
                             })
@@ -379,7 +378,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         if (!chartGroup) return;
         chartGroup.selectAll('*').remove();
         createStackedBarchart(nodes);
-    }, [groups, colorScale]);
+    }, [groups, customColors]);
 
     return (
         <>

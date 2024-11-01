@@ -32,22 +32,38 @@ async function suggest(prompt, graphSchema) {
     let maxTries = 5;
     for (let i = 0; i < maxTries; i++) {
         try {
+            // const input = {
+            //     top_k: 0,
+            //     top_p: 0.9,
+            //     prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in the generated images, suggest an additional node that is NOT in the tree and can be added to the same level of one existing node. Output in the JSON form: {'oldNodeName': '...', 'newNodeName': '...'}. For example, if there is a 'tiger' node in the tree, you can suggest to add the node 'zebra' and revise the prompt by replacing the word 'tiger' with 'zebra'. \nSchema: ${JSON5.stringify(graphSchema)}\nYour suggestion (JSON):`,
+            //     max_tokens: 512,
+            //     min_tokens: 0,
+            //     temperature: 0.4,
+            //     length_penalty: 1,
+            //     stop_sequences: "<|end_of_text|>",
+            //     prompt_template: "{prompt}",
+            //     presence_penalty: 1.15,
+            //     log_performance_metrics: false
+            //   };
+
+            // let output = "";
+            // for await (const event of replicate.stream("meta/meta-llama-3-70b", { input })) {
+            //     output += event.toString();
+            // };
+
             const input = {
-                top_k: 0,
                 top_p: 0.9,
                 prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in the generated images, suggest an additional node that is NOT in the tree and can be added to the same level of one existing node. Output in the JSON form: {'oldNodeName': '...', 'newNodeName': '...'}. For example, if there is a 'tiger' node in the tree, you can suggest to add the node 'zebra' and revise the prompt by replacing the word 'tiger' with 'zebra'. \nSchema: ${JSON5.stringify(graphSchema)}\nYour suggestion (JSON):`,
-                max_tokens: 512,
+                max_tokens: 1024,
                 min_tokens: 0,
-                temperature: 0.4,
-                length_penalty: 1,
-                stop_sequences: "<|end_of_text|>",
-                prompt_template: "{prompt}",
-                presence_penalty: 1.15,
-                log_performance_metrics: false
-              };
-
+                temperature: 0.6,
+                system_prompt: "",
+                presence_penalty: 0,
+                frequency_penalty: 0
+            };
+            
             let output = "";
-            for await (const event of replicate.stream("meta/meta-llama-3-70b", { input })) {
+            for await (const event of replicate.stream("meta/meta-llama-3.1-405b-instruct", { input })) {
                 output += event.toString();
             };
 
@@ -99,22 +115,37 @@ async function suggestPrompt(prompt, suggestion, priorPrompts) {
     let maxTries = 5;
     for (let i = 0; i < maxTries; i++) {
         try {
+            // const input = {
+            //     top_k: 0,
+            //     top_p: 0.9,
+            //     prompt: `You are a helpful assistant. Given the user's prompt: "${prompt}"\nNow the user wants to explore more about "${suggestion.newNodeName}" apart from "${suggestion.oldNodeName}". Suggest a new prompt for the user, and the new prompt should be different from the users' prior prompts. \nPrior prompts: ${priorPrompts.join(", ")}\nOutput the new prompt in the format: {'newPrompt': '...'}.\nYour suggestion (JSON only):`,
+            //     max_tokens: 200,
+            //     min_tokens: 0,
+            //     temperature: 0.4,
+            //     length_penalty: 1,
+            //     stop_sequences: "<|end_of_text|>",
+            //     prompt_template: "{prompt}",
+            //     presence_penalty: 1.15,
+            //     log_performance_metrics: false
+            //   };
+
+            // let output = "";
+            // for await (const event of replicate.stream("meta/meta-llama-3-70b", { input })) {
+            //     output += event.toString();
+            // };
             const input = {
-                top_k: 0,
                 top_p: 0.9,
-                prompt: `You are a helpful assistant. Given the user's prompt: "${prompt}"\nNow the user wants to explore more about "${suggestion.newNodeName}" apart from "${suggestion.oldNodeName}". Suggest a new prompt for the user, and the new prompt should be different from the users' prior prompts. \nPrior prompts: ${priorPrompts.join(", ")}\nOutput the new prompt in the format: {'newPrompt': '...'}.\nYour suggestion (JSON, don't include explanations):`,
-                max_tokens: 200,
+                prompt: `You are a helpful assistant. The user has written a prompt "${prompt}"\nNow the user wants to explore about "${suggestion.newNodeName}" apart from "${suggestion.oldNodeName}". Modify the prompt for the user (do as few modifications as possible), and the new prompt should be different from the users' prior prompts.\nPrior prompts: ${priorPrompts.join(", ")}\nOutput the new prompt in the JSON format: {'newPrompt': '...'} without any other comments.`,
+                max_tokens: 1024,
                 min_tokens: 0,
                 temperature: 0.6,
-                length_penalty: 1,
-                stop_sequences: "<|end_of_text|>",
-                prompt_template: "{prompt}",
-                presence_penalty: 1.15,
-                log_performance_metrics: false
-              };
-
+                system_prompt: "",
+                presence_penalty: 0,
+                frequency_penalty: 0
+            };
+            
             let output = "";
-            for await (const event of replicate.stream("meta/meta-llama-3-70b", { input })) {
+            for await (const event of replicate.stream("meta/meta-llama-3.1-405b-instruct", { input })) {
                 output += event.toString();
             };
 

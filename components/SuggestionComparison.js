@@ -44,7 +44,11 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
         }).catch((error) => {
             console.error(error);
         });
+    }
 
+    const handleRefresh = () => {
+        setSuggestionMetaData({});
+        updateSuggestion();
     }
 
     // in useeffect, send a http request
@@ -58,7 +62,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
                 <>
                     <div className="suggestion-text">
                         <div className="suggestion-text-left">
-                            <SyncOutlined onClick={updateSuggestion} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
+                            <SyncOutlined onClick={handleRefresh} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
                         </div>
                         <div className="suggestion-text-right">
                             <div><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to the <b>{suggestionMetaData.newNodeName}</b> of the <b>{suggestionMetaData.parentNodeName}</b>.</i> 

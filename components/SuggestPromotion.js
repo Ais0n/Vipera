@@ -27,6 +27,11 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
         });
     }
 
+    const handleRefresh = () => {
+        setSuggestionMetaData({});
+        updateSuggestion();
+    }
+
     // in useeffect, send a http request
     useEffect(() => {
         updateSuggestion();
@@ -39,7 +44,7 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
 
                     <div className="suggestion-text">
                         <div className="suggestion-text-left">
-                            <SyncOutlined onClick={updateSuggestion} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
+                            <SyncOutlined onClick={handleRefresh} style={{ "display": "inline-block", "margin": "auto 5px", "cursor": "pointer" }} />
                         </div>
                         <div className="suggestion-text-right">
                             <p><i>Want to see the results of <b> {suggestionMetaData.newNodeName} </b> apart from <b>{suggestionMetaData.oldNodeName}</b>?</i></p>
