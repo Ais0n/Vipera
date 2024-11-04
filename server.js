@@ -13,8 +13,8 @@ app.prepare().then(() => {
     const server = express();
 
     // Proxy API requests to server C
-    server.use('/api', createProxyMiddleware({
-        target: 'http://10.8.11.5:5001',
+    server.use('/a1pi', createProxyMiddleware({
+        target: 'http://127.0.0.1:5001',
         changeOrigin: true,
         // secure: false,
         pathRewrite: {

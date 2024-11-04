@@ -31,7 +31,7 @@
         "attributes": {}
       },
       {
-        "id": "Background",
+        "id": "background",
         "attributes": {
           "color": "white",
           "texture": "smooth"
@@ -61,7 +61,7 @@
       },
       {
         "source": "Doctor",
-        "target": "Background",
+        "target": "background",
         "relationship": "in front of"
       }
     ]

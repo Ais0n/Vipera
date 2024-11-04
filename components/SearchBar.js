@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
 
-function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
-  const [inputValue, setInputValue] = useState('');
-  const [showPrompts, setShowPrompts] = useState(true); // show example prompts or not
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum }) {
+  // const [inputValue, setInputValue] = useState('');
+  const [showPrompts, setShowPrompts] = useState(false); // show example prompts or not
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onGenerateClick(inputValue);
+    onGenerateClick(promptStr);
     setShowPrompts(false);
     ensureImagesSelected();
   };
 
   const handleExamplePromptClick = (prompt) => {
-    setInputValue(prompt);
+    setPromptStr(prompt);
   };
 
   return (
@@ -26,7 +26,7 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
           Describe your idea and observe the resulting AI generated images!
         </div>
         <a href="https://stability.ai/news/stablediffusion2-1-release7-dec-2022" className={styles.sdButton}>
-          <span className={styles.sdButtonText}>Stable Diffusion v3-medium</span>
+          <span className={styles.sdButtonText}>Stable Diffusion XL</span>
         </a>
       </div>
       <div className={styles.generateContainer}>
@@ -35,9 +35,19 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected }) {
             type="text"
             className={styles.searchBar}
             placeholder="Write prompt here"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            value={promptStr}
+            onChange={(e) => setPromptStr(e.target.value)}
             disabled={isGenerating}
+          />
+          <input
+            type="number"
+            className={styles.searchNumber}
+            placeholder="Number of images"
+            disabled={isGenerating}
+            value={imageNum}
+            onChange={(e) => {
+              setImageNum(e.target.value);
+            }}
           />
           <button type="submit" className={styles.searchButton} disabled={isGenerating}>
             <span className={styles.searchButtonText}>Generate</span>

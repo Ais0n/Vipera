@@ -12,22 +12,35 @@ import axios from 'axios';
 import { testData } from '../testData.js';
 import SceneGraph from '../components/SceneGraph.js';
 import ProcessingIndicator from '../components/Processing.js';
-import { Image } from 'antd';
+import ImageSummary from '../components/ImageSummary.js';
+import * as Utils from '../utils.js';
+import * as nanoid from 'nanoid';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isDoneGenerating, setIsDoneGenerating] = useState(false);
-  const [isDoneImage, setIsDoneImage] = useState(false);
+  const [isDoneGenerating, setIsDoneGenerating] = useState(true);
+  const [isDoneImage, setIsDoneImage] = useState(true);
   const [isDoneSceneGraph, setIsDoneSceneGraph] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
-  const [promptStr, setPromptStr] = useState('');
-  const [graphs, setGraphs] = useState([]);
+  const [promptStr, setPromptStr] = useState('A cinematic photo of a doctor');
+  const [graph, setGraph] = useState({});
+  const [graphSchema, setGraphSchema] = useState({});
+  const [metaData, setMetaData] = useState([]);
   const [aggregatedGraph, setAggregatedGraph] = useState({});
-  const [useSceneGraph, setUseSceneGraph] = useState(false);
+  const [useSceneGraph, setUseSceneGraph] = useState(true);
   const [badgeContents, setBadgeContents] = useState(undefined);
+  const [prompts, setPrompts] = useState([]);
+  const [stepPercentage, setStepPercentage] = useState(0);
+  const [imageNum, setImageNum] = useState(10);
+  const [imageIdMap, setImageIdMap] = useState({});
+  const [switchChecked, setSwitchChecked] = React.useState(false);
+  const [groups, setGroups] = React.useState([]);
+
+  const isDebug = false;
+  const baseUrl = '/api';
 
   const TRENDING_IMAGES = [
     { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
@@ -39,196 +52,244 @@ const Generate = () => {
     setSelectedCategory('images');
   };
 
-  const handleRefreshClick = () => {
-    handleGenerateClick(promptStr);
-    ensureImagesSelected();
-  };
+  let image_num = imageNum, IMAGE_DIR = '', DATE = '';
 
-  // Helper function to combine two distributions
-  const combineDistributions = (combinedDistribution, newDistribution) => {
-    const totalFaces = combinedDistribution.faceDetectedCount + newDistribution.face_detected_count;
+  async function generateNewImages(imageIds, userInput, newImages) { // newImages: array to store the images after the generation
+    const batchSize = 1; // Number of images to generate in one batch
+    const imageBatches = [];
 
-    // Helper function to combine two distributions
-    const combineCounts = (combDist, newDist, field) => {
-      for (const [key, value] of Object.entries(newDist[field])) {
-        if (combDist[field][key]) {
-          combDist[field][key] = ((combDist[field][key] * combinedDistribution.faceDetectedCount) + (value * newDistribution.face_detected_count)) / totalFaces;
+    // Split the imageIds into batches
+    for (let i = 0; i < imageIds.length; i += batchSize) {
+      imageBatches.push(imageIds.slice(i, i + batchSize));
+    }
+
+    const imagePromises = imageBatches.map(async (batch) => {
+      const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&num_outputs=${batch.length}&image_ids=${batch.join('|')}`;
+
+      let response;
+      const maxTries = 10;
+      let tryCount = 0;
+
+      do {
+        try {
+          response = await axios.get(genImageUrl);
+        } catch (error) {
+          if (tryCount >= maxTries) {
+            console.error(`Error generating images for batch: ${batch}`, error);
+            throw new Error(`Failed to generate images for batch (max tries reached): ${batch}`);
+          }
+        }
+        tryCount++;
+      } while (response?.status !== 200 && tryCount < maxTries);
+
+      if (response?.status === 200) {
+        const imagePaths = response.data.image_path; // Assuming response returns an array of paths
+
+        // Fetch image data for each path in the batch
+        const imageDataPromises = imagePaths.map(async (image_path, index) => {
+          try {
+            const imageData = await axios.get(image_path, { responseType: 'arraybuffer' });
+            const base64Image = Utils.arrayBufferToBase64(imageData.data);
+            return { batch: prompts.length + 1, imageId: batch[index], data: base64Image, path: image_path };
+          } catch (error) {
+            console.error(`Error fetching image data for ID: ${batch[index]}`, error);
+            throw new Error(`Failed to fetch image data for ID: ${batch[index]}`);
+          }
+        });
+
+        return Promise.all(imageDataPromises);
+      } else {
+        console.error(response);
+        throw new Error(`Failed to generate images for batch: ${batch}`);
+      }
+    });
+
+    try {
+      const allImages = await Promise.all(imagePromises);
+      const flattenedImages = allImages.flat(); // Flatten the array of arrays
+      newImages = [...newImages, ...flattenedImages];
+    } catch (error) {
+      console.error(error);
+      setIsGenerating(false);
+      setIsDoneGenerating(true);
+    }
+    return newImages;
+  }
+
+  async function getExistingImages(imageIds, newImages) {
+    for (let imageId of imageIds) {
+      const genImageUrl = `/temp_images${IMAGE_DIR}/${imageId}.png`;
+      const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
+      console.log(imageData)
+      const base64Image = Utils.arrayBufferToBase64(imageData.data);
+      newImages.push({ batch: prompts.length + 1, imageId: imageId, data: base64Image, path: genImageUrl });
+    }
+    return newImages;
+  }
+
+  const generateGraphSchema = async (images) => {
+    let sample_size = 1;
+    // randomly sample images
+    let sampleImages = [];
+    for (let i = 0; i < sample_size; i++) {
+      // sampleImages.push(images[Math.floor(Math.random() * images.length)]);
+      sampleImages.push(images[i]);
+    }
+
+    // check if the scene graph is already generated
+    let checkGraphUrl = `${baseUrl}/check-graph?path=/temp_graphs${IMAGE_DIR}.json`;
+    let response = await axios.get(checkGraphUrl);
+    console.log(response)
+    if (response.data.res) {
+      return Utils.processSceneGraph(response.data.res);
+    }
+
+    // get Scene Graph for each image
+    let sceneGraphs = [];
+    for (let i = 0; i < sampleImages.length; i++) {
+      let image = sampleImages[i];
+      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs' + IMAGE_DIR + '.json'}`;
+      let response = await axios.get(genGraphUrl);
+      console.log(response)
+      let metaGraph = response.data.res;
+      sceneGraphs.push(Utils.processSceneGraph(metaGraph));
+    }
+
+    // aggregate the scene graphs, merge leaf values as a list
+    let aggregatedGraph = {};
+    const aggregateGraphs = (graph, curGraph) => {
+      let keys = Object.keys(curGraph);
+      for (let key of keys) {
+        if (typeof (curGraph[key]) === 'object') {
+          if (typeof (graph[key]) === 'undefined') {
+            graph[key] = {};
+          }
+          aggregateGraphs(graph[key], curGraph[key]);
         } else {
-          combDist[field][key] = (value * newDistribution.face_detected_count) / totalFaces;
+          if (typeof (graph[key]) === 'undefined') {
+            graph[key] = [];
+          }
+          graph[key].push(curGraph[key]);
         }
       }
-      // Ensure the sum is 100%
-      let sum = Object.values(combDist[field]).reduce((acc, val) => acc + val, 0);
-      let diff = 1 - sum;
+    }
+    sceneGraphs.forEach(graph => {
+      aggregateGraphs(aggregatedGraph, graph);
+    });
 
-      // Find the key with the maximum value and adjust it by the difference, to be improved if needed
-      let maxKey = Object.keys(combDist[field]).reduce((a, b) => combDist[field][a] > combDist[field][b] ? a : b);
-      combDist[field][maxKey] += diff;
-    };
+    console.log(aggregatedGraph);
 
-    combineCounts(combinedDistribution, newDistribution, 'age');
-    combineCounts(combinedDistribution, newDistribution, 'gender');
-    combineCounts(combinedDistribution, newDistribution, 'skinTone');
+    // add an option "others" to each leaf node
+    // const addOthers = (graph) => {
+    //   let keys = Object.keys(graph);
+    //   for (let key of keys) {
+    //     if (!(graph[key] instanceof Array)) {
+    //       addOthers(graph[key]);
+    //     } else {
+    //       graph[key].push("others");
+    //     }
+    //   }
+    // }
+    // addOthers(aggregatedGraph);
 
-    combinedDistribution.faceDetectedCount += newDistribution.face_detected_count;
-    combinedDistribution.faceNotDetectedCount += newDistribution.face_not_detected_count;
-  };
+    return aggregatedGraph;
+  }
 
-  // const handleGenerateClick = async (userInput, append = false) => {
-  //   if (isGenerating || userInput.trim() === "") {
-  //     console.debug("Either generation in progress or user input is empty.");
-  //     return;
-  //   }
+  const updateGraphSchemaWithMetaData = (graphSchema, metaData) => {
+    let keys = Object.keys(graphSchema);
+    for (let key of keys) {
+      if (graphSchema[key] instanceof Array) {
+        let ok = true;
+        for (let item of graphSchema[key]) {
+          if (item == metaData[key]) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) {
+          if (typeof (metaData[key]) != 'undefined') {
+            graphSchema[key].push(metaData[key]);
+          }
+        }
+      } else if (typeof (graphSchema[key]) === 'object' && typeof (metaData[key]) !== 'undefined') {
+        updateGraphSchemaWithMetaData(graphSchema[key], metaData[key]);
+      }
+    }
+  }
 
-  //   setIsGenerating(true);
-  //   setIsDoneGenerating(false);
-  //   setIsDoneImage(false); 
-  //   setIsDoneDistribution(false); 
+  const getDataItem = (schema, imageId, dataItem) => {
+    for (let key in schema) {
+      if (typeof (schema[key]) === 'object' && !Array.isArray(schema[key])) {
+        dataItem[key] = getDataItem(schema[key], imageId, dataItem[key] || {});
+      } else {
+        // randomly choose a value from the array
+        if (dataItem && typeof (dataItem[key]) == 'undefined') {
+          dataItem[key] = schema[key][Math.floor(Math.random() * schema[key].length)];
+        }
+      }
+    }
+    return dataItem;
+  }
 
-  //   setError('');
+  const generateMetaData = async (images, graphSchema, candidateValues) => {
+    let _metaData = [];
+    if (isDebug) {
+      for (let i = 0; i < metaData.length; i++) {
+        _metaData.push(getDataItem(graphSchema, "", metaData[i]));
+      }
+      for (let i = metaData.length; i < images.length; i++) {
+        let currentDataItem = getDataItem(graphSchema, images[i].imageId, {});
+        currentDataItem.batch = prompts.length + 1;
+        currentDataItem.metaData = {
+          imageId: images[i].imageId,
+          batch: prompts.length + 1,
+        }
+        // currentDataItem.id = i;
+        _metaData.push(currentDataItem);
+      }
+    } else {
+      console.log("newImages", images);
+      const promises = images.map(async (image, index) => {
+        let labelFilePath = image.path.replace('temp_images', 'temp_labels');
+        labelFilePath = labelFilePath.slice(0, labelFilePath.length - 4) + '.json';
+        let checkLabelURL = `${baseUrl}/check-labels?path=${labelFilePath}`;
+        let response = await axios.get(checkLabelURL);
+        let data, isGenerateNeeded = true;
+        if (response.data.res) {
+          data = response.data.res;
+          isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
+          console.log(data, graphSchema, isGenerateNeeded);
+          // isGenerateNeeded = false;
+        }
 
-  //   // ----- Decoupled Images API Logic ----- //
-  //   //Getting the list of images - would be replaced by the new model later on
-  //   const generate_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/generate"
-  //   const generate_with_id_url = "https://vtsuohpeo0.execute-api.us-east-1.amazonaws.com/Prod/generate_with_ids"
-  //   const ouroboros_api_new_url = "http://18.224.86.65:5001/ouroborosSkin"
-  //   //"http://18.224.86.65:5001/ouroborosp" for parallelized without skintone
-  //   //"http://18.224.86.65:5001/ouroborosnp" for non parallelized without skintone
+        if (isGenerateNeeded) {
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
+          response = await axios.get(getLabelURL);
+          data = response.data.res;
+        }
 
-  //   const generateRequestData = {
-  //     num: 100,
-  //     prompt: "clear natural portrait or photograph of " + userInput,
-  //     width: 512,
-  //     height: 512,
-  //     num_inference_steps: 31,
-  //     guidance_scale: 12,
-  //     scheduler: "DPMSolverMultistep", 
-  //     negative_prompt: "blurry, black and white image, cartoon, text, painting, building",
-  //   };
-  //   let generateData;
-  //   let predictData;
-  //   let generateWithIdsResponse;
-  //   let generateWithIdsData;
-  //   setPromptStr(userInput);
-  //   try {
-  //     const generateResponse = await fetch(generate_url, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json"
-  //       },
-  //       body: JSON.stringify(generateRequestData)
-  //     });
+        console.log("before remove", data, graphSchema);
+        data = Utils.removeRedundantFields(data, graphSchema);
+        console.log("after remove", data);
+        data.batch = image.batch || prompts.length + 1;
+        data.metaData = {
+          imageId: image.imageId,
+          batch: image.batch || prompts.length + 1
+        };
 
-  //     if (!generateResponse.ok) {
-  //       throw new Error(`HTTP generate error! status: ${generateResponse.status}`);
-  //     }
+        return data;
+      });
 
-  //     generateData = await generateResponse.json();
-  //     const predictionIDs = generateData;
-  //     while (true) {
-  //       generateWithIdsResponse = await fetch(generate_with_id_url, {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json"
-  //         },
-  //         body: JSON.stringify({ ids: predictionIDs })
-  //       });
+      const results = await Promise.all(promises);
+      console.log(results)
+      _metaData = results;
+    }
+    return _metaData;
+  }
 
-  //       if (!generateWithIdsResponse.ok) {
-  //         throw new Error(`HTTP generate_with_ids error! status: ${generateWithIdsResponse.status}`);
-  //       }
-  //       generateWithIdsData = await generateWithIdsResponse.json();
-  //       if (generateWithIdsData.status === "Images still not processed, please try again in sometime") {
-  //         console.debug("Images still not processed, waiting...");
-  //         await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds before retrying
-  //       } else {
-  //         break;
-  //       }
-  //     }
-
-  //     predictData = generateWithIdsData;
-  //     //predict data is a list of strings (urls of images)
-  //     console.debug("Generate with IDs API Response:", predictData);
-  //     if (append) {
-  //       setImages(prevImages => [...prevImages, ...predictData]); // Append new images
-  //     } else {
-  //       setImages(predictData); // Replace with new images
-  //     }
-
-  //     setIsDoneGenerating(true);
-  //     //image done generating, display immediately
-  //     setIsDoneImage(true); 
-  //   }
-  //   catch{
-  //     console.error("API Error:", error);
-  //     setError('Failed to generate images. Please try again.');
-  //   }
-
-  //   // generating distribution
-  //   try {
-  //     const batchSize = 12; // Process images in batches of 12
-  //     const batches = [];
-  //     for (let i = 0; i < predictData.length; i += batchSize) {
-  //       batches.push(predictData.slice(i, i + batchSize));
-  //     }
-
-  //     const combinedDistribution = { age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 };
-
-  //     for (const batch of batches) {
-  //       console.log("Batch:", batch);
-  //       // check if the batch is empty
-  //       if (batch.length === 0) {
-  //         continue;
-  //       }
-  //       const oroRequestData = {
-  //         imgs: batch
-  //       };
-  //       console.debug("OuroborosAPI Input:", JSON.stringify(oroRequestData));
-  //       const oroResponse = await fetch(ouroboros_api_new_url, {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json"
-  //         },
-  //         body: JSON.stringify(oroRequestData)
-  //       });
-
-  //       console.log("Oro Response:", oroResponse);
-
-  //       if (!oroResponse.ok) {
-  //         throw new Error(`HTTP oroboros error! status: ${oroResponse.status}`);
-  //       }
-  //       console.debug("success in oro response");
-
-  //       const oroData = await oroResponse.json();
-  //       console.debug("Oro API Response:", oroData); // Print the entire API response
-
-  //       const oroResult = oroData[0];
-
-  //       // Combine distributions
-  //       combineDistributions(combinedDistribution, oroResult);
-  //     }
-
-  //     if (append) {
-  //       setDistribution(prevDistribution => {
-  //         const newDistribution = { ...prevDistribution };
-  //         combineDistributions(newDistribution, combinedDistribution);
-  //         return newDistribution;
-  //       });
-  //     }
-  //     else{
-  //       setDistribution(combinedDistribution);
-  //     }
-  //     setIsDoneDistribution(true); 
-  //   } catch (error) {
-  //     console.error("API Error:", error);
-  //     setError('Failed to generate distribution. Please try again.');
-  //   } finally {
-  //     setIsGenerating(false);
-  //   }
-
-  // };
 
   const handleGenerateClick = async (userInput, append = false) => {
+    console.log(userInput)
     if (isGenerating || userInput.trim() === "") {
       console.debug("Either generation in progress or user input is empty.");
       return;
@@ -238,287 +299,96 @@ const Generate = () => {
     setIsDoneGenerating(false);
     setIsDoneImage(false);
     setIsDoneSceneGraph(false);
+    setStepPercentage(0);
 
     setError('');
-    let keywords = ['doctor', 'picnic', 'nature', 'chef'];
-    let timewords = ["2024-08-14T03:20:49.750Z", "2024-08-14T02:52:09.289Z", '2024-08-14T03:07:24.235Z' , '2024-08-15T21:54:32.075Z'];
-    let num = [20, 20, 18, 20]
-    let image_num = 0;
-    // let IMAGE_DIR = userInput.toLowerCase().includes("doctor") ? 'doctors' : 'picnic';
-    let IMAGE_DIR = '', DATE = '';
-    for(let i = 0; i < keywords.length; i++) {
-      if(userInput.toLowerCase().includes(keywords[i])) {
-        IMAGE_DIR = keywords[i];
-        DATE = timewords[i];
-        image_num = num[i];
-        break;
+
+    // Generate image IDs
+    IMAGE_DIR = '/' + userInput.toLowerCase().replace(/ /g, '_');
+    let imageIds = [];
+    let isImagesExist = false;  // check if there are already images in IMAGE_DIR
+    let checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
+    let response = await axios.get(checkUrl);
+    if (response.data.res) {
+      imageIds = response.data.res.map(item => {
+        return item.substring(0, item.length - 4); // remove the suffix .png
+      });
+      if (imageIdMap[userInput] == undefined) {
+        imageIds = imageIds.slice(0, image_num);
+        let tmp = { ...imageIdMap };
+        tmp[userInput] = image_num;
+        setImageIdMap(tmp);
+      } else {
+        imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num);
+        let tmp = { ...imageIdMap };
+        tmp[userInput] += image_num;
+        setImageIdMap(tmp);
       }
     }
-    if(IMAGE_DIR == '') return;
-    // let DATE = IMAGE_DIR == 'doctors' ? "2024-08-14T03:20:49.750Z" : "2024-08-14T02:52:09.289Z";
-  
-    
-    let imageIds = [];
-    for (let i = 0; i < image_num; i++) {
-      imageIds.push(DATE + '_' + String(i))
+
+    isImagesExist = (imageIds.length == image_num);
+
+    if (!isImagesExist) {
+      imageIds = [];
+      for (let i = 0; i < image_num; i++) {
+        imageIds.push(userInput.replace(/ /g, '_') + '_' + String(i));
+      }
     }
 
     try {
-      const baseUrl = '/temp_images';
+      // Generate images
+      let newImages = [], allImages = Utils.deepClone(images);
 
-      for (let imageId of imageIds) {
-        const getImageUrl = `${baseUrl}/${IMAGE_DIR}/${imageId}.png`;
-
-        const imageData = await axios.get(getImageUrl, { responseType: 'arraybuffer' });
-        function arrayBufferToBase64(buffer) {
-          let binary = '';
-          const bytes = new Uint8Array(buffer);
-          const len = bytes.byteLength;
-          for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-          }
-          return window.btoa(binary);
-        }
-        const base64Image = arrayBufferToBase64(imageData.data);
-        setImages(prevImages => [...prevImages, { id: imageId, data: base64Image }]); // Append new images
-        setIsDoneImage(true);
+      if (isImagesExist) {
+        newImages = await getExistingImages(imageIds, newImages);
+      } else {
+        newImages = await generateNewImages(imageIds, userInput, newImages);
       }
+      console.log(newImages)
+      allImages = [...allImages, ...newImages];
+      setImages(allImages);
 
-      if(!useSceneGraph) {
+      setIsDoneImage(true);
+      setStepPercentage(33);
+      if (!useSceneGraph) {
+        setIsGenerating(false);
         setIsDoneGenerating(true);
         return;
       }
 
-      let sceneGraphResponseData = [];
-      for(let imageId of imageIds) {
-        const getSceneGraphUrl = `/old_json/${IMAGE_DIR}/${imageId}.json`;
-        const sceneGraphResponse = await axios.get(getSceneGraphUrl);
-        sceneGraphResponseData.push(sceneGraphResponse.data);
+      // Generate Scene Graph (Graph Schema)
+      let updatedGraphSchema = Utils.deepClone(graphSchema);
+      if (Object.keys(graphSchema).length == 0) {
+        updatedGraphSchema = await generateGraphSchema(newImages);
+        setGraphSchema(updatedGraphSchema);
+        console.log("updatedGraphSchema", updatedGraphSchema);
       }
+      setStepPercentage(66);
 
-      // const getSceneGraphUrl = `/a2pi/get-scene-graph?image_ids=${imageIds.join(',')}`;
-      // const sceneGraphResponse = await axios.get(getSceneGraphUrl);
-      // let sceneGraphResponseData = sceneGraphResponse.data;
-      // console.log(sceneGraphResponseData);
-
-      // let sceneGraphResponseData = testData;
-
-      // Solve them bugs from LLaVa
-      function validateGraph(graph) {
-        let {nodes, edges} = graph;
-        let nodeIds = {};
-        nodes.forEach(node => {
-          nodeIds[node.id] = 1;
-        })
-        // handle non-existing source/target nodes in edges
-        edges.forEach(edge => {
-          if(!nodeIds[edge.source]) {
-            nodes.push({
-              id: edge.source,
-              attributes: {},
-            })
-            nodeIds[edge.source] = 1;
-          }
-          if(!nodeIds[edge.target]) {
-            nodes.push({
-              id: edge.target,
-              attributes: {}
-            })
-          }
-        })
-        // handle nodes whose attribute values are not numerical/categorical
-        nodes.forEach(node => {
-          if(!node.attributes) return;
-          let keys = Object.keys(node.attributes);
-          keys.forEach(key => {
-            if(typeof(node.attributes[key]) == 'object' ) {
-              node.attributes = {...node.attributes, ...node.attributes[key]};
-              delete node.attributes[key];
-            }
-          })
-        })
-        // handle edges: relationship = type
-        edges.forEach(edge => {
-          if(typeof(edge.relationship) != 'undefined') {
-            edge.type = edge.relationship;
-            delete edge.relationship;
-          }
-        })
-        // handle nodes: name = id
-        nodes.forEach(node => {
-          if(typeof(node.name) != 'undefined') {
-            node.id = node.name;
-            delete node.name;
-          }
-        })
-        return {nodes, edges};
+      // Generate Meta Data
+      let newMetaData, allMetaData = [];
+      if (prompts.length > 0) {
+        newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+        allMetaData = Utils.deepClone(metaData);
+        allMetaData = [...allMetaData, ...newMetaData];
+        setMetaData(allMetaData);
+        console.log("newMetaData", allMetaData);
       }
+      setStepPercentage(99);
 
-      let _graphs = []
-      for (let s of sceneGraphResponseData) {
-        // let raw_str = s.match(/```json([\s\S]*)```/);
-        // if (raw_str == null || (raw_str instanceof Array && raw_str.length == 0)) {
-        //   console.error("Error parsing string ", raw_str)
-        // } else {
-        //   try {
-        //     let obj = JSON.parse(raw_str[1]);
-        //     console.log(obj);
-        //     _graphs.push(validateGraph(obj));
-        //   } catch (err) {
-        //     console.error(err);
-        //   }
-        // }
-        try {
-          // function extractJsonFromResponse(response) {
-          //   const startIndex = Math.min(response.indexOf('{'), response.indexOf('['));
-          //   const endIndex = Math.max(response.lastIndexOf('}'), response.lastIndexOf(']')) + 1;
-          //   const jsonPart = response.slice(startIndex, endIndex);
-          //   return jsonPart;
-          // }
-          // let raw_str = extractJsonFromResponse(s);
-          // if(!raw_str || typeof(raw_str) != 'string' || raw_str.length == 0) {
-          //   throw new Error("Error parsing string " + s);
-          // }
-          // let obj = JSON.parse(raw_str);
-          let obj = s;
-          obj = JSON.parse(JSON.stringify(obj).toLowerCase())
-          // console.log(obj);
-          _graphs.push(validateGraph(obj));
-        } catch (err) {
-          console.error(err);
-        }
-      }
-      setGraphs(_graphs);
 
-      function calculateAggregatedGraph(graphs) {
-        function mergeAttr(attrs, newNode) {
-          let newNodeAttrs = Object.keys(newNode);
-          for (let key of newNodeAttrs) {
-            if (typeof (attrs[key]) == 'undefined') {
-              attrs[key] = {};
-              attrs[key][newNode[key]] = 1;
-            } else if (typeof (attrs[key][newNode[key]]) == 'undefined') {
-              attrs[key][newNode[key]] = 1;
-            } else {
-              attrs[key][newNode[key]] += 1;
-            }
-          }
-          return attrs;
-        }
-        function mergeEdgeType(edges, newEdge) {
-          if (typeof (edges[newEdge]) == 'undefined') {
-            edges[newEdge] = 1;
-          } else {
-            edges[newEdge] += 1;
-          }
-          return edges;
-        }
-        let nodes = [], edges = [];
-        let node_dict = {}, edge_dict = {};
-        for (let graph of graphs) {
-          for (let node of graph.nodes) {
-            if (typeof (node_dict[node.id]) == 'undefined') {
-              node_dict[node.id] = nodes.length;
-              let mergedAttributes = mergeAttr({}, node.attributes)
-              nodes.push({ ...node, size: 1, attributes: mergedAttributes });
-            } else {
-              nodes[node_dict[node.id]].size += 1;
-              nodes[node_dict[node.id]].attributes = mergeAttr(nodes[node_dict[node.id]].attributes, node.attributes);
-            }
-          }
-          for (let edge of graph.edges) {
-            let { source, target, type } = edge;
-            const edge_id = String(source) + '_' + String(target);
-            if (typeof (edge_dict[edge_id]) == 'undefined') {
-              edge_dict[edge_id] = edges.length;
-              let mergedTypes = mergeEdgeType({}, type);
-              edges.push({ ...edge, size: 1, type: mergedTypes })
-            } else {
-              edges[edge_dict[edge_id]].size += 1;
-              edges[edge_dict[edge_id]].type = mergeEdgeType(edges[edge_dict[edge_id]].type, type);
-            }
-          }
-        }
-        console.log(nodes, edges)
-        
-        for (let node of nodes) {
-          node.ntype = "object";
-        }
-        for (let edge of edges) {
-          edge.etype = "relationship";
-        }
-        // separate edges with different 'type' value
-        let _edges = []
-        for(let edge of edges) {
-          if (!edge.type) continue;
-          let types = Object.keys(edge.type);
-          _edges.push({
-            ...edge,
-            type: types.join(',')
-          })
-          // for(let i = 0; i < types.length; i++) {
-            // _edges.push({
-            //   ...edge,
-            //   type: types[i],
-            //   size: edge.type[types[i]]
-            // })
-          // }
-        }
-        edges = _edges;
-        // make each attribute a separate node
-        let _nodes = []
-        for (let node of nodes) {
-          let attributes = node.attributes;
-          let attrNames = Object.keys(attributes);
-          for(let attrName of attrNames) {
-            let _size = 0;
-            for (let k in attributes[attrName]) { 
-              _size += attributes[attrName][k];
-            }
-            // a metric of bias: var(p_i) / avg(p_i)
-            const measureBias = (values) => {
-              if(!values) return 0;
-              let keys = Object.keys(values);
-              if(keys.length <= 1) return 0;
-              let p = [], sum = 0;
-              for(let key in values) {
-                p.push(values[key]);
-                sum += values[key];
-              }
-              let avg_p_i = 1.0 / keys.length;
-              let res = 0.0;
-              for(let _p of p) {
-                let p_i = _p / sum;
-                res += (p_i - avg_p_i) * (p_i-avg_p_i);
-              }
-              return Math.min(1.0, res / avg_p_i);
-            }
-            let _node = {
-              id: String(node.id) + '_' + String(attrName),
-              ntype: "attribute",
-              values: node.size == _size ? attributes[attrName] : {...attributes[attrName], '(unknown)': node.size - _size},
-              size: _size,
-              bias: measureBias(attributes[attrName])
-            };
-            _nodes.push(_node);
-            edges.push({
-              source: node.id,
-              target: _node.id,
-              etype: "attribute",
-              size: 1,
-            })
-          }
-        }
+      // // update the graph schema with metaData
+      // for (let item of newMetaData) {
+      //   updateGraphSchemaWithMetaData(updatedGraphSchema, item);
+      // }
 
-        nodes = [...nodes, ..._nodes];
+      // calculate the graph with statistics
+      let _graph = Utils.calculateGraph(allMetaData, updatedGraphSchema, Utils.deepClone(graph));
+      console.log(_graph)
+      setGraph(_graph);
 
-        return { nodes, edges };
-      }
-
-      let _aggregatedGraph = calculateAggregatedGraph(_graphs);
-      console.log(_aggregatedGraph);
-      setAggregatedGraph(_aggregatedGraph);
-      setIsDoneSceneGraph(true);
+      setPrompts([...prompts, userInput]);
+      setIsGenerating(false);
       setIsDoneGenerating(true);
     } catch (error) {
       console.error('Error generating images:', error);
@@ -526,50 +396,272 @@ const Generate = () => {
     }
   }
 
-  const handleGenerateMoreClick = () => {
-    handleGenerateClick(promptStr, true);
-  };
+  const handlePromote = async (suggestion) => {
+    setPromptStr(suggestion.newPrompt);
+    let updateSchema = (schema, oldNodeName, newNodeName) => {
+      if (typeof (schema) != 'object') return;
+      let keys = Object.keys(schema);
+      for (let key of keys) {
+        if (key == oldNodeName) {
+          schema[newNodeName] = Utils.deepClone(schema[oldNodeName]);
+        } else {
+          if (typeof (schema[key]) == 'object') {
+            updateSchema(schema[key], oldNodeName, newNodeName);
+          }
+        }
+      }
+    }
+    let _graphSchema = Utils.deepClone(graphSchema);
+    updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+    let updateGraph = (graph, suggestion) => {
+      if (!graph || !graph.children) return;
+      for (let child of graph.children) {
+        if (child.name == suggestion.oldNodeName) {
+          let newNode = Utils.deepClone(child);
+          newNode.name = suggestion.newNodeName;
+          const traverseGraph = (curNode) => {
+            if (!curNode || !curNode.children) return;
+            for (let i = 0; i < curNode.children.length; i++) {
+              if (curNode.children[i].type == "attribute") {
+                curNode.children[i] = { name: curNode.children[i].name, type: "attribute", count: 0, children: [] };
+              } else {
+                traverseGraph(curNode[i]);
+              }
+            }
+          }
+          traverseGraph(newNode);
+          graph.children.push(newNode);
+          break;
+        } else {
+          updateGraph(child, suggestion);
+        }
+      }
+    }
+    let _graph = Utils.deepClone(graph);
+    updateGraph(_graph, suggestion);
+    setGraph(_graph);
+    console.log("updatedGraph", _graph);
+  }
 
-  const handleNodeHover = (d) => {
-    console.log(d)
-    if(d.ntype == 'attribute') {
-      let _badgeContents = [];
-      graphs.forEach(graph => {
-        let node_id = d.id.split('_')[0];
-        let attr_id = d.id.split('_')[1];
-        let node = graph.nodes.find(node => node.id == node_id);
-        if(!node) return;
-        _badgeContents.push(typeof(node.attributes[attr_id]) == 'undefined' ? 'unknown' : node.attributes[attr_id]);
-      });
-      console.log(_badgeContents)
-      setBadgeContents(_badgeContents);
+  const handleExternal = async (suggestion) => {
+    setIsGenerating(true);
+    setIsDoneGenerating(false);
+    setStepPercentage(0);
+    // update the schema (but does not store the new value)
+    let updateSchema = (schema, suggestion) => {
+      if (typeof (schema) != 'object') return;
+      let keys = Object.keys(schema);
+      for (let key of keys) {
+        if (key == suggestion.parentNodeName) {
+          schema[key][suggestion.newNodeName] = Utils.deepClone(suggestion.candidateValues);
+        } else if (typeof (schema[key]) == 'object') {
+          updateSchema(schema[key], suggestion);
+        }
+      }
+    }
+    let _graphSchema = Utils.deepClone(graphSchema);
+    updateSchema(_graphSchema, suggestion);
+    // setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+    setStepPercentage(50);
+
+    // store the new schema
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+
+    // update the graph (loading)
+    const updateGraph = (graph, suggestion) => {
+      if (!graph || !graph.children) return;
+      for (let child of graph.children) {
+        if (child.name == suggestion.parentNodeName) {
+          let newNode = { name: suggestion.newNodeName, children: [], count: 0, type: "attribute" };
+          child.children.push(newNode);
+          break;
+        } else {
+          updateGraph(child, suggestion);
+        }
+      }
+    }
+    let _graph = Utils.deepClone(graph);
+    updateGraph(_graph, suggestion);
+    console.log(_graph)
+    setGraph(_graph);
+
+    // use the new schema to relabel the images (get new metadata)
+    let newMetaData = await generateMetaData(images, _graphSchema);
+    setMetaData(newMetaData);
+    setStepPercentage(99);
+
+    // update the schema with the new metadata
+    for (let item of newMetaData) {
+      updateGraphSchemaWithMetaData(_graphSchema, item);
+    }
+
+    // store the new schema
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+
+    // calculate the graph with statistics
+    _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
+    console.log(_graph)
+    setGraph(_graph);
+
+    setIsGenerating(false);
+    setIsDoneGenerating(true);
+  }
+
+  const handleSuggestionButtonClick = (suggestion, type) => {
+    // let oldPrompt = prompts[prompts.length - 1];
+    // let newPrompt = "";
+    // if (suggestion.addValue) {
+    //   newPrompt = oldPrompt + ', ' + suggestion.addValue;
+    // } else if (suggestion.replaceValue) {
+    //   newPrompt = oldPrompt.replace(suggestion.replaceValue, suggestion.newValue);
+    // }
+    // setPromptStr(newPrompt);
+
+    if (type == 'promote') {
+      handlePromote(suggestion);
+    } else if (type == 'external') {
+      handleExternal(suggestion);
     }
   }
 
-  const handleNodeLeave = (d) => {
-    setBadgeContents(undefined);
+  const handleNodeEdit = (dataObj, newNodeName) => {
+    // calculate the path to the root
+    let pathToRoot = [];
+    let curNode = dataObj;
+    while (curNode.data.name != 'root') {
+      pathToRoot.push(curNode.data.name);
+      curNode = curNode.parent;
+    }
+    pathToRoot = pathToRoot.reverse();
+    // update the schema
+    let _graphSchema = Utils.deepClone(graphSchema);
+    curNode = _graphSchema;
+    for (let i = 0; i < pathToRoot.length - 1; i++) {
+      curNode = curNode[pathToRoot[i]];
+    }
+    curNode[newNodeName] = Utils.deepClone(curNode[pathToRoot[pathToRoot.length - 1]]);
+    delete curNode[pathToRoot[pathToRoot.length - 1]];
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+    // update the graph
+    let _graph = Utils.deepClone(graph);
+    curNode = _graph;
+    for (let i = 0; i < pathToRoot.length; i++) {
+      curNode = curNode.children.find(node => node.name === pathToRoot[i]);
+    }
+    curNode.name = newNodeName;
+    setGraph(_graph);
+    console.log("updatedGraph", _graph);
+  }
+
+  const handleNodeAdd = (dataObj, newNode) => {
+    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues } = newNode;
+    // calculate the path to the root
+    let pathToRoot = [];
+    let curNode = dataObj;
+    while (curNode.data.name != 'root') {
+      pathToRoot.push(curNode.data.name);
+      curNode = curNode.parent;
+    }
+    pathToRoot = pathToRoot.reverse();
+    // update the schema
+    let _graphSchema = Utils.deepClone(graphSchema);
+    curNode = _graphSchema;
+    for (let i = 0; i < pathToRoot.length; i++) {
+      curNode = curNode[pathToRoot[i]];
+    }
+    curNode[newNodeName] = candidateValues == '' ? [] : candidateValues.split(',');
+    setGraphSchema(_graphSchema);
+    console.log("updatedGraphSchema", _graphSchema);
+    // update the graph
+    let _graph = Utils.deepClone(graph);
+    curNode = _graph;
+    for (let i = 0; i < pathToRoot.length; i++) {
+      curNode = curNode.children.find(node => node.name === pathToRoot[i]);
+    }
+    curNode.children.push({ name: newNodeName, children: [], count: 0, type: newNodeType });
+    setGraph(_graph);
+    console.log("updatedGraph", _graph);
+
+    if (newNodeType == 'attribute') {
+      // update labels if the new node is an attribute
+      let partialSchema = {}; // The schema for the new node
+      curNode = partialSchema;
+      for (let i = 0; i < pathToRoot.length; i++) {
+        curNode[pathToRoot[i]] = {};
+        curNode = curNode[pathToRoot[i]];
+      }
+      curNode[newNodeName] = "...";
+      console.log("partialSchema", partialSchema);
+      // Generate Meta Data
+      generateMetaData(images, partialSchema, candidateValues).then(labeledSchema => {
+        setIsGenerating(true);
+        setIsDoneGenerating(false);
+        setStepPercentage(50);
+        console.log("labeledSchema", labeledSchema);
+        // update the metadata
+        let newMetaData = Utils.deepClone(metaData);
+        images.forEach((image, index) => {
+          let item = labeledSchema[index];
+          let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.imageId);
+          if (oldMetaData == undefined) {
+            oldMetaData = {};
+          }
+          let res = Utils.mergeMetadata(oldMetaData, item);
+          let idx = newMetaData.findIndex(item => item.metaData.imageId == image.imageId);
+          if (idx != -1) {
+            newMetaData[idx] = res;
+          } else {
+            newMetaData.push(res);
+          }
+        })
+
+        setMetaData(newMetaData);
+        console.log("newMetaData", newMetaData);
+        // update the graph
+        _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
+        console.log("newgraph", _graph)
+        setGraph(_graph);
+
+        setIsGenerating(false);
+        setIsDoneGenerating(true);
+        setSwitchChecked(true);
+      })
+    }
+  }
+
+  const handleLabelEditSave = (newData) => {
+    console.log(newData);
+    let newMetaData = Utils.deepClone(metaData);
+    newMetaData[newData.index] = { ...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data };
+    setMetaData(newMetaData);
+    console.log('newMetaData', newMetaData);
+    let _graph = Utils.calculateGraph(newMetaData, graphSchema, Utils.deepClone(graph));
+    console.log('_graph', _graph);
+    setGraph(_graph);
   }
 
   return (
     <div>
       <Header />
-      <button onClick={setUseSceneGraph}> Use Scene Graph</button>
-      <h1 className={style.mainTitle}>Ouroboros</h1>
-      <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} />
+      {/* <button onClick={setUseSceneGraph}> Use Scene Graph</button> */}
+      {/* <h1 className={style.mainTitle}>Ouroboros</h1> */}
+      {/* <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} /> */}
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} />
+      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} />
 
-      
+
       {error && <p>{error}</p>}
-      {isGenerating && <div className={style.analyzeView}>
-        {useSceneGraph &&
-        <div className={style.sceneGraph}>
-          {!isDoneSceneGraph && <ProcessingIndicator />}
-          <SceneGraph data={aggregatedGraph} handleNodeHover={handleNodeHover} handleNodeLeave={handleNodeLeave}></SceneGraph>
-        </div>}
-        <div className={style.imageView}>
+      {!isDoneGenerating && <ProcessingIndicator stepPercentage={stepPercentage} />}
+      {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
+        {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
           <div className={style.imageContainer}>
             {images.map((image, index) => (
@@ -579,7 +671,10 @@ const Generate = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
+        <h1>Analyze</h1>
+        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} />
+
       </div>}
 
 
@@ -601,9 +696,36 @@ const Generate = () => {
           Helvetica Neue,
           sans-serif;
       }
-      * {
-        box-sizing: border-box;
+      /* total width */
+      *::-webkit-scrollbar {
+          background-color:#fff;
+          width:10px;
+          height: 10px;
       }
+
+      /* background of the scrollbar except button or resizer */
+      *::-webkit-scrollbar-track {
+          background-color: #eee;
+          border-radius: 16px;
+      }
+      *::-webkit-scrollbar-track:hover {
+          background-color:#f4f4f4
+          border-radius: 16px;
+      }
+
+      /* scrollbar itself */
+      *::-webkit-scrollbar-thumb {
+          background-color:#babac0;
+          border-radius:16px;
+          border:5px solid #fff
+      }
+      *::-webkit-scrollbar-thumb:hover {
+          background-color:#a0a0a5;
+          border:4px solid #f4f4f4
+      }
+
+      /* set button(top and bottom of the scrollbar) */
+      *::-webkit-scrollbar-button {display:none}
     `}</style>
     </div>
   );
