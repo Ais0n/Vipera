@@ -57,7 +57,7 @@ async function generateGraph(imageData) {
                   input: {
                     image: imageData,
                     top_p: 1,
-                    prompt: "What physical objects are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}",
+                    prompt: "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}",
                     max_tokens: 1024,
                     temperature: 0.6
                     // "Extract descriptive objects from the image, and organize them as a tree. Output the tree as a JSON string. The root node should contain only two children 'foreground' and 'background'. Do not include more than 5 objects in the response. Example: {\"foreground\":{obj1, obj2, ...},\"background\":{obj1, ...}}"

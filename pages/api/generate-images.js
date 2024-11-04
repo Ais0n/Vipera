@@ -19,15 +19,17 @@ export default async function handler(req, res) {
 
         try {
             const imagePath = await generateImage(prompt, num_outputs);
+            let newPaths = [];
             // read the images from the paths and save them to output_dir
             let promises = image_ids.map(async (image_id, index) => {
                 let response = await axios.get(imagePath[index], { responseType: 'arraybuffer' });
                 let imageBuffer = Buffer.from(response.data);
                 let image_path = path.join(output_dir, `${image_id}.png`);
+                newPaths.push('/temp_images/' + prompt.replace(/ /g, '_') + `/${image_id}.png`);
                 fs.writeFileSync(image_path, imageBuffer);
             });
-            Promise.all(promises);
-            return res.status(200).json({ image_path: imagePath});
+            await Promise.all(promises);
+            return res.status(200).json({ image_path: newPaths });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Image generation failed' });

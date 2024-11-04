@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import * as Utils from '../utils';
 
 const Tooltip = ({ visible, x, y, image, data }) => {
     const svgRef = useRef();

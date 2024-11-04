@@ -26,7 +26,7 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, prompt
           Describe your idea and observe the resulting AI generated images!
         </div>
         <a href="https://stability.ai/news/stablediffusion2-1-release7-dec-2022" className={styles.sdButton}>
-          <span className={styles.sdButtonText}>Stable Diffusion v3-medium</span>
+          <span className={styles.sdButtonText}>Stable Diffusion XL</span>
         </a>
       </div>
       <div className={styles.generateContainer}>

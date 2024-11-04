@@ -83,36 +83,14 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
             }
         };
 
-        const removeRedundantFields = (data, schema) => {
-            const result = Utils.deepClone(data);
-            const traverse = (curNode, schemaNode) => {
-                if (typeof (curNode) !== 'object') return;
-                let keys = Object.keys(curNode);
-                for (let key of keys) {
-                    if (key == 'exist' || key == 'EXIST') continue;
-                    if (typeof (curNode[key]) == 'object') {
-                        if (typeof (schemaNode[key]) == 'object') {
-                            traverse(curNode[key], schemaNode[key]);
-                        } else {
-                            delete curNode[key];
-                        }
-                    } else {
-                        if (!(schemaNode[key] instanceof Array)) {
-                            delete curNode[key];
-                        }
-                    }
-                }
-            };
-            traverse(result, schema);
-            return result;
-        }
-
         let flattenedData = [];
         console.log(data)
         for (let item of data) {
             let { metaData, batch, ...rest } = item;
             let tmp = {};
-            rest = removeRedundantFields(Utils.deepClone(rest), graphSchema);
+            // console.log("before pca remove:", rest, graphSchema)
+            rest = Utils.removeRedundantFields(Utils.deepClone(rest), graphSchema);
+            // console.log("after pca remove:", rest)
             flattenData(rest, '', tmp);
             flattenedData.push(tmp);
         }
@@ -144,9 +122,10 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
             }  
         }
 
+        const jitterAmount = Math.max(0.5, 0.3 * (d3.max(reducedData.map(d=>d[0])) - d3.min(reducedData.map(d => d[0]))));
+
         const jitter = (value) => {
             if (!value) value = 0;
-            const jitterAmount = 0.5;
             return value + (Math.random() - 0.5) * jitterAmount;
         };
 
@@ -211,6 +190,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
                 for (let key in graphMetadata) {
                     let values = Object.values(graphMetadata[key]);
                     let imageValue = graphMetadata[key][JSON.stringify({ batch: d[2].metaData.batch, imageId: d[2].metaData.imageId })];
+                    if(!imageValue || imageValue == "") {continue;}
                     imageMetadata[key] = {
                         value: `${key}: ${imageValue}`,
                         percentage: values.filter(val => val === imageValue).length / values.length

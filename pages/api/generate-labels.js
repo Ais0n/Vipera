@@ -43,6 +43,7 @@ export default async function handler(req, res) {
                         fs.mkdirSync(path.dirname(file_path), { recursive: true });
                     }
                     let contents = Utils.mergeMetadata(data, result);
+                    contents = Utils.repairDataWithSchema(contents, JSON.parse(schema));
                     fs.writeFileSync(file_path, JSON.stringify(contents));
                     resolve();
                 });
@@ -68,13 +69,13 @@ async function generateLabel(imageData, schema, candidateValues) {
     for(let i = 0; i < maxTries; i++) {
         try {
             let output = await replicate.run(
-                "yorickvp/llava-13b:80537f9eead1a5bfa72d5ac6ea6414379be41d4d4f6679fd776e9535d1eb58bb",
+                "yorickvp/llava-v1.6-34b:41ecfbfb261e6c1adf3ad896c9066ca98346996d7c4045c5bc944a79d430f174",
                 {
                   input: {
                     image: imageData,
                     top_p: 1,
                     // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
-                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the value "..." with the generated label. All labels must be strings, and should NOT be numbers, booleans, or arrays. (${candidateValues ? 'You are required to choose from the following values: ' + candidateValues : ''}) If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Schema: ${schema}`,
+                    prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the placeholder value '...' with the generated label. All labels must be strings, and should NOT be numbers, booleans, or arrays. (${candidateValues ? 'You are required to choose from the following values: ' + candidateValues : ''}) If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Your output should *NOT* include the placeholder '...'. Schema: ${schema}`,
                     max_tokens: 1024,
                     temperature: 0.8
                   }

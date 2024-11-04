@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Input, Button } from 'antd';
+import * as Utils from '../utils';
 
-const ModalLabelEdit = ({ isOpen, onClose, onSave, nodeData }) => {
+const ModalLabelEdit = ({ isOpen, onClose, onSave, nodeData, graphSchema }) => {
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
         if (nodeData && nodeData.metaData) {
             let {batch, metaData, ...initialFormData} = nodeData.metaData;
+            initialFormData = Utils.removeRedundantFields(initialFormData, graphSchema);
             setFormData(initialFormData);
         }
     }, [nodeData, isOpen]);

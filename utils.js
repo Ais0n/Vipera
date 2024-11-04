@@ -66,7 +66,7 @@ function calculateGraph(metaData, graphSchema, graph) {
                 }
             }
         } else if (typeof (dataItem) != 'undefined' && dataItem != "") {
-            if(curNode.type != 'attribute') {
+            if (curNode.type != 'attribute') {
                 return;
             }
             if (!curNode.values) {
@@ -79,7 +79,7 @@ function calculateGraph(metaData, graphSchema, graph) {
             let ok = false;
             curNode.list.forEach(item => {
                 if (item.batch == itemMetadata.batch && item.dataItem == dataItem) {
-                    if(!item.imageId.includes(itemMetadata.imageId)) {
+                    if (!item.imageId.includes(itemMetadata.imageId)) {
                         item.count += 1;
                         item.imageId.push(itemMetadata.imageId);
                     }
@@ -97,19 +97,19 @@ function calculateGraph(metaData, graphSchema, graph) {
         }
     }
 
-    if(!graph || !graph.children) {
-        graph = { 
+    if (!graph || !graph.children) {
+        graph = {
             name: 'root',
             children: buildGraph(graphSchema),
-        } 
+        }
     }
     // recursively make node.imageInfo = []
     const makeNodeImageInfo = (node) => {
         node.imageInfo = [];
-        if(node.type == "attribute") {
+        if (node.type == "attribute") {
             node.list = [];
         }
-        if(node.children) {
+        if (node.children) {
             node.children.forEach(child => {
                 makeNodeImageInfo(child);
             });
@@ -138,7 +138,7 @@ function getMetaDatafromGraph(graph, batch, imageId) {
             })
             if (isFound) {
                 if (curNode.values) {
-                    res.push({name: curNode.name, values: curNode.values, path: (path == "") ? curNode.name :  path + "." + curNode.name});
+                    res.push({ name: curNode.name, values: curNode.values, path: (path == "") ? curNode.name : path + "." + curNode.name });
                 } else if (curNode.children) {
                     curNode.children.forEach(child => {
                         traverseGraph(child, res, (path == "") ? curNode.name : path + "." + curNode.name);
@@ -150,10 +150,10 @@ function getMetaDatafromGraph(graph, batch, imageId) {
     traverseGraph(curNode, res, "");
     const extendName = (path, name) => {
         let nodes = path.split("."), tmpName = "";
-        for(let i = nodes.length - 1; i >= 0; i--) {
+        for (let i = nodes.length - 1; i >= 0; i--) {
             tmpName = (tmpName == "") ? nodes[i] : nodes[i] + "." + tmpName;
-            if(tmpName == name) {
-                tmpName = nodes[i-1] + "." + tmpName;
+            if (tmpName == name) {
+                tmpName = nodes[i - 1] + "." + tmpName;
                 break;
             }
         }
@@ -168,13 +168,13 @@ function getMetaDatafromGraph(graph, batch, imageId) {
         group[item.name].push(item);
     });
     let queue = Object.keys(group);
-    while(queue.length > 0) {
+    while (queue.length > 0) {
         let name = queue.shift();
         let items = group[name];
-        if(items.length > 1) {
+        if (items.length > 1) {
             items.forEach(item => {
                 item.name = extendName(item.path, item.name);
-                if(!group[item.name]) {
+                if (!group[item.name]) {
                     group[item.name] = [];
                     queue.push(item.name);
                 }
@@ -185,7 +185,7 @@ function getMetaDatafromGraph(graph, batch, imageId) {
     }
     let ans = {};
     res.forEach(item => {
-        if(!ans[item.name]) {
+        if (!ans[item.name]) {
             ans[item.name] = {};
         }
         ans[item.name] = item.values;
@@ -223,8 +223,8 @@ function processSceneGraph(graph) {
     // };
     // graph = removeLeafNodes(graph, 0);
     // return graph;
-    let {foreground, background} = graph;
-    let res = {foreground: {}, background: {}};
+    let { foreground, background } = graph;
+    let res = { foreground: {}, background: {} };
     foreground.forEach(item => {
         res["foreground"][item] = {};
     });
@@ -236,13 +236,13 @@ function processSceneGraph(graph) {
 
 const mergeMetadata = (oldMetadata, newMetadata) => {
     const mergeDeep = (target, source) => {
-        if(!(target instanceof Object) || !(source instanceof Object)) {
+        if (!(target instanceof Object) || !(source instanceof Object)) {
             return source;
         }
         for (const key in source) {
             if (source[key] instanceof Object && key in target) {
                 target[key] = mergeDeep(target[key], source[key]);
-            } else if(!(key in target)) {
+            } else if (!(key in target)) {
                 target[key] = source[key];
             }
         }
@@ -256,12 +256,12 @@ const isObjectSubset = (obj1, obj2) => {
         return true;
     }
     for (let key in obj2) {
-        if(key == 'exist' || key == 'EXIST') continue;
+        if (key == 'exist' || key == 'EXIST') continue;
         if (obj1[key] == undefined) {
             return false;
         } else {
             let res = isObjectSubset(obj1[key], obj2[key]);
-            if(!res) return false;
+            if (!res) return false;
         }
     }
     return true;
@@ -270,7 +270,7 @@ const isObjectSubset = (obj1, obj2) => {
 const getColorScale = (index) => {
     const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
     let colors = [];
-    for(let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
         colors.push(colorScale(i));
     }
     if (index == undefined || index < 0) {
@@ -281,12 +281,59 @@ const getColorScale = (index) => {
 }
 
 const getGroupId = (groups, batch) => {
-    for(let i = 0; i < groups.length; i++) {
-        if(groups[i].items.includes(batch)) {
+    for (let i = 0; i < groups.length; i++) {
+        if (groups[i].items.includes(batch)) {
             return i;
         }
     }
     return -1;
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId };
+const removeRedundantFields = (data, schema) => {
+    const result = deepClone(data);
+    const traverse = (curNode, schemaNode) => {
+        if (typeof (curNode) !== 'object') return;
+        let keys = Object.keys(curNode);
+        for (let key of keys) {
+            if (key == 'exist' || key == 'EXIST') {
+                delete curNode[key];
+                continue;
+            }
+            if (typeof (curNode[key]) == 'object') {
+                if (typeof (schemaNode[key]) == 'object') {
+                    traverse(curNode[key], schemaNode[key]);
+                } else {
+                    delete curNode[key];
+                }
+            } else {
+                if ((!(schemaNode[key] instanceof Array) && typeof (schemaNode[key]) == 'object') || typeof (schemaNode[key]) == 'undefined' || curNode[key] == "") {
+                    delete curNode[key];
+                }
+            }
+        }
+    };
+    traverse(result, schema);
+    return result;
+}
+
+const repairDataWithSchema = (data, schema) => {
+    console.log("repairDataWithSchema", data, schema, Object.keys(schema));
+    const result = deepClone(data);
+    const traverse = (curNode, schemaNode) => {
+        if (typeof (curNode) !== 'object') return;
+        let keys = Object.keys(schemaNode);
+        for (let key of keys) {
+            if (key == 'exist' || key == 'EXIST') continue;
+            if (typeof (curNode[key]) == 'undefined') {
+                curNode[key] = {"exist": "no"};
+            } else {
+                if (typeof (curNode[key]) == 'object' && typeof (schemaNode[key]) == 'object') {
+                    traverse(curNode[key], schemaNode[key]);
+                }
+            }
+        }
+    };
+    traverse(result, schema);
+    return result;
+}
+export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema };

@@ -80,12 +80,10 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     let key = dataItem.dataItem;
                     dataItemMap[key] = dataItemMap[dataItem.dataItem] || [];
                     dataItemMap[key].push(dataItem);
-                    dataItemCount[key] = dataItemCount[dataItem.dataItem] || 0;
-                    dataItemCount[key] += dataItem.count;
                 });
                 // for each bucket, merge dataItems whose batch are in the same group
                 // you can calculate group by batch, using Utils.getGroupId = (groups, batch)
-                for(let key in dataItemMap) {
+                for (let key in dataItemMap) {
                     let newMap = {};
                     dataItemMap[key].forEach(dataItem => {
                         let groupId = Utils.getGroupId(groups, dataItem.batch - 1);
@@ -94,7 +92,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                         newMap[groupId].push(dataItem);
                     });
                     dataItemMap[key] = [];
-                    for(let groupId in newMap) {
+                    for (let groupId in newMap) {
                         let count = 0, newImageIds = [], _batch = 0; // _batch is any batch value within the group, only used to decide the color
                         newMap[groupId].forEach(dataItem => {
                             count += dataItem.count;
@@ -105,6 +103,13 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     }
                 }
 
+                // Calculate the maximum count
+                for (let key in dataItemMap) {
+                    dataItemMap[key].forEach(dataItem => {
+                        dataItemCount[dataItem.dataItem] = dataItemCount[dataItem.dataItem] || 0;
+                        dataItemCount[dataItem.dataItem] += Math.log(dataItem.count+5);
+                    });
+                }
                 maxCount = Math.max(...Object.values(dataItemCount));
 
                 // Stack the data for the bars
@@ -112,7 +117,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 for (let key in dataItemMap) {
                     let yOffset = -25;
                     dataItemMap[key].forEach(dataItem => {
-                        let height = dataItem.count / maxCount * (chartHeight - 15);
+                        let height = Math.log(dataItem.count+5) / maxCount * (chartHeight - 15);
                         yOffset += height;
                         chartGroup.append('rect')
                             .data([dataItem])
@@ -141,17 +146,44 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     });
                 }
 
-
-                // Add x-axis labels (no axis)
+                // Add x-axis labels (no axis). IF the label name is more than 6 characters, you can rotate the labels
                 chartGroup.selectAll('.x-axis-label')
                     .data(d.data.list)
                     .enter().append('text')
                     .attr('class', 'x-axis-label')
-                    .attr('x', d => xScale(d.dataItem) + xScale.bandwidth() / 2) // Center label
-                    .attr('y', chartHeight + 37) // Position below the bars
+                    .attr('x', d => xScale(d.dataItem) + xScale.bandwidth() / 2)
+                    .attr('y', chartHeight + 37)
                     .attr('text-anchor', 'middle')
                     .attr('pointer-events', 'none')
-                    .text(d => d.dataItem);
+                    .each(function (d) {
+                        let text = d.dataItem;
+                        // let words = text.split(' ');
+                        // split the words by every 6 chars
+                        let words = text.match(/.{1,4}/g);
+                        let line = [];
+                        let lineNumber = 0;
+                        let tspan = d3.select(this).selectAll('tspan')
+                            .data(words);
+
+                        tspan.exit().remove();
+
+                        tspan.enter().append('tspan')
+                            .attr('x', xScale(d.dataItem) + xScale.bandwidth() / 2)
+                            .attr('dy', (d, i) => i ? 15 : 0) // Adjust vertical spacing between lines
+                            .text(word => {
+                                line.push(word);
+                                let lineText = line.join(' ');
+                                let width = this.getComputedTextLength(); // Get width of current line
+                                if (width > xScale.bandwidth() * 0.8) { // Adjust threshold as needed
+                                    line.pop();
+                                    lineText = line.join(' ');
+                                    line = [word];
+                                    lineNumber++;
+                                }
+                                return word;
+                            });
+                    });
+
 
                 // Add the "Store" button
                 const storeButton = g.append('g')
@@ -197,7 +229,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
     }
 
     function getNodeWidth(d) {
-        return d.depth == 0 ? 30 : d.data.type == 'object' ? getTextWidth(d.data.name) : 140;
+        return d.depth == 0 ? 30 : d.data.type == 'object' ? getTextWidth(d.data.name) : 300;
     }
 
     function getNodeHeight(d) {

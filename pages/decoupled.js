@@ -88,7 +88,7 @@ const Generate = () => {
         // Fetch image data for each path in the batch
         const imageDataPromises = imagePaths.map(async (image_path, index) => {
           try {
-            const imageData = await axios.get(image_path, { responseType: 'arraybuffer'});
+            const imageData = await axios.get(image_path, { responseType: 'arraybuffer' });
             const base64Image = Utils.arrayBufferToBase64(imageData.data);
             return { batch: prompts.length + 1, imageId: batch[index], data: base64Image, path: image_path };
           } catch (error) {
@@ -148,7 +148,7 @@ const Generate = () => {
     let sceneGraphs = [];
     for (let i = 0; i < sampleImages.length; i++) {
       let image = sampleImages[i];
-      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs'+IMAGE_DIR+'.json'}`;
+      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs' + IMAGE_DIR + '.json'}`;
       let response = await axios.get(genGraphUrl);
       console.log(response)
       let metaGraph = response.data.res;
@@ -207,7 +207,7 @@ const Generate = () => {
           }
         }
         if (ok) {
-          if(typeof(metaData[key]) != 'undefined') {
+          if (typeof (metaData[key]) != 'undefined') {
             graphSchema[key].push(metaData[key]);
           }
         }
@@ -261,31 +261,16 @@ const Generate = () => {
           console.log(data, graphSchema, isGenerateNeeded);
           // isGenerateNeeded = false;
         }
-        
-        if(isGenerateNeeded) {
+
+        if (isGenerateNeeded) {
           let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
           response = await axios.get(getLabelURL);
           data = response.data.res;
         }
 
-        const removeRedundantFields = (data, schema) => {
-          const result = Utils.deepClone(data);
-          const traverse = (curNode, schemaNode) => {
-            if (typeof (curNode) !== 'object') return;
-            let keys = Object.keys(curNode);
-            for (let key of keys) {
-              if(typeof(schemaNode[key]) == 'undefined') {
-                delete curNode[key];
-              } else {
-                traverse(curNode[key], schemaNode[key]);
-              }
-            }
-          };
-          traverse(result, schema);
-          return result;
-        }
-
-        data = removeRedundantFields(data, graphSchema);
+        console.log("before remove", data, graphSchema);
+        data = Utils.removeRedundantFields(data, graphSchema);
+        console.log("after remove", data);
         data.batch = image.batch || prompts.length + 1;
         data.metaData = {
           imageId: image.imageId,
@@ -328,14 +313,14 @@ const Generate = () => {
       imageIds = response.data.res.map(item => {
         return item.substring(0, item.length - 4); // remove the suffix .png
       });
-      if(imageIdMap[userInput] == undefined) {
+      if (imageIdMap[userInput] == undefined) {
         imageIds = imageIds.slice(0, image_num);
-        let tmp = {...imageIdMap};
+        let tmp = { ...imageIdMap };
         tmp[userInput] = image_num;
         setImageIdMap(tmp);
       } else {
         imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num);
-        let tmp = {...imageIdMap};
+        let tmp = { ...imageIdMap };
         tmp[userInput] += image_num;
         setImageIdMap(tmp);
       }
@@ -343,9 +328,9 @@ const Generate = () => {
 
     isImagesExist = (imageIds.length == image_num);
 
-    if(!isImagesExist) {
+    if (!isImagesExist) {
       imageIds = [];
-      for(let i = 0; i < image_num; i++) {
+      for (let i = 0; i < image_num; i++) {
         imageIds.push(userInput.replace(/ /g, '_') + '_' + String(i));
       }
     }
@@ -373,7 +358,7 @@ const Generate = () => {
 
       // Generate Scene Graph (Graph Schema)
       let updatedGraphSchema = Utils.deepClone(graphSchema);
-      if(Object.keys(graphSchema).length == 0) {
+      if (Object.keys(graphSchema).length == 0) {
         updatedGraphSchema = await generateGraphSchema(newImages);
         setGraphSchema(updatedGraphSchema);
         console.log("updatedGraphSchema", updatedGraphSchema);
@@ -381,13 +366,16 @@ const Generate = () => {
       setStepPercentage(66);
 
       // Generate Meta Data
-      let newMetaData = await generateMetaData(newImages, updatedGraphSchema);
-      let allMetaData = Utils.deepClone(metaData); 
-      allMetaData = [...allMetaData, ...newMetaData];
-      setMetaData(allMetaData);
-      console.log("newMetaData", allMetaData);
+      let newMetaData, allMetaData = [];
+      if (prompts.length > 0) {
+        newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+        allMetaData = Utils.deepClone(metaData);
+        allMetaData = [...allMetaData, ...newMetaData];
+        setMetaData(allMetaData);
+        console.log("newMetaData", allMetaData);
+      }
       setStepPercentage(99);
-      
+
 
       // // update the graph schema with metaData
       // for (let item of newMetaData) {
@@ -428,16 +416,16 @@ const Generate = () => {
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
     let updateGraph = (graph, suggestion) => {
-      if(!graph || !graph.children) return;
-      for(let child of graph.children) {
-        if(child.name == suggestion.oldNodeName) {
+      if (!graph || !graph.children) return;
+      for (let child of graph.children) {
+        if (child.name == suggestion.oldNodeName) {
           let newNode = Utils.deepClone(child);
           newNode.name = suggestion.newNodeName;
           const traverseGraph = (curNode) => {
-            if(!curNode || !curNode.children) return;
-            for(let i = 0; i < curNode.children.length; i++) {
-              if(curNode.children[i].type == "attribute") {
-                curNode.children[i] = {name: curNode.children[i].name, type: "attribute", count: 0, children: []};
+            if (!curNode || !curNode.children) return;
+            for (let i = 0; i < curNode.children.length; i++) {
+              if (curNode.children[i].type == "attribute") {
+                curNode.children[i] = { name: curNode.children[i].name, type: "attribute", count: 0, children: [] };
               } else {
                 traverseGraph(curNode[i]);
               }
@@ -485,10 +473,10 @@ const Generate = () => {
 
     // update the graph (loading)
     const updateGraph = (graph, suggestion) => {
-      if(!graph || !graph.children) return;
-      for(let child of graph.children) {
-        if(child.name == suggestion.parentNodeName) {
-          let newNode = {name: suggestion.newNodeName, children: [], count: 0, type: "attribute"};
+      if (!graph || !graph.children) return;
+      for (let child of graph.children) {
+        if (child.name == suggestion.parentNodeName) {
+          let newNode = { name: suggestion.newNodeName, children: [], count: 0, type: "attribute" };
           child.children.push(newNode);
           break;
         } else {
@@ -545,7 +533,7 @@ const Generate = () => {
     // calculate the path to the root
     let pathToRoot = [];
     let curNode = dataObj;
-    while(curNode.data.name != 'root') {
+    while (curNode.data.name != 'root') {
       pathToRoot.push(curNode.data.name);
       curNode = curNode.parent;
     }
@@ -553,7 +541,7 @@ const Generate = () => {
     // update the schema
     let _graphSchema = Utils.deepClone(graphSchema);
     curNode = _graphSchema;
-    for(let i = 0; i < pathToRoot.length - 1; i++) {
+    for (let i = 0; i < pathToRoot.length - 1; i++) {
       curNode = curNode[pathToRoot[i]];
     }
     curNode[newNodeName] = Utils.deepClone(curNode[pathToRoot[pathToRoot.length - 1]]);
@@ -563,7 +551,7 @@ const Generate = () => {
     // update the graph
     let _graph = Utils.deepClone(graph);
     curNode = _graph;
-    for(let i = 0; i < pathToRoot.length; i++) {
+    for (let i = 0; i < pathToRoot.length; i++) {
       curNode = curNode.children.find(node => node.name === pathToRoot[i]);
     }
     curNode.name = newNodeName;
@@ -572,11 +560,11 @@ const Generate = () => {
   }
 
   const handleNodeAdd = (dataObj, newNode) => {
-    let {nodeName: newNodeName, nodeType: newNodeType, candidateValues} = newNode;
+    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues } = newNode;
     // calculate the path to the root
     let pathToRoot = [];
     let curNode = dataObj;
-    while(curNode.data.name != 'root') {
+    while (curNode.data.name != 'root') {
       pathToRoot.push(curNode.data.name);
       curNode = curNode.parent;
     }
@@ -584,7 +572,7 @@ const Generate = () => {
     // update the schema
     let _graphSchema = Utils.deepClone(graphSchema);
     curNode = _graphSchema;
-    for(let i = 0; i < pathToRoot.length; i++) {
+    for (let i = 0; i < pathToRoot.length; i++) {
       curNode = curNode[pathToRoot[i]];
     }
     curNode[newNodeName] = candidateValues == '' ? [] : candidateValues.split(',');
@@ -593,18 +581,18 @@ const Generate = () => {
     // update the graph
     let _graph = Utils.deepClone(graph);
     curNode = _graph;
-    for(let i = 0; i < pathToRoot.length; i++) {
+    for (let i = 0; i < pathToRoot.length; i++) {
       curNode = curNode.children.find(node => node.name === pathToRoot[i]);
     }
     curNode.children.push({ name: newNodeName, children: [], count: 0, type: newNodeType });
     setGraph(_graph);
     console.log("updatedGraph", _graph);
 
-    if(newNodeType == 'attribute') {
+    if (newNodeType == 'attribute') {
       // update labels if the new node is an attribute
       let partialSchema = {}; // The schema for the new node
       curNode = partialSchema;
-      for(let i = 0; i < pathToRoot.length; i++) {
+      for (let i = 0; i < pathToRoot.length; i++) {
         curNode[pathToRoot[i]] = {};
         curNode = curNode[pathToRoot[i]];
       }
@@ -621,12 +609,12 @@ const Generate = () => {
         images.forEach((image, index) => {
           let item = labeledSchema[index];
           let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.imageId);
-          if(oldMetaData == undefined) {
+          if (oldMetaData == undefined) {
             oldMetaData = {};
           }
           let res = Utils.mergeMetadata(oldMetaData, item);
           let idx = newMetaData.findIndex(item => item.metaData.imageId == image.imageId);
-          if(idx != -1) {
+          if (idx != -1) {
             newMetaData[idx] = res;
           } else {
             newMetaData.push(res);
@@ -650,7 +638,7 @@ const Generate = () => {
   const handleLabelEditSave = (newData) => {
     console.log(newData);
     let newMetaData = Utils.deepClone(metaData);
-    newMetaData[newData.index] = {...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data};
+    newMetaData[newData.index] = { ...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data };
     setMetaData(newMetaData);
     console.log('newMetaData', newMetaData);
     let _graph = Utils.calculateGraph(newMetaData, graphSchema, Utils.deepClone(graph));
@@ -685,7 +673,7 @@ const Generate = () => {
           </div>
         </div> */}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts}  switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups}/>
+        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} />
 
       </div>}
 

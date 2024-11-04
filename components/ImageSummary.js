@@ -267,7 +267,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                             </div>
                         }
                         <ModalLabelEdit isOpen={isLabelModalOpen} onClose={() => setIsLabelModalOpen(false)}
-                            onSave={handleLabelEditSave} nodeData={contextMenuData} />
+                            onSave={handleLabelEditSave} nodeData={contextMenuData} graphSchema={graphSchema}/>
                     </div>
                     <div className="label-view">
                         <div style={{ "display": "flex", "alignItems": "center", "justifyContent": "space-between" }}>
