@@ -24,9 +24,13 @@ export default async function handler(req, res) {
             let promises = image_ids.map(async (image_id, index) => {
                 let response = await axios.get(imagePath[index], { responseType: 'arraybuffer' });
                 let imageBuffer = Buffer.from(response.data);
-                let image_path = path.join(output_dir, `${image_id}.png`);
-                newPaths.push('/temp_images/' + prompt.replace(/ /g, '_') + `/${image_id}.png`);
-                fs.writeFileSync(image_path, imageBuffer);
+                if(process.env.SAVE_MODE == 'true') {
+                    fs.writeFileSync(image_path, imageBuffer);
+                    let image_path = path.join(output_dir, `${image_id}.png`);
+                    newPaths.push('/temp_images/' + prompt.replace(/ /g, '_') + `/${image_id}.png`);
+                } else {
+                    newPaths.push(imagePath[index]);
+                }
             });
             await Promise.all(promises);
             return res.status(200).json({ image_path: newPaths });

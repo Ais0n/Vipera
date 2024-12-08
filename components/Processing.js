@@ -1,10 +1,10 @@
 import React from 'react';
 
-const ProcessingIndicator = ({ containerStyle, stepPercentage }) => {
+const ProcessingIndicator = ({ containerStyle, statusInfo }) => {
   return (
     <div className="processing-indicator" style={containerStyle}>
       <div className="spinner"></div>
-      <p>Processing...{stepPercentage}%</p>
+      <p>{statusInfo}</p>
       <style jsx>{`
         .processing-indicator {
           display: flex;

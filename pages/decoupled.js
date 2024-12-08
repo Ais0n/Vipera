@@ -33,7 +33,7 @@ const Generate = () => {
   const [useSceneGraph, setUseSceneGraph] = useState(true);
   const [badgeContents, setBadgeContents] = useState(undefined);
   const [prompts, setPrompts] = useState([]);
-  const [stepPercentage, setStepPercentage] = useState(0);
+  const [statusInfo, setstatusInfo] = useState(0);
   const [imageNum, setImageNum] = useState(10);
   const [imageIdMap, setImageIdMap] = useState({});
   const [switchChecked, setSwitchChecked] = React.useState(false);
@@ -105,9 +105,34 @@ const Generate = () => {
     });
 
     try {
-      const allImages = await Promise.all(imagePromises);
-      const flattenedImages = allImages.flat(); // Flatten the array of arrays
-      newImages = [...newImages, ...flattenedImages];
+      // const results = await Promise.allSettled(imagePromises);
+      // const flattenedImages = [];
+      // let num_of_promises_finished = 0;
+
+      // results.forEach(result => {
+      //   if (result.status === 'fulfilled') {
+      //     flattenedImages.push(...result.value); // Assuming result.value is an array
+      //     num_of_promises_finished++;
+      //     setstatusInfo("Generate images: " + String(num_of_promises_finished) + "/" + String(imageIds.length));
+      //   } else {
+      //     console.error('Image processing failed:', result.reason);
+      //   }
+      // });
+      // newImages = [...newImages, ...flattenedImages];
+      let generatedCount = 0;
+      imagePromises.forEach(promise => {
+        promise.then(result => {
+          console.log(result)
+          result.forEach(r => {
+            newImages = [...newImages, r];
+            generatedCount++;
+          });
+          setstatusInfo("Generate images: " + generatedCount + "/" + String(imageIds.length));
+        })
+      });
+
+      // Wait for all promises to complete
+      await Promise.all(imagePromises);
     } catch (error) {
       console.error(error);
       setIsGenerating(false);
@@ -280,7 +305,18 @@ const Generate = () => {
         return data;
       });
 
-      const results = await Promise.all(promises);
+      let generatedCount = 0, results = [];
+      promises.forEach(promise => {
+        promise.then(result => {
+          results.push(result);
+          generatedCount++;
+
+          setstatusInfo("Generating metadata: " + generatedCount + "/" + String(promises.length));
+        })
+      });
+
+      // Wait for all promises to complete
+      await Promise.all(promises);
       console.log(results)
       _metaData = results;
     }
@@ -299,7 +335,7 @@ const Generate = () => {
     setIsDoneGenerating(false);
     setIsDoneImage(false);
     setIsDoneSceneGraph(false);
-    setStepPercentage(0);
+    setstatusInfo("Start generating images...");
 
     setError('');
 
@@ -349,7 +385,7 @@ const Generate = () => {
       setImages(allImages);
 
       setIsDoneImage(true);
-      setStepPercentage(33);
+      setstatusInfo("Generating scene graph...");
       if (!useSceneGraph) {
         setIsGenerating(false);
         setIsDoneGenerating(true);
@@ -363,7 +399,7 @@ const Generate = () => {
         setGraphSchema(updatedGraphSchema);
         console.log("updatedGraphSchema", updatedGraphSchema);
       }
-      setStepPercentage(66);
+      setstatusInfo("Generating metadata...");
 
       // Generate Meta Data
       let newMetaData, allMetaData = [];
@@ -374,7 +410,7 @@ const Generate = () => {
         setMetaData(allMetaData);
         console.log("newMetaData", allMetaData);
       }
-      setStepPercentage(99);
+      setstatusInfo(99);
 
 
       // // update the graph schema with metaData
@@ -448,7 +484,7 @@ const Generate = () => {
   const handleExternal = async (suggestion) => {
     setIsGenerating(true);
     setIsDoneGenerating(false);
-    setStepPercentage(0);
+    setstatusInfo(0);
     // update the schema (but does not store the new value)
     let updateSchema = (schema, suggestion) => {
       if (typeof (schema) != 'object') return;
@@ -465,7 +501,7 @@ const Generate = () => {
     updateSchema(_graphSchema, suggestion);
     // setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
-    setStepPercentage(50);
+    setstatusInfo(50);
 
     // store the new schema
     setGraphSchema(_graphSchema);
@@ -492,7 +528,7 @@ const Generate = () => {
     // use the new schema to relabel the images (get new metadata)
     let newMetaData = await generateMetaData(images, _graphSchema);
     setMetaData(newMetaData);
-    setStepPercentage(99);
+    setstatusInfo(99);
 
     // update the schema with the new metadata
     for (let item of newMetaData) {
@@ -602,7 +638,7 @@ const Generate = () => {
       generateMetaData(images, partialSchema, candidateValues).then(labeledSchema => {
         setIsGenerating(true);
         setIsDoneGenerating(false);
-        setStepPercentage(50);
+        setstatusInfo(50);
         console.log("labeledSchema", labeledSchema);
         // update the metadata
         let newMetaData = Utils.deepClone(metaData);
@@ -659,7 +695,7 @@ const Generate = () => {
 
 
       {error && <p>{error}</p>}
-      {!isDoneGenerating && <ProcessingIndicator stepPercentage={stepPercentage} />}
+      {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} />}
       {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}
