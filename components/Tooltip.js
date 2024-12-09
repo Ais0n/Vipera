@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import * as Utils from '../utils';
 
 const Tooltip = ({ visible, x, y, image, data }) => {
     const svgRef = useRef();
@@ -9,64 +8,101 @@ const Tooltip = ({ visible, x, y, image, data }) => {
         if (visible && svgRef.current) {
             const svg = d3.select(svgRef.current);
             svg.selectAll("*").remove(); // Clear previous content
-            let keys = Object.keys(data), N = keys.length;
-            console.log(data, N)
-            const radius = 40; // Radius of the arcs
-            const arcMargin = 0.1; // Margin between arcs
-            const angleStep = (Math.PI * 2) / N - arcMargin; // Angle for each arc
 
-            // Define a single color for the arcs
-            const arcColor = '#aaa'; // Change this to your desired color
+            const keys = Object.keys(data);
+            const values = keys.map(key => data[key].percentage); // Normalize percentage values
+            const labels = keys.map(key => String(key) + ': ' + String(data[key].value));
+            const N = values.length;
 
-            const arcGenerator = d3.arc()
-                .innerRadius(12)
-                .outerRadius((d) => (d.p / 2 + 0.5) * radius); // Use data value for outer radius
+            const radius = 50; // Radius of the radar chart
+            const centerX = 100; // X-coordinate of the center
+            const centerY = 70; // Y-coordinate of the center
 
-            // Create groups for each arc
-            for (let i = 0; i < N; i++) {
-                const startAngle = i * (angleStep + arcMargin); // Adjust start angle for margin
-                const endAngle = (i + 1) * (angleStep + arcMargin) - arcMargin; // Adjust end angle for margin
+            // Scales
+            const angleScale = d3.scaleLinear()
+                .domain([0, N])
+                .range([0, 2 * Math.PI]);
+            const radiusScale = d3.scaleLinear()
+                .domain([0, 1]) // Assuming percentage values are between 0 and 1
+                .range([0, radius]);
 
-                // Create the arc
-                svg.append('path')
-                    .attr('d', arcGenerator({ startAngle, endAngle, p: data[keys[i]].percentage }))
-                    .attr('transform', `translate(${100}, ${50})`) // Center the arcs
-                    .attr('fill', arcColor); // Use the same color for all arcs
-
-                // Calculate label position and line end points
-                const midAngle = (startAngle + endAngle) / 2;
-                const curRadius = radius * (data[keys[i]].percentage / 2 + 0.5);
-                const lineX1 = 100 + (curRadius * 0.75) * Math.sin(midAngle);
-                const lineY1 = 50 - (curRadius * 0.75) * Math.cos(midAngle);
-                const lineX2 = 100 + (curRadius * 1.15) * Math.sin(midAngle); // Extend line outward
-                const lineY2 = 50 - (curRadius * 1.15) * Math.cos(midAngle);
-
-                // Add lines
-                svg.append('line')
-                    .attr('x1', lineX1)
-                    .attr('y1', lineY1)
-                    .attr('x2', lineX2)
-                    .attr('y2', lineY2)
-                    .attr('stroke', 'black')
-                    .attr('stroke-width', 2);
-
-                // Determine label position
-                const isLeft = lineX2 < 100; // Check if label is on the left
-                const labelOffset = isLeft ? -65 : 5; // Offset to prevent overlap
-                const labelX = lineX2 + labelOffset; // Adjust label X position
-                const labelY = lineY2;
-
-                // Add labels beside the line using foreignObject for wrapping
-                svg.append('foreignObject')
-                    .attr('x', labelX)
-                    .attr('y', labelY - 10) // Adjust vertical position
-                    .attr('width', 60) // Set width for wrapping
-                    .attr('height', 30) // Adjust height as needed
-                    .append('xhtml:div')
-                    .style('font-size', '10px')
-                    .style('text-align', isLeft ? 'right' : 'left') // Align text based on position
-                    .text(keys[i] + ': ' + data[keys[i]].value);
+            // Radar grid (spider web)
+            const gridLevels = 5; // Number of concentric circles
+            for (let i = 1; i <= gridLevels; i++) {
+                const r = (radius / gridLevels) * i;
+                svg.append("circle")
+                    .attr("cx", centerX)
+                    .attr("cy", centerY)
+                    .attr("r", r)
+                    .attr("fill", "none")
+                    .attr("stroke", "#ccc")
+                    .attr("stroke-width", 0.5);
             }
+
+            // Axes
+            labels.forEach((label, i) => {
+                const angle = angleScale(i);
+                const x2 = centerX + radius * Math.sin(angle);
+                const y2 = centerY - radius * Math.cos(angle);
+
+                // Draw axis line
+                svg.append("line")
+                    .attr("x1", centerX)
+                    .attr("y1", centerY)
+                    .attr("x2", x2)
+                    .attr("y2", y2)
+                    .attr("stroke", "#ccc")
+                    .attr("stroke-width", 0.5);
+
+                // Add axis label
+                const labelX = centerX + (radius + 10) * Math.sin(angle);
+                const labelY = centerY - (radius + 10) * Math.cos(angle);
+                svg.append("text")
+                    .attr("x", labelX)
+                    .attr("y", labelY)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "central")
+                    .style("font-size", "10px")
+                    .text(label);
+            });
+
+            // Radar data points
+            const radarLine = d3.lineRadial()
+                .radius((d, i) => d)
+                .angle((d, i) => angleScale(i))
+                .curve(d3.curveLinearClosed);
+
+            const radarData = values.map(v => radiusScale(v));
+
+            if (N > 1) {
+                svg.append("path")
+                    .datum(radarData)
+                    .attr("d", radarLine)
+                    .attr("transform", `translate(${centerX},${centerY})`)
+                    .attr("fill", "rgba(0, 123, 255, 0.3)")
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", 2);
+            } else if (N === 1) {
+                // Draw a single point for one dimension
+                svg.append("circle")
+                    .attr("cx", centerX)
+                    .attr("cy", centerY - radarData[0])
+                    .attr("r", 5)
+                    .attr("fill", "blue");
+            }
+
+            // Data points
+            radarData.forEach((r, i) => {
+                const angle = angleScale(i);
+                const x = centerX + r * Math.sin(angle);
+                const y = centerY - r * Math.cos(angle);
+
+                svg.append("circle")
+                    .attr("cx", x)
+                    .attr("cy", y)
+                    .attr("r", 3)
+                    .attr("fill", "blue");
+            });
         }
     }, [visible, data]);
 
@@ -83,9 +119,14 @@ const Tooltip = ({ visible, x, y, image, data }) => {
                 borderRadius: '4px',
                 padding: '10px',
                 pointerEvents: 'none',
-            }}>
-            <img src={`data:image/png;base64,${image}`} alt="Image" style={{ width: '100px', height: '100px' }} />
-            <svg ref={svgRef} width="200" height="110"/>
+            }}
+        >
+            <img
+                src={`data:image/png;base64,${image}`}
+                alt="Image"
+                style={{ width: '150px', height: '150px' }}
+            />
+            <svg ref={svgRef} width="250" height="150" />
         </div>
     );
 };
