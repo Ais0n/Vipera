@@ -193,6 +193,21 @@ function getMetaDatafromGraph(graph, batch, imageId) {
     return ans;
 }
 
+function getImageMetadata(graph, batch, imageId) {
+    let graphMetadata = getMetaDatafromGraph(graph, batch, imageId);
+    console.log(graphMetadata);
+    let imageMetadata = {};
+    for (let key in graphMetadata) {
+        let values = Object.values(graphMetadata[key]);
+        let imageValue = graphMetadata[key][JSON.stringify({ batch: batch, imageId: imageId })];
+        imageMetadata[key] = {
+            value: `${imageValue}`,
+            percentage: values.filter(val => val === imageValue).length / values.length
+        }
+    }
+    return imageMetadata;
+}
+
 function arrayBufferToBase64(buffer) {
     let binary = '';
     const bytes = new Uint8Array(buffer);
@@ -336,4 +351,4 @@ const repairDataWithSchema = (data, schema) => {
     traverse(result, schema);
     return result;
 }
-export { deepClone, calculateGraph, getMetaDatafromGraph, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema };
+export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema };

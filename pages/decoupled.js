@@ -15,6 +15,7 @@ import ProcessingIndicator from '../components/Processing.js';
 import ImageSummary from '../components/ImageSummary.js';
 import * as Utils from '../utils.js';
 import * as nanoid from 'nanoid';
+import ModalReview from '../components/ModalReview.js';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -33,11 +34,12 @@ const Generate = () => {
   const [useSceneGraph, setUseSceneGraph] = useState(true);
   const [badgeContents, setBadgeContents] = useState(undefined);
   const [prompts, setPrompts] = useState([]);
-  const [statusInfo, setstatusInfo] = useState(0);
+  const [statusInfo, setStatusInfo] = useState(0);
   const [imageNum, setImageNum] = useState(10);
   const [imageIdMap, setImageIdMap] = useState({});
-  const [switchChecked, setSwitchChecked] = React.useState(false);
-  const [groups, setGroups] = React.useState([]);
+  const [switchChecked, setSwitchChecked] = useState(false);
+  const [groups, setGroups] = useState([]);
+  const [reviewPanelVisible, setReviewPanelVisible] = useState(false);
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -113,7 +115,7 @@ const Generate = () => {
       //   if (result.status === 'fulfilled') {
       //     flattenedImages.push(...result.value); // Assuming result.value is an array
       //     num_of_promises_finished++;
-      //     setstatusInfo("Generate images: " + String(num_of_promises_finished) + "/" + String(imageIds.length));
+      //     setStatusInfo("Generate images: " + String(num_of_promises_finished) + "/" + String(imageIds.length));
       //   } else {
       //     console.error('Image processing failed:', result.reason);
       //   }
@@ -127,7 +129,7 @@ const Generate = () => {
             newImages = [...newImages, r];
             generatedCount++;
           });
-          setstatusInfo("Generate images: " + generatedCount + "/" + String(imageIds.length));
+          setStatusInfo("Generate images: " + generatedCount + "/" + String(imageIds.length));
         })
       });
 
@@ -257,6 +259,10 @@ const Generate = () => {
   }
 
   const generateMetaData = async (images, graphSchema, candidateValues) => {
+    setIsGenerating(true);
+    setIsDoneGenerating(false);
+    setStatusInfo("Start generating metadata...");
+
     let _metaData = [];
     if (isDebug) {
       for (let i = 0; i < metaData.length; i++) {
@@ -311,7 +317,7 @@ const Generate = () => {
           results.push(result);
           generatedCount++;
 
-          setstatusInfo("Generating metadata: " + generatedCount + "/" + String(promises.length));
+          setStatusInfo("Generating metadata: " + generatedCount + "/" + String(promises.length));
         })
       });
 
@@ -320,6 +326,10 @@ const Generate = () => {
       console.log(results)
       _metaData = results;
     }
+
+    setIsGenerating(false);
+    setIsDoneGenerating(true);
+
     return _metaData;
   }
 
@@ -335,7 +345,7 @@ const Generate = () => {
     setIsDoneGenerating(false);
     setIsDoneImage(false);
     setIsDoneSceneGraph(false);
-    setstatusInfo("Start generating images...");
+    setStatusInfo("Start generating images...");
 
     setError('');
 
@@ -385,7 +395,7 @@ const Generate = () => {
       setImages(allImages);
 
       setIsDoneImage(true);
-      setstatusInfo("Generating scene graph...");
+      setStatusInfo("Generating scene graph...");
       if (!useSceneGraph) {
         setIsGenerating(false);
         setIsDoneGenerating(true);
@@ -399,7 +409,6 @@ const Generate = () => {
         setGraphSchema(updatedGraphSchema);
         console.log("updatedGraphSchema", updatedGraphSchema);
       }
-      setstatusInfo("Generating metadata...");
 
       // Generate Meta Data
       let newMetaData, allMetaData = [];
@@ -410,7 +419,6 @@ const Generate = () => {
         setMetaData(allMetaData);
         console.log("newMetaData", allMetaData);
       }
-      setstatusInfo(99);
 
 
       // // update the graph schema with metaData
@@ -484,7 +492,7 @@ const Generate = () => {
   const handleExternal = async (suggestion) => {
     setIsGenerating(true);
     setIsDoneGenerating(false);
-    setstatusInfo(0);
+    setStatusInfo(0);
     // update the schema (but does not store the new value)
     let updateSchema = (schema, suggestion) => {
       if (typeof (schema) != 'object') return;
@@ -501,7 +509,7 @@ const Generate = () => {
     updateSchema(_graphSchema, suggestion);
     // setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
-    setstatusInfo(50);
+    setStatusInfo(50);
 
     // store the new schema
     setGraphSchema(_graphSchema);
@@ -528,7 +536,7 @@ const Generate = () => {
     // use the new schema to relabel the images (get new metadata)
     let newMetaData = await generateMetaData(images, _graphSchema);
     setMetaData(newMetaData);
-    setstatusInfo(99);
+    setStatusInfo(99);
 
     // update the schema with the new metadata
     for (let item of newMetaData) {
@@ -636,9 +644,9 @@ const Generate = () => {
       console.log("partialSchema", partialSchema);
       // Generate Meta Data
       generateMetaData(images, partialSchema, candidateValues).then(labeledSchema => {
-        setIsGenerating(true);
-        setIsDoneGenerating(false);
-        setstatusInfo(50);
+        // setIsGenerating(true);
+        // setIsDoneGenerating(false);
+        // setStatusInfo(50);
         console.log("labeledSchema", labeledSchema);
         // update the metadata
         let newMetaData = Utils.deepClone(metaData);
@@ -664,9 +672,9 @@ const Generate = () => {
         console.log("newgraph", _graph)
         setGraph(_graph);
 
-        setIsGenerating(false);
-        setIsDoneGenerating(true);
-        setSwitchChecked(true);
+        // setIsGenerating(false);
+        // setIsDoneGenerating(true);
+        // setSwitchChecked(true);
       })
     }
   }
@@ -695,7 +703,8 @@ const Generate = () => {
 
 
       {error && <p>{error}</p>}
-      {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} />}
+      {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible}/>}
+      <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}

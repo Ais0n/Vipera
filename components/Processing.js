@@ -1,10 +1,11 @@
 import React from 'react';
 
-const ProcessingIndicator = ({ containerStyle, statusInfo }) => {
+const ProcessingIndicator = ({ containerStyle, statusInfo, setReviewPanelVisible }) => {
   return (
     <div className="processing-indicator" style={containerStyle}>
       <div className="spinner"></div>
       <p>{statusInfo}</p>
+      <div>During the waiting, you may <a className="openLink" onClick={() => setReviewPanelVisible(true)}>review the labeled images</a></div>
       <style jsx>{`
         .processing-indicator {
           display: flex;
@@ -30,6 +31,12 @@ const ProcessingIndicator = ({ containerStyle, statusInfo }) => {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        .openLink {
+          color: blue;
+          cursor: pointer;
+          text-decoration: underline;
         }
       `}</style>
     </div>

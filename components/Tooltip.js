@@ -65,7 +65,7 @@ const Tooltip = ({ visible, x, y, image, data }) => {
                     .append('xhtml:div')
                     .style('font-size', '10px')
                     .style('text-align', isLeft ? 'right' : 'left') // Align text based on position
-                    .text(data[keys[i]].value);
+                    .text(keys[i] + ': ' + data[keys[i]].value);
             }
         }
     }, [visible, data]);
