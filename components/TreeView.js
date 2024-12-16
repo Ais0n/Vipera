@@ -107,7 +107,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 for (let key in dataItemMap) {
                     dataItemMap[key].forEach(dataItem => {
                         dataItemCount[dataItem.dataItem] = dataItemCount[dataItem.dataItem] || 0;
-                        dataItemCount[dataItem.dataItem] += Math.log(dataItem.count+5);
+                        dataItemCount[dataItem.dataItem] += Math.log(dataItem.count + 5);
                     });
                 }
                 maxCount = Math.max(...Object.values(dataItemCount));
@@ -117,7 +117,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                 for (let key in dataItemMap) {
                     let yOffset = -25;
                     dataItemMap[key].forEach(dataItem => {
-                        let height = Math.log(dataItem.count+5) / maxCount * (chartHeight - 15);
+                        let height = Math.log(dataItem.count + 5) / maxCount * (chartHeight - 15);
                         yOffset += height;
                         chartGroup.append('rect')
                             .data([dataItem])
@@ -157,31 +157,20 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
                     .attr('pointer-events', 'none')
                     .each(function (d) {
                         let text = d.dataItem;
-                        // let words = text.split(' ');
-                        // split the words by every 6 chars
-                        let words = text.match(/.{1,4}/g);
-                        let line = [];
-                        let lineNumber = 0;
-                        let tspan = d3.select(this).selectAll('tspan')
-                            .data(words);
+                        let fontSize = '12px'; // Default font size
 
-                        tspan.exit().remove();
+                        // Adjust font size based on text length
+                        if (text.length > 10) {
+                            fontSize = '10px'; // Smaller font for longer text
+                        }
+                        if (text.length > 20) {
+                            text = text.substring(0, 17) + '...'; // Truncate if too long
+                            fontSize = '8px'; // Even smaller for truncated text
+                        }
 
-                        tspan.enter().append('tspan')
-                            .attr('x', xScale(d.dataItem) + xScale.bandwidth() / 2)
-                            .attr('dy', (d, i) => i ? 15 : 0) // Adjust vertical spacing between lines
-                            .text(word => {
-                                line.push(word);
-                                let lineText = line.join(' ');
-                                let width = this.getComputedTextLength(); // Get width of current line
-                                if (width > xScale.bandwidth() * 0.8) { // Adjust threshold as needed
-                                    line.pop();
-                                    lineText = line.join(' ');
-                                    line = [word];
-                                    lineNumber++;
-                                }
-                                return word;
-                            });
+                        d3.select(this)
+                            .style('font-size', fontSize)
+                            .text(text);
                     });
 
 
