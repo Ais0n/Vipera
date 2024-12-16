@@ -6,6 +6,11 @@ import * as Utils from '../utils.js';
 const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
     const [selectedImages, setSelectedImages] = useState([]);
     const [selectedLabels, setSelectedLabels] = useState([]);
+    const [textAreaValue, setTextAreaValue] = useState('');
+
+    const handleChange = (e) => {
+        setTextAreaValue(e.target.value);
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -57,7 +62,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
                     <RedoOutlined onClick={selectRandomImages}/>
                     <CloseOutlined onClick={onClose}/>
                 </div>
-                <div className="imageGallery">
+                {selectedImages.length > 0 ? <div className="imageGallery">
                     {selectedImages.map((image, index) => (
                         <div key={index} className="imageItem">
                             <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.imageId}`} />
@@ -77,10 +82,14 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
                             )}
                         </div>
                     ))}
-                </div>
+                </div> : <i>No images available. Please generate images first.</i>}
                 <div className="comments">
                     <h3 style={{'float': 'left'}}> Comments for the LLM (optional) </h3>
-                    <Input.TextArea placeholder="Briefly describe your expectations for the LLMs here."></Input.TextArea>
+                    <Input.TextArea 
+                        placeholder="Briefly describe your expectations for the LLMs here."
+                        value={textAreaValue}
+                        onChange={handleChange}
+                    ></Input.TextArea>
                 </div>
                 <Button type="primary" onClick={handleSave}>Save</Button>
                 <style jsx>{`
