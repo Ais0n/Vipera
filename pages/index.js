@@ -22,7 +22,7 @@ const Home = () => {
   return (
     <div>
       <Head>
-        <title>Ouroboros</title>
+        <title>Vipera</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
@@ -46,7 +46,7 @@ const Home = () => {
           </div>
         </div>
         <div className={styles.stepContainer}>
-          <div className={styles.firstTitle}>OUROBOROS</div>
+          <div className={styles.firstTitle}>Vipera</div>
           <div className={styles.secondTitle}>3 Key Steps to Fight Bias</div>
           <div className={styles.steps}>
             {STEPS_IMAGES.map(image => (
