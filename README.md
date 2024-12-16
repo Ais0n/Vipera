@@ -1,4 +1,4 @@
-Ouroboros
+Vipera
 
 This is a simple React powered NextJS App.
 
