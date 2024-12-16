@@ -40,6 +40,7 @@ const Generate = () => {
   const [switchChecked, setSwitchChecked] = useState(false);
   const [groups, setGroups] = useState([]);
   const [reviewPanelVisible, setReviewPanelVisible] = useState(false);
+  const [userFeedback, setUserFeedback] = useState('');
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -294,7 +295,7 @@ const Generate = () => {
         }
 
         if (isGenerateNeeded) {
-          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}&feedback=${userFeedback}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
           response = await axios.get(getLabelURL);
           data = response.data.res;
         }
@@ -690,6 +691,17 @@ const Generate = () => {
     setGraph(_graph);
   }
 
+  const handleReviewResults = ({ updatedMetaData, textAreaValue }) => {
+    console.log(metaData, updatedMetaData)
+    setMetaData(updatedMetaData);
+    let _graph = Utils.calculateGraph(updatedMetaData, graphSchema, Utils.deepClone(graph));
+      console.log(_graph)
+      setGraph(_graph);
+    if(textAreaValue && textAreaValue !== '') {
+      setUserFeedback(textAreaValue);
+    }
+  }
+
   return (
     <div>
       <Header />
@@ -704,7 +716,7 @@ const Generate = () => {
 
       {error && <p>{error}</p>}
       {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible}/>}
-      <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onClose={() => setReviewPanelVisible(false)}></ModalReview>
+      <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>
           {!isDoneImage && <ProcessingIndicator />}

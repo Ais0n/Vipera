@@ -8,6 +8,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
     const [selectedLabels, setSelectedLabels] = useState([]);
     const [textAreaValue, setTextAreaValue] = useState('');
     const [messageApi, contextHolder] = message.useMessage();
+    const [updatedMetaData, setUpdatedMetaData] = useState();
 
     const handleChange = (e) => {
         setTextAreaValue(e.target.value);
@@ -35,47 +36,83 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
         }
 
         // Calculate labels
-        const labels = _selectedImages.map(image => {
-            return Utils.getImageMetadata(graph, image.batch, image.imageId);
+        let labels = _selectedImages.map(image => {
+            // return Utils.getImageMetadata(graph, image.batch, image.imageId);
+            console.log(metaData, image)
+            let imageMetaData = metaData.find(item => item.metaData.batch === image.batch && item.metaData.imageId === image.imageId);
+            console.log(imageMetaData);
+            if(imageMetaData) {
+                let {metaData, batch, ...cleanedImageMetadata} = imageMetaData;
+                return renderLabels(cleanedImageMetadata);
+            } else {
+                return undefined;
+            }
         });
         setSelectedLabels(labels);
     };
+
+    const renderLabels = (imageMetaData) => {
+        // needed: path, name, value
+        let res = [];
+        const traverse = (node, path) => {
+            let keys = Object.keys(node);
+            for (let key of keys) {
+                let newPath = path == '' ? key : path + '.' + key;
+                if (typeof (node[key]) !== 'object') {
+                    res.push({ path: newPath, value: node[key], name: key });
+                } else {
+                    traverse(node[key], newPath);
+                }
+            }
+        }
+        traverse(imageMetaData, '');
+        Utils.uniqueName(res);
+        return res;
+    }
 
     const handleSave = () => {
         // const updatedMetaData = selectedImages.map((image, index) => ({
         //     image,
         //     label: metaData[index]?.label || '',
         // }));
-        messageApi.warning('There are some issues with this feature. They will be fixed in hours.');
-        // onSave(updatedMetaData);
-        // onClose();
+        // messageApi.warning('There are some issues with this feature. They will be fixed in hours.');
+        onSave({updatedMetaData: updatedMetaData ? updatedMetaData : metaData, textAreaValue});
+        onClose();
     };
 
-    const handleLabelChange = (index, value) => {
-        const updatedMetaData = [...metaData];
-        updatedMetaData[index].label = value;
-        onSave(updatedMetaData);
+    const handleLabelChange = (index, path, value) => {
+        let newMetadata = Utils.deepClone(updatedMetaData);
+        let tmp = newMetadata[index];
+        let keys = path.split('.');
+        keys.forEach((key, i) => {
+            if (i === keys.length - 1) {
+                tmp[key] = value;
+            } else {
+                tmp = tmp[key];
+            }
+        });
+        setUpdatedMetaData(newMetadata);
     };
 
     return (
         isOpen && (
             <div className='modalContainer'>
                 <div className="icons">
-                    <RedoOutlined onClick={selectRandomImages}/>
-                    <CloseOutlined onClick={onClose}/>
+                    <RedoOutlined onClick={selectRandomImages} />
+                    <CloseOutlined onClick={onClose} />
                 </div>
                 {selectedImages.length > 0 ? <div className="imageGallery">
                     {selectedImages.map((image, index) => (
                         <div key={index} className="imageItem">
                             <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.imageId}`} />
-                            {selectedLabels[index] && Object.keys(selectedLabels[index]).length > 0 && (
+                            {selectedLabels[index] && selectedLabels[index].length > 0 && (
                                 <div className="labelContainer">
-                                    {Object.keys(selectedLabels[index]).map((key) => (
-                                        <div key={key} className="labelItem">
-                                            <b>{key}:</b>
+                                    {selectedLabels[index].map((item) => item && (
+                                        <div key={String(index) + String(item.path)} className="labelItem">
+                                            <b>{item.name}:</b>
                                             <Input
-                                                defaultValue={selectedLabels[index][key].value}
-                                                onChange={(e) => handleLabelChange(index, e.target.value)}
+                                                defaultValue={item.value}
+                                                onChange={(e) => handleLabelChange(index, item.path, e.target.value)}
                                                 className="labelInput"
                                             />
                                         </div>
@@ -86,8 +123,8 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
                     ))}
                 </div> : <i>No images available. Please generate images first.</i>}
                 <div className="comments">
-                    <h3 style={{'float': 'left'}}> Comments for the LLM (optional) </h3>
-                    <Input.TextArea 
+                    <h3 style={{ 'float': 'left' }}> Comments for the LLM (optional) </h3>
+                    <Input.TextArea
                         placeholder="Briefly describe your expectations for the LLMs here."
                         value={textAreaValue}
                         onChange={handleChange}

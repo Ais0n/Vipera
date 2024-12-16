@@ -148,6 +148,18 @@ function getMetaDatafromGraph(graph, batch, imageId) {
         }
     }
     traverseGraph(curNode, res, "");
+    uniqueName(res);
+    let ans = {};
+    res.forEach(item => {
+        if (!ans[item.name]) {
+            ans[item.name] = {};
+        }
+        ans[item.name] = item.values;
+    });
+    return ans;
+}
+
+function uniqueName(res) {
     const extendName = (path, name) => {
         let nodes = path.split("."), tmpName = "";
         for (let i = nodes.length - 1; i >= 0; i--) {
@@ -183,14 +195,6 @@ function getMetaDatafromGraph(graph, batch, imageId) {
             group[name] = undefined;
         }
     }
-    let ans = {};
-    res.forEach(item => {
-        if (!ans[item.name]) {
-            ans[item.name] = {};
-        }
-        ans[item.name] = item.values;
-    });
-    return ans;
 }
 
 function getImageMetadata(graph, batch, imageId) {
@@ -351,4 +355,4 @@ const repairDataWithSchema = (data, schema) => {
     traverse(result, schema);
     return result;
 }
-export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema };
+export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName };
