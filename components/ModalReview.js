@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Input, Button, Image } from 'antd';
+import { Modal, Input, Button, Image, message } from 'antd';
 import { RedoOutlined, CloseOutlined } from '@ant-design/icons';
 import * as Utils from '../utils.js';
 
@@ -7,6 +7,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
     const [selectedImages, setSelectedImages] = useState([]);
     const [selectedLabels, setSelectedLabels] = useState([]);
     const [textAreaValue, setTextAreaValue] = useState('');
+    const [messageApi, contextHolder] = message.useMessage();
 
     const handleChange = (e) => {
         setTextAreaValue(e.target.value);
@@ -41,12 +42,13 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
     };
 
     const handleSave = () => {
-        const updatedMetaData = selectedImages.map((image, index) => ({
-            image,
-            label: metaData[index]?.label || '',
-        }));
-        onSave(updatedMetaData);
-        onClose();
+        // const updatedMetaData = selectedImages.map((image, index) => ({
+        //     image,
+        //     label: metaData[index]?.label || '',
+        // }));
+        messageApi.warning('There are some issues with this feature. They will be fixed in hours.');
+        // onSave(updatedMetaData);
+        // onClose();
     };
 
     const handleLabelChange = (index, value) => {
@@ -91,6 +93,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
                         onChange={handleChange}
                     ></Input.TextArea>
                 </div>
+                {contextHolder}
                 <Button type="primary" onClick={handleSave}>Save</Button>
                 <style jsx>{`
                     .modalContainer {
