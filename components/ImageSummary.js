@@ -73,17 +73,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
 
     const handleImageHover = (e, d) => {
         console.log(e, d);
-        let graphMetadata = Utils.getMetaDatafromGraph(graph, d.batch, d.imageId);
-        console.log(graphMetadata);
-        let imageMetadata = {};
-        for (let key in graphMetadata) {
-            let values = Object.values(graphMetadata[key]);
-            let imageValue = graphMetadata[key][JSON.stringify({ batch: d.batch, imageId: d.imageId })];
-            imageMetadata[key] = {
-                value: `${key}: ${imageValue}`,
-                percentage: values.filter(val => val === imageValue).length / values.length
-            }
-        }
+        let imageMetadata = Utils.getImageMetadata(graph, d.batch, d.imageId);
         setImageTooltip({
             visible: true,
             x: e.pageX + 15,

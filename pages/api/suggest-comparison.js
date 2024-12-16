@@ -3,9 +3,10 @@ import JSON5 from 'json5';
 import { createCanvas, loadImage } from 'canvas'; // Ensure you install 'canvas' package
 import Replicate from "replicate";
 import fs from 'fs';
+import { fal } from "@fal-ai/client";
 
-const replicate = new Replicate({
-    auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
+fal.config({
+  credentials: process.env.NEXT_FAL_AI_KEY
 });
 
 const getImageData = async (imagePath) => {
@@ -71,32 +72,28 @@ async function suggestComparison(imageData, schema) {
     for (let i = 0; i < maxTries; i++) {
         try {
             const input = {
-                image: imageData,
+                image_url: imageData,
                 top_p: 1,
                 prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that can be added to the children of an existing node in the tree (the two images should be *significantly different* in terms of the additional node so that the difference is meaningful for auditing; and the node to be added must be *different* from the nodes in the tree).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
                 max_tokens: 1024,
                 temperature: 0.6
             };
-            let output = await replicate.run(
-                "yorickvp/llava-13b:80537f9eead1a5bfa72d5ac6ea6414379be41d4d4f6679fd776e9535d1eb58bb",
-                { input }
-            );
+            const {request_id} = await fal.queue.submit("fal-ai/llava-next", {
+                input: input,
+                webhookUrl: "https://optional.webhook.url/for/results",
+              });
+            
+            let status;
+            do {
+                status = await fal.queue.status("fal-ai/llava-next", { requestId: request_id, logs: true });
+                // console.log(status);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+            } while (status.status !== 'COMPLETED');
 
-            // const input = {
-            //     image: imageData,
-            //     caption: false,
-            //     question: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that is NOT already in the tree and can be added to the children of an existing node in the tree (the two images should be different in terms of the additional node).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...]}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
-            //     temperature: 0.6,
-            //     use_nucleus_sampling: false
-            // }
-            // let output = await replicate.run(
-            //     "andreasjansson/blip-2:f677695e5e89f8b236e52ecd1d3f01beb44c34606419bcc19345e046d8f786f9",
-            //     {
-            //       input
-            //     }
-            // );
-
-            output = output.join("");
+            // Fetch the result
+            let { data: output } = await fal.queue.result("fal-ai/llava-next", { requestId: request_id });
+            output = output.output;
+            
             console.log("input: ", input.prompt)
             console.log("output: ", output);
             // Find the JSON part from the output

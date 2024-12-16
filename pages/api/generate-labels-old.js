@@ -5,10 +5,9 @@ import axios from 'axios';
 import JSON5 from 'json5';
 import * as Utils from '../../utils.js';
 import fs from 'fs';
-import { fal } from "@fal-ai/client";
 
-fal.config({
-  credentials: process.env.NEXT_FAL_AI_KEY
+const replicate = new Replicate({
+    auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
 });
 
 export default async function handler(req, res) {
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
             result = JSON.parse(JSON.stringify(result).toLowerCase());
 
             // save result to label_dir
-            if (label_dir && process.env.SAVE_MODE == 'true') {
+            if (label_dir) {
                 let promise = new Promise(async (resolve, reject) => {
                     let file_path = path.join(process.cwd(), 'public', label_dir);
                     // read the existing file
@@ -70,29 +69,18 @@ async function generateLabel(imageData, schema, candidateValues) {
     for (let i = 0; i < maxTries; i++) {
         try {
             const input = {
-                image_url: imageData,
+                image: imageData,
                 top_p: 1,
                 // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
                 prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the placeholder value '...' with the generated label. All labels must be strings, and should NOT be numbers, booleans, or arrays. (${candidateValues ? 'You are required to choose from the following values: ' + candidateValues : ''}) If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Your output should *NOT* include the placeholder '...'. Schema: ${schema}`,
                 max_tokens: 1024,
                 temperature: 0.8
             };
-            const {request_id} = await fal.queue.submit("fal-ai/llava-next", {
-                input: input,
-                webhookUrl: "https://optional.webhook.url/for/results",
-              });
-            
-            let status;
-            do {
-                status = await fal.queue.status("fal-ai/llava-next", { requestId: request_id, logs: true });
-                // console.log(status);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-            } while (status.status !== 'COMPLETED');
-
-            // Fetch the result
-            let { data: output } = await fal.queue.result("fal-ai/llava-next", { requestId: request_id });
-            output = output.output;
-
+            let output = await replicate.run(
+                "yorickvp/llava-v1.6-34b:41ecfbfb261e6c1adf3ad896c9066ca98346996d7c4045c5bc944a79d430f174",
+                { input }
+            );
+            output = output.join("");
             console.log("input:", input.prompt);
             console.log("output:", output);
             // Find the JSON part from the output
