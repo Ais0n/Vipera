@@ -1,6 +1,6 @@
 Vipera
 
-This is a simple React powered NextJS App.
+This is a simple React powered NextJS Application.
 
 Instructions:
 1. Install latest NodeJS (any v20+)
