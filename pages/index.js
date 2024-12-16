@@ -2,7 +2,7 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Header from '../components/Header';
 import HomeDescription from '../components/HomeDescription';
-import GoToOuroboros from '../components/GoToOuroboros';
+import GoToVipera from '../components/GoToVipera';
 import GoToDiscussionForum from '../components/GoToDiscussionForum';
 import Footer from '../components/Footer';
 
@@ -37,7 +37,7 @@ const Home = () => {
             </div>
             <div className={styles.navButtons}>
               <div className={styles.genPageButton1}>
-                <GoToOuroboros />
+                <GoToVipera />
               </div>
               <div className={styles.genPageButton2}>
                 <GoToDiscussionForum />

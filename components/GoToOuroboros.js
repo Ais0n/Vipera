@@ -1,9 +1,9 @@
-// components/GoToOuroboros.js
+// components/GoToVipera.js
 
 import React from 'react';
 import styles from '../styles/HomeButton.module.css';
 
-const GoToOuroboros = () => {
+const GoToVipera = () => {
     return (
       <>
       <a className={styles.no_underline} href="decoupled">
@@ -12,7 +12,7 @@ const GoToOuroboros = () => {
                 <img src={'/Obby.svg'} alt="obby" />
             </div>
             <div className={styles.text_ouroboros}>
-              Go to Ouroboros
+              Go to Vipera
             </div>
         </div>
       </a>
@@ -20,4 +20,4 @@ const GoToOuroboros = () => {
     );
 };
 
-export default GoToOuroboros;
+export default GoToVipera;
