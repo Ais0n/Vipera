@@ -9,20 +9,18 @@ import GenerateState from '../components/GenerateState';
 import Footer from '../components/Footer';
 import style from '../styles/GeneratePage.module.css';
 import axios from 'axios';
-import { testData } from '../testData.js';
-import SceneGraph from '../components/SceneGraph.js';
 import ProcessingIndicator from '../components/Processing.js';
 import ImageSummary from '../components/ImageSummary.js';
 import * as Utils from '../utils.js';
 import * as nanoid from 'nanoid';
 import ModalReview from '../components/ModalReview.js';
+import { message } from 'antd';
 
 const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDoneGenerating, setIsDoneGenerating] = useState(true);
   const [isDoneImage, setIsDoneImage] = useState(true);
   const [isDoneSceneGraph, setIsDoneSceneGraph] = useState(false);
-  const [error, setError] = useState('');
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
@@ -41,6 +39,8 @@ const Generate = () => {
   const [groups, setGroups] = useState([]);
   const [reviewPanelVisible, setReviewPanelVisible] = useState(false);
   const [userFeedback, setUserFeedback] = useState('');
+  const [failedImageIds, setFailedImageIds] = useState([]);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -57,94 +57,129 @@ const Generate = () => {
 
   let image_num = imageNum, IMAGE_DIR = '', DATE = '';
 
-  async function generateNewImages(imageIds, userInput, newImages) { // newImages: array to store the images after the generation
-    const batchSize = 1; // Number of images to generate in one batch
-    const imageBatches = [];
+  // Function to generate a single image
+  async function generateImage(imageId, userInput, maxTries = 10) {
+    const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&image_id=${imageId}`;
+    let tryCount = 0;
 
-    // Split the imageIds into batches
-    for (let i = 0; i < imageIds.length; i += batchSize) {
-      imageBatches.push(imageIds.slice(i, i + batchSize));
-    }
-
-    const imagePromises = imageBatches.map(async (batch) => {
-      const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&num_outputs=${batch.length}&image_ids=${batch.join('|')}`;
-
-      let response;
-      const maxTries = 10;
-      let tryCount = 0;
-
-      do {
-        try {
-          response = await axios.get(genImageUrl);
-        } catch (error) {
-          if (tryCount >= maxTries) {
-            console.error(`Error generating images for batch: ${batch}`, error);
-            throw new Error(`Failed to generate images for batch (max tries reached): ${batch}`);
-          }
+    while (tryCount < maxTries) {
+      try {
+        const response = await axios.get(genImageUrl);
+        if (response.status === 200) {
+          return response.data.image_path; // Assuming this is an array of image paths
         }
-        tryCount++;
-      } while (response?.status !== 200 && tryCount < maxTries);
-
-      if (response?.status === 200) {
-        const imagePaths = response.data.image_path; // Assuming response returns an array of paths
-
-        // Fetch image data for each path in the batch
-        const imageDataPromises = imagePaths.map(async (image_path, index) => {
-          try {
-            const imageData = await axios.get(image_path, { responseType: 'arraybuffer' });
-            const base64Image = Utils.arrayBufferToBase64(imageData.data);
-            return { batch: prompts.length + 1, imageId: batch[index], data: base64Image, path: image_path };
-          } catch (error) {
-            console.error(`Error fetching image data for ID: ${batch[index]}`, error);
-            throw new Error(`Failed to fetch image data for ID: ${batch[index]}`);
-          }
-        });
-
-        return Promise.all(imageDataPromises);
-      } else {
-        console.error(response);
-        throw new Error(`Failed to generate images for batch: ${batch}`);
+      } catch (error) {
+        console.warn(`Attempt ${tryCount + 1} failed for imageId: ${imageId}`, error);
       }
-    });
-
-    try {
-      // const results = await Promise.allSettled(imagePromises);
-      // const flattenedImages = [];
-      // let num_of_promises_finished = 0;
-
-      // results.forEach(result => {
-      //   if (result.status === 'fulfilled') {
-      //     flattenedImages.push(...result.value); // Assuming result.value is an array
-      //     num_of_promises_finished++;
-      //     setStatusInfo("Generate images: " + String(num_of_promises_finished) + "/" + String(imageIds.length));
-      //   } else {
-      //     console.error('Image processing failed:', result.reason);
-      //   }
-      // });
-      // newImages = [...newImages, ...flattenedImages];
-      let generatedCount = 0;
-      imagePromises.forEach(promise => {
-        promise.then(result => {
-          console.log(result)
-          result.forEach(r => {
-            newImages = [...newImages, r];
-            generatedCount++;
-          });
-          setStatusInfo("Generate images: " + generatedCount + "/" + String(imageIds.length));
-        })
-      });
-
-      // Wait for all promises to complete
-      await Promise.all(imagePromises);
-    } catch (error) {
-      console.error(error);
-      setIsGenerating(false);
-      setIsDoneGenerating(true);
+      tryCount++;
     }
-    return newImages;
+
+    console.error(`Failed to generate image after ${maxTries} tries: imageId ${imageId}`);
+    return null; // Indicate failure
   }
 
-  async function getExistingImages(imageIds, newImages) {
+  // Function to fetch a single image's data
+  async function fetchImageData(imagePath) {
+    try {
+      const response = await axios.get(imagePath, { responseType: "arraybuffer" });
+      return Utils.arrayBufferToBase64(response.data);
+    } catch (error) {
+      console.error(`Error fetching image data for path: ${imagePath}`, error);
+      return null; // Indicate failure
+    }
+  }
+
+  // Main function to generate new images
+  async function generateNewImages(imageIds, userInput, batch) {
+    let newImages = [];
+    const maxTries = 10;
+    const failedImages = []; // Keep track of failed image IDs
+
+    // Generate images in parallel
+    const generationResults = await Promise.all(
+      imageIds.map(async (imageId) => {
+        const imagePath = await generateImage(imageId, userInput, maxTries);
+
+        if (!imagePath) {
+          failedImages.push(imageId); // Track failed generation
+          return null;
+        }
+
+        const base64Data = await fetchImageData(imagePath);
+        if (!base64Data) {
+          failedImages.push(imageId); // Track failed fetch
+          return null;
+        }
+        return {
+          batch,
+          imageId,
+          data: base64Data,
+          path: imagePath,
+        };
+      })
+    );
+
+    // Flatten the results and add to `newImages`
+    const successfulImages = generationResults
+      .flat()
+      .filter((result) => result !== null);
+
+    newImages.push(...successfulImages);
+
+    // Log status
+    console.log(
+      `Generation complete: ${successfulImages.length} succeeded, ${failedImages.length} failed.`
+    );
+
+    // Allow user to regenerate failed images
+    if (failedImages.length > 0) {
+      console.warn(String(failedImages.length) + " images failed to generate or fetch:", failedImages);
+      messageApi.error(
+        `${failedImages.length} images failed. You can retry generating the failed ones.`
+      );
+    }
+
+    return {
+      newImages,
+      failedImages, // Return failed images for potential regeneration
+    };
+  }
+
+  // Retry failed images
+  async function retryFailedImages(failedImageIds) {
+    if (failedImageIds.length === 0) {
+      console.log("No failed images to retry.");
+      return;
+    }
+
+    try {
+      console.log(`Retrying failed images: ${failedImageIds}`);
+      setStatusInfo("Retrying failed images...");
+
+      const { newImages: retriedImages, failedImages: stillFailed } = await generateNewImages(
+        failedImageIds,
+        promptStr,
+        prompts.length
+      );
+
+      // Update state
+      setImages((prevImages) => [...prevImages, ...retriedImages]);
+      setFailedImageIds(stillFailed);
+
+      if (stillFailed.length > 0) {
+        console.error("Some images still failed after retry:", stillFailed);
+        messageApi.error("Some images still failed after retry. You can retry again.");
+      } else {
+        messageApi.success("All failed images have been successfully regenerated.");
+      }
+    } catch (error) {
+      console.error("Error while retrying failed images:", error);
+      messageApi.error("An error occurred while retrying failed images.");
+    }
+  }
+
+  async function getExistingImages(imageIds) {
+    let newImages = [];
     for (let imageId of imageIds) {
       const genImageUrl = `/temp_images${IMAGE_DIR}/${imageId}.png`;
       const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
@@ -296,8 +331,14 @@ const Generate = () => {
 
         if (isGenerateNeeded) {
           let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}&feedback=${userFeedback}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
-          response = await axios.get(getLabelURL);
-          data = response.data.res;
+          try {
+            response = await axios.get(getLabelURL);
+            data = response.data.res;
+          } catch (error) {
+            console.error('Error generating labels:', error);
+            messageApi.error('Error generating labels');
+            return {};
+          }
         }
 
         console.log("before remove", data, graphSchema);
@@ -334,110 +375,182 @@ const Generate = () => {
     return _metaData;
   }
 
+  const handleGenerateClick = async (userInput) => {
+    console.log("User input:", userInput);
 
-  const handleGenerateClick = async (userInput, append = false) => {
-    console.log(userInput)
+    // Early exit conditions
     if (isGenerating || userInput.trim() === "") {
-      console.debug("Either generation in progress or user input is empty.");
+      console.debug("Either a generation is in progress or the user input is empty.");
       return;
     }
 
+    // Initialize state
+    initializeGenerationState();
+
+    // Format user input for directory
+    const IMAGE_DIR = `/${userInput.toLowerCase().replace(/ /g, "_")}`;
+
+    try {
+      // Step 1: Get or generate image IDs
+      const imageIds = await getImageIds(userInput, IMAGE_DIR);
+
+      // Step 2: Generate or fetch images
+      const { newImages, failedImages } = await handleImageGeneration(userInput, imageIds);
+
+      setImages((prevImages) => [...prevImages, ...newImages]);
+      setFailedImageIds(failedImages);
+
+      if (failedImages.length > 0) {
+        throw new Error("Some images failed. You can retry generating them.");
+      }
+
+      // Proceed to further steps only if there are new images
+      if (newImages.length > 0) {
+        // Step 3: Try generating the scene graph
+        await trySceneGraphGeneration(newImages);
+
+        // Step 4: Try generating metadata
+        await tryMetadataGeneration(newImages);
+      }
+
+      setPrompts((prevPrompts) => [...prevPrompts, userInput]);
+      setIsDoneGenerating(true);
+    } catch (error) {
+      console.error("Error during generation process:", error);
+      messageApi.error(error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  //
+  // Helper Functions
+  //
+
+  // Initialize state for the generation process
+  const initializeGenerationState = () => {
     setIsGenerating(true);
     setIsDoneGenerating(false);
     setIsDoneImage(false);
     setIsDoneSceneGraph(false);
-    setStatusInfo("Start generating images...");
+    setStatusInfo("Starting image generation...");
+    setFailedImageIds([]);
+  };
 
-    setError('');
-
-    // Generate image IDs
-    IMAGE_DIR = '/' + userInput.toLowerCase().replace(/ /g, '_');
-    let imageIds = [];
-    let isImagesExist = false;  // check if there are already images in IMAGE_DIR
-    let checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
-    let response = await axios.get(checkUrl);
-    if (response.data.res) {
-      imageIds = response.data.res.map(item => {
-        return item.substring(0, item.length - 4); // remove the suffix .png
-      });
-      if (imageIdMap[userInput] == undefined) {
-        imageIds = imageIds.slice(0, image_num);
-        let tmp = { ...imageIdMap };
-        tmp[userInput] = image_num;
-        setImageIdMap(tmp);
-      } else {
-        imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num);
-        let tmp = { ...imageIdMap };
-        tmp[userInput] += image_num;
-        setImageIdMap(tmp);
-      }
-    }
-
-    isImagesExist = (imageIds.length == image_num);
-
-    if (!isImagesExist) {
-      imageIds = [];
-      for (let i = 0; i < image_num; i++) {
-        imageIds.push(userInput.replace(/ /g, '_') + '_' + String(i));
-      }
-    }
-
+  // Step 1: Get or generate image IDs
+  const getImageIds = async (userInput, IMAGE_DIR) => {
     try {
-      // Generate images
-      let newImages = [], allImages = Utils.deepClone(images);
+      const checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
+      const response = await axios.get(checkUrl);
+
+      if (response.data.res) {
+        let imageIds = response.data.res.map((item) => item.replace(/\.png$/, ""));
+        const currentImageIndex = imageIdMap[userInput] || 0;
+
+        // Update image ID map
+        setImageIdMap((prevMap) => ({
+          ...prevMap,
+          [userInput]: currentImageIndex + image_num,
+        }));
+
+        return imageIds.slice(currentImageIndex, currentImageIndex + image_num);
+      } else {
+        // Generate new image IDs if none exist
+        return Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${i}`);
+      }
+    } catch (error) {
+      console.error("Error fetching image IDs:", error);
+      throw new Error("Failed to fetch or generate image IDs.");
+    }
+  };
+
+  // Step 2: Handle image generation
+  const handleImageGeneration = async (userInput, imageIds) => {
+    try {
+      let newImages = [];
+      let failedImages = [];
+
+      // Check if images already exist
+      const isImagesExist = imageIds.length === image_num;
 
       if (isImagesExist) {
-        newImages = await getExistingImages(imageIds, newImages);
+        newImages = await getExistingImages(imageIds);
       } else {
-        newImages = await generateNewImages(imageIds, userInput, newImages);
+        const generatedImages = await generateNewImages(imageIds, userInput, prompts.length + 1);
+        newImages = generatedImages.newImages;
+        failedImages = generatedImages.failedImages;
       }
-      console.log(newImages)
-      allImages = [...allImages, ...newImages];
-      setImages(allImages);
 
-      setIsDoneImage(true);
+      return { newImages, failedImages };
+    } catch (error) {
+      console.error("Error generating images:", error);
+      throw new Error("Failed to generate or fetch images.");
+    }
+  };
+
+  // Try generating the scene graph
+  async function trySceneGraphGeneration(newImages) {
+    try {
       setStatusInfo("Generating scene graph...");
-      if (!useSceneGraph) {
-        setIsGenerating(false);
-        setIsDoneGenerating(true);
-        return;
-      }
-
-      // Generate Scene Graph (Graph Schema)
       let updatedGraphSchema = Utils.deepClone(graphSchema);
-      if (Object.keys(graphSchema).length == 0) {
+
+      // Generate graph schema only if none exists
+      if (Object.keys(graphSchema).length === 0) {
         updatedGraphSchema = await generateGraphSchema(newImages);
         setGraphSchema(updatedGraphSchema);
-        console.log("updatedGraphSchema", updatedGraphSchema);
+        console.log("Updated Graph Schema:", updatedGraphSchema);
       }
 
-      // Generate Meta Data
-      let newMetaData, allMetaData = [];
-      if (prompts.length > 0) {
-        newMetaData = await generateMetaData(newImages, updatedGraphSchema);
-        allMetaData = Utils.deepClone(metaData);
-        allMetaData = [...allMetaData, ...newMetaData];
-        setMetaData(allMetaData);
-        console.log("newMetaData", allMetaData);
-      }
-
-
-      // // update the graph schema with metaData
-      // for (let item of newMetaData) {
-      //   updateGraphSchemaWithMetaData(updatedGraphSchema, item);
-      // }
-
-      // calculate the graph with statistics
-      let _graph = Utils.calculateGraph(allMetaData, updatedGraphSchema, Utils.deepClone(graph));
-      console.log(_graph)
-      setGraph(_graph);
-
-      setPrompts([...prompts, userInput]);
-      setIsGenerating(false);
-      setIsDoneGenerating(true);
+      setIsDoneSceneGraph(true);
     } catch (error) {
-      console.error('Error generating images:', error);
-      throw error;
+      console.error("Error generating scene graph:", error);
+      messageApi.error("Scene graph generation failed. You can retry.");
+      setIsDoneSceneGraph(false);
+    }
+  }
+
+  // Retry scene graph generation
+  async function retrySceneGraphGeneration(newImages) {
+    try {
+      console.log("Retrying scene graph generation...");
+      await trySceneGraphGeneration(newImages);
+      messageApi.success("Scene graph successfully generated on retry.");
+    } catch (error) {
+      console.error("Retry failed for scene graph generation:", error);
+      messageApi.error("Scene graph generation failed again. Please try later.");
+    }
+  }
+
+  // Try generating metadata
+  async function tryMetadataGeneration(newImages) {
+    try {
+      if (prompts.length > 0) {
+        setStatusInfo("Generating metadata...");
+        const newMetaData = await generateMetaData(newImages, graphSchema);
+        const allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
+        setMetaData(allMetaData);
+        console.log("New Metadata:", allMetaData);
+
+        // Update the graph with statistics
+        const updatedGraph = Utils.calculateGraph(allMetaData, graphSchema, Utils.deepClone(graph));
+        setGraph(updatedGraph);
+        console.log("Updated Graph:", updatedGraph);
+      }
+    } catch (error) {
+      console.error("Error generating metadata:", error);
+      messageApi.error("Metadata generation failed. You can retry.");
+    }
+  }
+
+  // Retry metadata generation
+  async function retryMetadataGeneration(newImages) {
+    try {
+      console.log("Retrying metadata generation...");
+      await tryMetadataGeneration(newImages);
+      messageApi.success("Metadata successfully generated on retry.");
+    } catch (error) {
+      console.error("Retry failed for metadata generation:", error);
+      messageApi.error("Metadata generation failed again. Please try later.");
     }
   }
 
@@ -558,15 +671,6 @@ const Generate = () => {
   }
 
   const handleSuggestionButtonClick = (suggestion, type) => {
-    // let oldPrompt = prompts[prompts.length - 1];
-    // let newPrompt = "";
-    // if (suggestion.addValue) {
-    //   newPrompt = oldPrompt + ', ' + suggestion.addValue;
-    // } else if (suggestion.replaceValue) {
-    //   newPrompt = oldPrompt.replace(suggestion.replaceValue, suggestion.newValue);
-    // }
-    // setPromptStr(newPrompt);
-
     if (type == 'promote') {
       handlePromote(suggestion);
     } else if (type == 'external') {
@@ -695,15 +799,16 @@ const Generate = () => {
     console.log(metaData, updatedMetaData)
     setMetaData(updatedMetaData);
     let _graph = Utils.calculateGraph(updatedMetaData, graphSchema, Utils.deepClone(graph));
-      console.log(_graph)
-      setGraph(_graph);
-    if(textAreaValue && textAreaValue !== '') {
+    console.log(_graph)
+    setGraph(_graph);
+    if (textAreaValue && textAreaValue !== '') {
       setUserFeedback(textAreaValue);
     }
   }
 
   return (
     <div>
+      {contextHolder}
       <Header />
       {/* <button onClick={setUseSceneGraph}> Use Scene Graph</button> */}
       {/* <h1 className={style.mainTitle}>Ouroboros</h1> */}
@@ -711,11 +816,9 @@ const Generate = () => {
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} />
+      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} />
 
-
-      {error && <p>{error}</p>}
-      {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible}/>}
+      {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible} />}
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
         {/* <div className={style.imageView}>

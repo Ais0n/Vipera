@@ -67,6 +67,7 @@
 
 .generateContainer {
   margin-top: 28px;
+  margin-bottom: 28px;
   display: flex;
   flex-direction: row; /* Stack children horizontally */
   position: relative;

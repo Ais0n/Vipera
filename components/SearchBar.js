@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
+import { Alert, Button } from 'antd';
 
-function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum }) {
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum, failedImageIds, retryFailedImages }) {
   // const [inputValue, setInputValue] = useState('');
   const [showPrompts, setShowPrompts] = useState(false); // show example prompts or not
 
@@ -73,6 +74,17 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, prompt
             ))}
           </div>
         </div>
+      )}
+      {failedImageIds.length > 0 && (
+        <Alert type="error" message={String(failedImageIds.length) + " images failed. You can retry generating the failed ones."}
+          showIcon
+          action={
+            <Button size="small" type="text" onClick={() => retryFailedImages(failedImageIds)}>
+              Retry
+            </Button>
+          }
+          closable>
+        </Alert>
       )}
     </div>
   );
