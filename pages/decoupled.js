@@ -1,6 +1,6 @@
 // pages/decoupled.js
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import AnalyzeImages from '../components/AnalyzeImages';
@@ -55,7 +55,7 @@ const Generate = () => {
     setSelectedCategory('images');
   };
 
-  let image_num = imageNum, IMAGE_DIR = '', DATE = '';
+  let image_num = imageNum;
 
   // Function to generate a single image
   async function generateImage(imageId, userInput, maxTries = 10) {
@@ -134,9 +134,9 @@ const Generate = () => {
     // Allow user to regenerate failed images
     if (failedImages.length > 0) {
       console.warn(String(failedImages.length) + " images failed to generate or fetch:", failedImages);
-      messageApi.error(
-        `${failedImages.length} images failed. You can retry generating the failed ones.`
-      );
+      // messageApi.error(
+      //   `${failedImages.length} images failed. You can retry generating the failed ones.`
+      // );
     }
 
     return {
@@ -153,8 +153,12 @@ const Generate = () => {
     }
 
     try {
+      initializeGenerationState();
+
       console.log(`Retrying failed images: ${failedImageIds}`);
       setStatusInfo("Retrying failed images...");
+
+      const IMAGE_DIR = `/${promptStr.toLowerCase().replace(/ /g, "_")}`
 
       const { newImages: retriedImages, failedImages: stillFailed } = await generateNewImages(
         failedImageIds,
@@ -171,14 +175,32 @@ const Generate = () => {
         messageApi.error("Some images still failed after retry. You can retry again.");
       } else {
         messageApi.success("All failed images have been successfully regenerated.");
+        // Proceed to further steps only if there are new images
+        if (retriedImages.length > 0) {
+          // Step 3: Try generating the scene graph
+          const updatedGraphSchema = await trySceneGraphGeneration(retriedImages, IMAGE_DIR);
+
+          
+          if (updatedGraphSchema === null) {
+            throw new Error("Scene graph generation failed. You can retry.");
+          } 
+          
+          // Step 4: Try generating metadata
+          await tryMetadataGeneration(retriedImages, updatedGraphSchema);
+        }
+
+        setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
       }
     } catch (error) {
       console.error("Error while retrying failed images:", error);
       messageApi.error("An error occurred while retrying failed images.");
+    } finally {
+      setIsGenerating(false);
+      setIsDoneGenerating(true);
     }
   }
 
-  async function getExistingImages(imageIds) {
+  async function getExistingImages(imageIds, IMAGE_DIR) {
     let newImages = [];
     for (let imageId of imageIds) {
       const genImageUrl = `/temp_images${IMAGE_DIR}/${imageId}.png`;
@@ -190,7 +212,7 @@ const Generate = () => {
     return newImages;
   }
 
-  const generateGraphSchema = async (images) => {
+  const generateGraphSchema = async (images, IMAGE_DIR) => {
     let sample_size = 1;
     // randomly sample images
     let sampleImages = [];
@@ -388,14 +410,14 @@ const Generate = () => {
     initializeGenerationState();
 
     // Format user input for directory
-    const IMAGE_DIR = `/${userInput.toLowerCase().replace(/ /g, "_")}`;
+    const IMAGE_DIR = `/${userInput.toLowerCase().replace(/ /g, "_")}`
 
     try {
       // Step 1: Get or generate image IDs
-      const imageIds = await getImageIds(userInput, IMAGE_DIR);
+      const { isImagesExist, imageIds} = await getImageIds(userInput, IMAGE_DIR);
 
       // Step 2: Generate or fetch images
-      const { newImages, failedImages } = await handleImageGeneration(userInput, imageIds);
+      const { newImages, failedImages } = await handleImageGeneration(userInput, IMAGE_DIR, isImagesExist, imageIds);
 
       setImages((prevImages) => [...prevImages, ...newImages]);
       setFailedImageIds(failedImages);
@@ -407,19 +429,24 @@ const Generate = () => {
       // Proceed to further steps only if there are new images
       if (newImages.length > 0) {
         // Step 3: Try generating the scene graph
-        await trySceneGraphGeneration(newImages);
+        const updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
 
+        
+        if(updatedGraphSchema === null) {
+          throw new Error("Scene graph generation failed. You can retry.");
+        } 
+        
         // Step 4: Try generating metadata
-        await tryMetadataGeneration(newImages);
+        await tryMetadataGeneration(newImages, updatedGraphSchema);
       }
 
       setPrompts((prevPrompts) => [...prevPrompts, userInput]);
-      setIsDoneGenerating(true);
     } catch (error) {
       console.error("Error during generation process:", error);
-      messageApi.error(error.message);
+      // messageApi.error(error.message);
     } finally {
       setIsGenerating(false);
+      setIsDoneGenerating(true);
     }
   };
 
@@ -440,24 +467,50 @@ const Generate = () => {
   // Step 1: Get or generate image IDs
   const getImageIds = async (userInput, IMAGE_DIR) => {
     try {
+      let isImagesExist, imageIds;
       const checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
       const response = await axios.get(checkUrl);
 
-      if (response.data.res) {
-        let imageIds = response.data.res.map((item) => item.replace(/\.png$/, ""));
-        const currentImageIndex = imageIdMap[userInput] || 0;
+      // if (response.data.res) {
+      //   let imageIds = response.data.res.map((item) => item.replace(/\.png$/, ""));
+      //   const currentImageIndex = imageIdMap[userInput] || 0;
 
-        // Update image ID map
-        setImageIdMap((prevMap) => ({
-          ...prevMap,
-          [userInput]: currentImageIndex + image_num,
-        }));
+      //   // Update image ID map
+      //   setImageIdMap((prevMap) => ({
+      //     ...prevMap,
+      //     [userInput]: currentImageIndex + image_num,
+      //   }));
 
-        return imageIds.slice(currentImageIndex, currentImageIndex + image_num);
+      //   return imageIds.slice(currentImageIndex, currentImageIndex + image_num);
+      // } else {
+      //   // Generate new image IDs if none exist
+      //   return Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${i}`);
+      // }
+
+      if (response.data.res instanceof Array) { // the image ids exist
+        isImagesExist = true;
+        imageIds = response.data.res.map(item => {
+          return item.substring(0, item.length - 4); // remove the suffix .png
+        });
+        if (imageIdMap[userInput] == undefined) {
+          imageIds = imageIds.slice(0, image_num);
+          let tmp = { ...imageIdMap };
+          tmp[userInput] = image_num;
+          setImageIdMap(tmp);
+        } else {
+          imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num);
+          let tmp = { ...imageIdMap };
+          tmp[userInput] += image_num;
+          setImageIdMap(tmp);
+        }
+        return {isImagesExist, imageIds};
+      } else if (response.data.res === null) {
+        isImagesExist = false;
+        imageIds = Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${i}`);
       } else {
-        // Generate new image IDs if none exist
-        return Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${i}`);
+        throw new Error("Failed to check if the images already exist");
       }
+      return {isImagesExist, imageIds};
     } catch (error) {
       console.error("Error fetching image IDs:", error);
       throw new Error("Failed to fetch or generate image IDs.");
@@ -465,16 +518,13 @@ const Generate = () => {
   };
 
   // Step 2: Handle image generation
-  const handleImageGeneration = async (userInput, imageIds) => {
+  const handleImageGeneration = async (userInput, IMAGE_DIR, isImagesExist, imageIds) => {
     try {
       let newImages = [];
       let failedImages = [];
 
-      // Check if images already exist
-      const isImagesExist = imageIds.length === image_num;
-
       if (isImagesExist) {
-        newImages = await getExistingImages(imageIds);
+        newImages = await getExistingImages(imageIds, IMAGE_DIR);
       } else {
         const generatedImages = await generateNewImages(imageIds, userInput, prompts.length + 1);
         newImages = generatedImages.newImages;
@@ -488,32 +538,34 @@ const Generate = () => {
     }
   };
 
-  // Try generating the scene graph
-  async function trySceneGraphGeneration(newImages) {
+  // Step 3: Try generating the scene graph
+  async function trySceneGraphGeneration(newImages, IMAGE_DIR) {
     try {
       setStatusInfo("Generating scene graph...");
       let updatedGraphSchema = Utils.deepClone(graphSchema);
 
       // Generate graph schema only if none exists
       if (Object.keys(graphSchema).length === 0) {
-        updatedGraphSchema = await generateGraphSchema(newImages);
+        updatedGraphSchema = await generateGraphSchema(newImages, IMAGE_DIR);
         setGraphSchema(updatedGraphSchema);
         console.log("Updated Graph Schema:", updatedGraphSchema);
       }
 
       setIsDoneSceneGraph(true);
+      return updatedGraphSchema;
     } catch (error) {
       console.error("Error generating scene graph:", error);
       messageApi.error("Scene graph generation failed. You can retry.");
       setIsDoneSceneGraph(false);
+      return null;
     }
   }
 
   // Retry scene graph generation
-  async function retrySceneGraphGeneration(newImages) {
+  async function retrySceneGraphGeneration(newImages, IMAGE_DIR) {
     try {
       console.log("Retrying scene graph generation...");
-      await trySceneGraphGeneration(newImages);
+      await trySceneGraphGeneration(newImages, IMAGE_DIR);
       messageApi.success("Scene graph successfully generated on retry.");
     } catch (error) {
       console.error("Retry failed for scene graph generation:", error);
@@ -522,20 +574,22 @@ const Generate = () => {
   }
 
   // Try generating metadata
-  async function tryMetadataGeneration(newImages) {
+  async function tryMetadataGeneration(newImages, updatedGraphSchema) {
     try {
+      // Generate Meta Data
+      let newMetaData, allMetaData = [];
       if (prompts.length > 0) {
         setStatusInfo("Generating metadata...");
-        const newMetaData = await generateMetaData(newImages, graphSchema);
-        const allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
+        newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+        allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
         setMetaData(allMetaData);
         console.log("New Metadata:", allMetaData);
-
-        // Update the graph with statistics
-        const updatedGraph = Utils.calculateGraph(allMetaData, graphSchema, Utils.deepClone(graph));
-        setGraph(updatedGraph);
-        console.log("Updated Graph:", updatedGraph);
       }
+
+      // Update the graph with statistics
+      const updatedGraph = Utils.calculateGraph(allMetaData, updatedGraphSchema, Utils.deepClone(graph));
+      setGraph(updatedGraph);
+      console.log("Updated Graph:", updatedGraph);
     } catch (error) {
       console.error("Error generating metadata:", error);
       messageApi.error("Metadata generation failed. You can retry.");
