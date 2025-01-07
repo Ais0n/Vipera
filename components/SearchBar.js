@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
 import { Alert, Button } from 'antd';
 
-function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum, failedImageIds, retryFailedImages }) {
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum, failedImageIds, retryFailedImages, retrySceneGraphContext, retrySceneGraphGeneration, failedImageIdsForMetadata, retryMetadataGeneration }) {
   // const [inputValue, setInputValue] = useState('');
   const [showPrompts, setShowPrompts] = useState(false); // show example prompts or not
 
@@ -80,6 +80,28 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, prompt
           showIcon
           action={
             <Button size="small" type="text" onClick={() => retryFailedImages(failedImageIds)}>
+              Retry
+            </Button>
+          }
+          closable>
+        </Alert>
+      )}
+      {retrySceneGraphContext && (
+        <Alert type="error" message="Scene graph generation failed. Please retry."
+          showIcon
+          action={
+            <Button size="small" type="text" onClick={() => retrySceneGraphGeneration(retrySceneGraphContext.newImages, retrySceneGraphContext.IMAGE_DIR)}>
+              Retry
+            </Button>
+          }
+          closable>
+        </Alert>
+      )}
+      {failedImageIdsForMetadata.length > 0 && (
+        <Alert type="error" message={String(failedImageIdsForMetadata.length) + " images failed. You can retry generating metadata for the failed ones."}
+          showIcon
+          action={
+            <Button size="small" type="text" onClick={() => retryMetadataGeneration(failedImageIdsForMetadata)}>
               Retry
             </Button>
           }

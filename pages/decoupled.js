@@ -40,6 +40,9 @@ const Generate = () => {
   const [reviewPanelVisible, setReviewPanelVisible] = useState(false);
   const [userFeedback, setUserFeedback] = useState('');
   const [failedImageIds, setFailedImageIds] = useState([]);
+  const [retrySceneGraphContext, setRetrySceneGraphContext] = useState(false);
+  const [failedImageIdsForMetadata, setFailedImageIdsForMetadata] = useState([]);
+  const [retryMetaDataContext, setRetryMetaDataContext] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
 
   const isDebug = false;
@@ -96,6 +99,7 @@ const Generate = () => {
     const failedImages = []; // Keep track of failed image IDs
 
     // Generate images in parallel
+    let generatedCount = 0;
     const generationResults = await Promise.all(
       imageIds.map(async (imageId) => {
         const imagePath = await generateImage(imageId, userInput, maxTries);
@@ -110,6 +114,9 @@ const Generate = () => {
           failedImages.push(imageId); // Track failed fetch
           return null;
         }
+
+        setStatusInfo(`Generating images: ${++generatedCount}/${imageIds.length}`);
+
         return {
           batch,
           imageId,
@@ -321,7 +328,7 @@ const Generate = () => {
     setIsDoneGenerating(false);
     setStatusInfo("Start generating metadata...");
 
-    let _metaData = [];
+    let _metaData = [], _failedImageIdsForMetadata = [];
     if (isDebug) {
       for (let i = 0; i < metaData.length; i++) {
         _metaData.push(getDataItem(graphSchema, "", metaData[i]));
@@ -358,8 +365,11 @@ const Generate = () => {
             data = response.data.res;
           } catch (error) {
             console.error('Error generating labels:', error);
-            messageApi.error('Error generating labels');
-            return {};
+            // messageApi.error('Error generating labels');
+            return {
+              status: 'failed',
+              imageId: image.imageId,
+            };
           }
         }
 
@@ -372,18 +382,30 @@ const Generate = () => {
           batch: image.batch || prompts.length + 1
         };
 
-        return data;
+        return {
+          status: 'success',
+          data: data
+        };
       });
 
       let generatedCount = 0, results = [];
       promises.forEach(promise => {
         promise.then(result => {
-          results.push(result);
           generatedCount++;
+          if (result.status == 'success') {
+            results.push(result.data);
+          } else {
+            _failedImageIdsForMetadata.push(result.imageId);
+          }
 
           setStatusInfo("Generating metadata: " + generatedCount + "/" + String(promises.length));
         })
       });
+
+      if(_failedImageIdsForMetadata.length > 0) {
+        console.error("Some images failed to generate metadata:", _failedImageIdsForMetadata);
+        // messageApi.error("Some images failed to generate metadata.");
+      }
 
       // Wait for all promises to complete
       await Promise.all(promises);
@@ -394,7 +416,11 @@ const Generate = () => {
     setIsGenerating(false);
     setIsDoneGenerating(true);
 
-    return _metaData;
+    return {
+      status: _failedImageIdsForMetadata.length > 0 ? 'failed' : 'success',
+      data: _metaData,
+      failedImageIdsForMetadata: _failedImageIdsForMetadata
+    };
   }
 
   const handleGenerateClick = async (userInput) => {
@@ -431,8 +457,8 @@ const Generate = () => {
         // Step 3: Try generating the scene graph
         const updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
 
-        
         if(updatedGraphSchema === null) {
+          setRetrySceneGraphContext({newImages, IMAGE_DIR});
           throw new Error("Scene graph generation failed. You can retry.");
         } 
         
@@ -564,26 +590,66 @@ const Generate = () => {
   // Retry scene graph generation
   async function retrySceneGraphGeneration(newImages, IMAGE_DIR) {
     try {
+      initializeGenerationState();
       console.log("Retrying scene graph generation...");
-      await trySceneGraphGeneration(newImages, IMAGE_DIR);
-      messageApi.success("Scene graph successfully generated on retry.");
+      const updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
+      if(updatedGraphSchema === null) {
+        setRetrySceneGraphContext({newImages, IMAGE_DIR});
+        throw new Error("Scene graph generation failed. You can retry.");
+      } 
+      setRetrySceneGraphContext(undefined);
+      
+      // Step 4: Try generating metadata
+      await tryMetadataGeneration(newImages, updatedGraphSchema);
+
+      setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
     } catch (error) {
       console.error("Retry failed for scene graph generation:", error);
-      messageApi.error("Scene graph generation failed again. Please try later.");
+      // messageApi.error("Scene graph generation failed again. Please try later.");
+    } finally {
+      setIsGenerating(false);
+      setIsDoneGenerating(true);
     }
   }
 
   // Try generating metadata
-  async function tryMetadataGeneration(newImages, updatedGraphSchema) {
+  async function tryMetadataGeneration(newImages, updatedGraphSchema, candidateValues) {
     try {
       // Generate Meta Data
       let newMetaData, allMetaData = [];
       if (prompts.length > 0) {
         setStatusInfo("Generating metadata...");
-        newMetaData = await generateMetaData(newImages, updatedGraphSchema);
+        let res = await generateMetaData(newImages, updatedGraphSchema, candidateValues);
+        setFailedImageIdsForMetadata(res.failedImageIdsForMetadata);
+        newMetaData = res.data;
+        setRetryMetaDataContext({updatedGraphSchema, candidateValues});
+
+        // merge metadata with old metadata
+        let oldMetaData = Utils.deepClone(metaData);
+        console.log(newMetaData, oldMetaData);
+        newImages.forEach((image, index) => {
+          let newItem = newMetaData.find(item => item.metaData && item.metaData.imageId == image.imageId);
+          let oldItem = oldMetaData.find(item => item.metaData && item.metaData.imageId == image.imageId);
+          if (!newItem) return;
+          if (!oldItem) oldItem = {};
+          let mergedItem = Utils.mergeMetadata(oldItem, newItem);
+          let idx = newMetaData.findIndex(item => item.metaData && item.metaData.imageId == image.imageId);
+          if (idx != -1) {
+            newMetaData[idx] = mergedItem;
+          } else {
+            newMetaData.push(mergedItem);
+          }
+        })
+
         allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
         setMetaData(allMetaData);
         console.log("New Metadata:", allMetaData);
+
+        if(res.status == 'failed') {
+          setIsGenerating(false);
+          setIsDoneGenerating(true);
+          throw new Error("Metadata generation failed. You can retry.");
+        }
       }
 
       // Update the graph with statistics
@@ -592,19 +658,18 @@ const Generate = () => {
       console.log("Updated Graph:", updatedGraph);
     } catch (error) {
       console.error("Error generating metadata:", error);
-      messageApi.error("Metadata generation failed. You can retry.");
+      // messageApi.error("Metadata generation failed. You can retry.");
     }
   }
 
   // Retry metadata generation
-  async function retryMetadataGeneration(newImages) {
+  async function retryMetadataGeneration(imageIds) {
     try {
+      let newImages = images.filter(image => imageIds.includes(image.imageId));
       console.log("Retrying metadata generation...");
-      await tryMetadataGeneration(newImages);
-      messageApi.success("Metadata successfully generated on retry.");
+      await tryMetadataGeneration(newImages, retryMetaDataContext.updatedGraphSchema, retryMetaDataContext.candidateValues);
     } catch (error) {
       console.error("Retry failed for metadata generation:", error);
-      messageApi.error("Metadata generation failed again. Please try later.");
     }
   }
 
@@ -660,7 +725,7 @@ const Generate = () => {
   const handleExternal = async (suggestion) => {
     setIsGenerating(true);
     setIsDoneGenerating(false);
-    setStatusInfo(0);
+    setStatusInfo("Start applying the suggestion...");
     // update the schema (but does not store the new value)
     let updateSchema = (schema, suggestion) => {
       if (typeof (schema) != 'object') return;
@@ -677,7 +742,18 @@ const Generate = () => {
     updateSchema(_graphSchema, suggestion);
     // setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
-    setStatusInfo(50);
+
+    // use the new schema to relabel the images (get new metadata)
+    setStatusInfo("Starting generating metadata for the new schema...");
+    let res = await generateMetaData(images, _graphSchema);
+    if(res.status == 'failed') {
+      setIsGenerating(false);
+      setIsDoneGenerating(true);
+      messageApi.error("Failed to generate metadata for the new schema.");
+      return;
+    }
+    let newMetaData = res.data;
+    setMetaData(newMetaData);
 
     // store the new schema
     setGraphSchema(_graphSchema);
@@ -701,9 +777,7 @@ const Generate = () => {
     console.log(_graph)
     setGraph(_graph);
 
-    // use the new schema to relabel the images (get new metadata)
-    let newMetaData = await generateMetaData(images, _graphSchema);
-    setMetaData(newMetaData);
+    
     setStatusInfo(99);
 
     // update the schema with the new metadata
@@ -779,6 +853,7 @@ const Generate = () => {
       curNode = curNode[pathToRoot[i]];
     }
     curNode[newNodeName] = candidateValues == '' ? [] : candidateValues.split(',');
+
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
     // update the graph
@@ -802,41 +877,51 @@ const Generate = () => {
       curNode[newNodeName] = "...";
       console.log("partialSchema", partialSchema);
       // Generate Meta Data
-      generateMetaData(images, partialSchema, candidateValues).then(labeledSchema => {
-        // setIsGenerating(true);
-        // setIsDoneGenerating(false);
-        // setStatusInfo(50);
-        console.log("labeledSchema", labeledSchema);
-        // update the metadata
-        let newMetaData = Utils.deepClone(metaData);
-        images.forEach((image, index) => {
-          let item = labeledSchema[index];
-          let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.imageId);
-          if (oldMetaData == undefined) {
-            oldMetaData = {};
-          }
-          let res = Utils.mergeMetadata(oldMetaData, item);
-          let idx = newMetaData.findIndex(item => item.metaData.imageId == image.imageId);
-          if (idx != -1) {
-            newMetaData[idx] = res;
-          } else {
-            newMetaData.push(res);
-          }
-        })
+      // const updateMetaData = (resMetaData) => {
+      //   if(resMetaData.status == 'failed') {
+      //     setIsGenerating(false);
+      //     setIsDoneGenerating(true);
+      //     setFailedImageIdsForMetadata(resMetaData.failedImageIdsForMetadata);
+      //     messageApi.error("Failed to generate metadata for the new node.");
+      //     return;
+      //   }
+      //   let labeledSchema = resMetaData.data;
+      //   console.log("labeledSchema", labeledSchema);
+      //   // update the metadata
+      //   let newMetaData = Utils.deepClone(metaData);
+      //   images.forEach((image, index) => {
+      //     let item = labeledSchema[index];
+      //     let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.imageId);
+      //     if (oldMetaData == undefined) {
+      //       oldMetaData = {};
+      //     }
+      //     let res = Utils.mergeMetadata(oldMetaData, item);
+      //     let idx = newMetaData.findIndex(item => item.metaData.imageId == image.imageId);
+      //     if (idx != -1) {
+      //       newMetaData[idx] = res;
+      //     } else {
+      //       newMetaData.push(res);
+      //     }
+      //   })
 
-        setMetaData(newMetaData);
-        console.log("newMetaData", newMetaData);
-        // update the graph
-        _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
-        console.log("newgraph", _graph)
-        setGraph(_graph);
+      //   setMetaData(newMetaData);
+      //   console.log("newMetaData", newMetaData);
+      //   // update the graph
+      //   _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
+      //   console.log("newgraph", _graph)
+      //   setGraph(_graph);
 
-        // setIsGenerating(false);
-        // setIsDoneGenerating(true);
-        // setSwitchChecked(true);
-      })
+      //   // setIsGenerating(false);
+      //   // setIsDoneGenerating(true);
+      //   // setSwitchChecked(true);
+      // }
+      // generateMetaData(images, partialSchema, candidateValues)
+      tryMetadataGeneration(images, partialSchema, candidateValues);
     }
+    
   }
+
+  // const retryNodeAdd
 
   const handleLabelEditSave = (newData) => {
     console.log(newData);
@@ -870,7 +955,7 @@ const Generate = () => {
       {/* {images.length <= 0 && (
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
       )} */}
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} />
+      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} retrySceneGraphContext={retrySceneGraphContext} retrySceneGraphGeneration={retrySceneGraphGeneration} failedImageIdsForMetadata={failedImageIdsForMetadata} retryMetadataGeneration={retryMetadataGeneration}/>
 
       {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible} />}
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>

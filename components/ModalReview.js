@@ -41,8 +41,8 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
             console.log(metaData, image)
             let imageMetaData = metaData.find(item => item.metaData.batch === image.batch && item.metaData.imageId === image.imageId);
             console.log(imageMetaData);
-            if(imageMetaData) {
-                let {metaData, batch, ...cleanedImageMetadata} = imageMetaData;
+            if (imageMetaData) {
+                let { metaData, batch, ...cleanedImageMetadata } = imageMetaData;
                 return renderLabels(cleanedImageMetadata);
             } else {
                 return undefined;
@@ -76,7 +76,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
         //     label: metaData[index]?.label || '',
         // }));
         // messageApi.warning('There are some issues with this feature. They will be fixed in hours.');
-        onSave({updatedMetaData: updatedMetaData ? updatedMetaData : metaData, textAreaValue});
+        onSave({ updatedMetaData: updatedMetaData ? updatedMetaData : metaData, textAreaValue });
         onClose();
     };
 
@@ -119,6 +119,9 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
                                     ))}
                                 </div>
                             )}
+                            {
+                                (!selectedLabels[index] || selectedLabels[index].length == 0) && <i style={{'text-align': 'center'}}>No labels available.</i>
+                            }
                         </div>
                     ))}
                 </div> : <i>No images available. Please generate images first.</i>}

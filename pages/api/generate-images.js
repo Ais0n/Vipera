@@ -9,6 +9,7 @@ const replicate = new Replicate({
 });
 
 export default async function handler(req, res) {
+    // throw new Error("");
     if (req.method === 'GET') {
         let { prompt, imageId } = req.query;
         let output_dir = path.join(process.cwd(), 'public', 'temp_images', prompt.replace(/ /g, '_'));

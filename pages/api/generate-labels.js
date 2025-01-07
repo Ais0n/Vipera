@@ -12,6 +12,7 @@ fal.config({
 });
 
 export default async function handler(req, res) {
+    // throw new Error("");
     if (req.method === 'GET') {
         let _path = req.query.path;
         let schema = req.query.schema;
