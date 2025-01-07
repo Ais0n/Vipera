@@ -5,8 +5,8 @@ This is a simple React powered NextJS Application.
 Instructions:
 1. Install latest NodeJS (any v20+)
 2. run `npm install` to install the dependencies.
-3. In terminal, navigate to project directory and type:  `npm run build && npm run dev`  -> then view site in browser at: http://localhost:80
-4. For different pages, view site in browser at: http://localhost:80/pagename (pagename is in pages folder)
+3. In terminal, navigate to project directory and type:  `npm run build && npm run dev`  -> then view site in browser at: http://localhost:3000
+4. For different pages, view site in browser at: http://localhost:3000/pagename (pagename is in pages folder)
     Home page -> index.js
     Generate page -> decoupled.js
 5. Ouroboros discussion post web page "https://forum.weaudit.org/c/ouroboros-discussion/54"
