@@ -40,7 +40,7 @@ function calculateGraph(metaData, graphSchema, graph) {
                     // });
                     // currentNode.children.push({name: 'values', type: "attribute", children: [], count: 0});
                     currentNode.type = "attribute";
-                } else {
+                } else if (typeof(currentData) === 'object') {
                     Object.keys(currentData).forEach((subKey) => {
                         const subNode = { name: subKey, children: [], count: 0, type: "object" };
                         currentNode.children.push(subNode);

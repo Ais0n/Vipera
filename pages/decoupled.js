@@ -613,7 +613,11 @@ const Generate = () => {
   }
 
   // Try generating metadata
-  async function tryMetadataGeneration(newImages, updatedGraphSchema, candidateValues) {
+  async function tryMetadataGeneration(newImages, updatedGraphSchema, candidateValues, newGraph) {
+    if(!newGraph) {
+      newGraph = Utils.deepClone(graph);
+    }
+
     try {
       // Generate Meta Data
       let newMetaData, allMetaData = [];
@@ -653,8 +657,8 @@ const Generate = () => {
       }
 
       // Update the graph with statistics
-      const updatedGraph = Utils.calculateGraph(allMetaData, updatedGraphSchema, Utils.deepClone(graph));
-      setGraph(updatedGraph);
+      const updatedGraph = Utils.calculateGraph(allMetaData, updatedGraphSchema, newGraph);
+      setGraph((prevGraph) => ({...updatedGraph }));
       console.log("Updated Graph:", updatedGraph);
     } catch (error) {
       console.error("Error generating metadata:", error);
@@ -916,7 +920,7 @@ const Generate = () => {
       //   // setSwitchChecked(true);
       // }
       // generateMetaData(images, partialSchema, candidateValues)
-      tryMetadataGeneration(images, partialSchema, candidateValues);
+      tryMetadataGeneration(images, partialSchema, candidateValues, _graph);
     }
     
   }
