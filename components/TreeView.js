@@ -7,7 +7,7 @@ import { Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors }) => {
+const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -214,7 +214,7 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
         document.body.appendChild(textElement);
         const width = textElement.offsetWidth;
         document.body.removeChild(textElement);
-        return width + 30;
+        return width + 40;
     }
 
     function getNodeWidth(d) {
@@ -350,6 +350,37 @@ const TreeView = ({ data, handleBarHover, handleNodeHover, handleNodeEdit, handl
             .attr('pointer-events', 'none')
 
         createStackedBarchart(nodes);
+
+        // Add the "Store" button for each non-attribute node
+        nodes.filter(d => d.data.type != 'attribute' && d.data.name != 'root')
+            .each(function (d) {
+                const g = d3.select(this);
+                const storeButtonForNonAttrNodes = g.append('g')
+                    .attr('transform', `translate(${getNodeWidth(d) - 17}, ${17})`)
+                    .style('cursor', 'pointer')
+                    .on('click', () => {
+                        console.log(d);
+                        // Store the raw data when clicked
+                        let pathStr = "", curNode = d;
+                        while (curNode && curNode.data.name != 'root') {
+                            pathStr = (pathStr == "") ? curNode.data.name : curNode.data.name + '.' + pathStr;
+                            curNode = curNode.parent;
+                        }
+                        addBookmarkedChart({
+                            type: "non-attribute",
+                            data: d.data,
+                            images: images.filter(image => d.data.imageInfo.find(item => item.imageId == image.imageId)),
+                            title: pathStr + " - " + String(d.data.count) + " images"
+                        });
+                    });
+
+                // Load and append the local SVG
+                d3.xml('/bookmark.svg').then(svgData => {
+                    const importedNode = document.importNode(svgData.documentElement, true);
+                    const svg = d3.select(importedNode).attr('width', 15).attr('height', 15);
+                    storeButtonForNonAttrNodes.node().appendChild(importedNode);
+                });
+            })
 
         const zoom = d3.zoom()
             .scaleExtent([0.25, 2])

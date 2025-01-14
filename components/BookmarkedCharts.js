@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Image } from 'antd';
 import * as d3 from 'd3';
 
 const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments }) => {
@@ -88,8 +89,10 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments 
 
             if (type === 'bar') {
                 renderBarChart(svg, data, chartHeight, chartWidth, margin);
-            } else {
+            } else if (type === 'scatterplot') {
                 renderScatterplot(svg, data, chartHeight, chartWidth, margin);
+            } else {
+                // renderNonAttribute(svg, data, chartHeight, chartWidth, margin);  // no need
             }
         });
     };
@@ -115,7 +118,14 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments 
                         <tr key={index}>
                             <td className='bookmarked-cell'>
                                 {data.title && <b>{data.title}</b>}
-                                <div className='charts' id={`chart-${index}`} style={{ width: '100%', height: '220px' }}></div>
+                                <div className='charts' id={`chart-${index}`} style={{ width: '100%', height: data.type != 'non-attribute' ? '220px' : 0 }}></div>
+                                <div className="imageContainer">
+                                    {data.type == "non-attribute" && data.images.map((image, index) => (
+                                        <div key={index} className="imageItem" style={{ 'borderTop': '7px solid ' + colorScale(image.batch) }}>
+                                            <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.imageId}`}/>
+                                        </div>
+                                    ))}
+                                </div>
                             </td>
                             <td className='bookmarked-cell'>
                                 <div>
@@ -142,6 +152,20 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments 
                     padding: 8px;
                     vertical-align: top;
                     width: 50%;
+                }
+                .imageItem {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 5px;
+                    overflow: hidden;
+                    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+                }
+                .imageContainer {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    max-height: 300px;
+                    overflow-y: scroll;
                 }
             `}</style>
         </div>
