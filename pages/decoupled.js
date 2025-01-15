@@ -930,7 +930,8 @@ const Generate = () => {
   const handleLabelEditSave = (newData) => {
     console.log(newData);
     let newMetaData = Utils.deepClone(metaData);
-    newMetaData[newData.index] = { ...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data };
+    let index = newMetaData.findIndex(item => item.metaData.imageId == newData.data.imageId);
+    newMetaData[index] = { ...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data };
     setMetaData(newMetaData);
     console.log('newMetaData', newMetaData);
     let _graph = Utils.calculateGraph(newMetaData, graphSchema, Utils.deepClone(graph));

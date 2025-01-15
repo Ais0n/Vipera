@@ -98,7 +98,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
     const openContextMenu = (e, index) => {
         e.preventDefault();
         setContextMenuPos({ top: e.pageY, left: e.pageX });
-        setContextMenuData({ index, data: images[index], metaData: metaData[index] });
+        setContextMenuData({ index, data: images[index], metaData: metaData.find(item => item.metaData.batch == images[index].batch && item.metaData.imageId == images[index].imageId) });
     }
 
     const closeContextMenu = () => {
