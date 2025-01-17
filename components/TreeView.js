@@ -3,19 +3,23 @@ import * as d3 from 'd3';
 import * as Utils from '../utils.js';
 import ModalTreeEdit from './ModalTreeEdit.js';
 import ModalTreeAdd from './ModalTreeAdd.js';
-import { Skeleton } from 'antd';
+import ModalTreeRelabel from './ModalTreeRelabel.js';
+import { Modal, Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors }) => {
+const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, handleNodeRelabel, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
-    const contextMenuRef = useRef();
+    const contextMenuRef = useRef(); // for non-attribute nodes
+    const contextMenuRef2 = useRef(); // for attribute nodes
 
     const [contextMenuData, setContextMenuData] = useState(null);
+    const [contextMenuData2, setContextMenuData2] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isRelabelModalOpen, setIsRelabelModalOpen] = useState(false);
 
     const handleEdit = (newName) => {
         console.log('Edit node', contextMenuData, newName);
@@ -25,6 +29,11 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
     const handleAdd = (newName) => {
         console.log('Add node', contextMenuData, newName);
         handleNodeAdd(contextMenuData, newName);
+    }
+
+    const handleRelabel = (candidateValues) => {
+        console.log('Relabel node', candidateValues);
+        // handleNodeRelabel(contextMenuData2, candidateValues);
     }
 
     const createStackedBarchart = (nodes) => {
@@ -317,8 +326,24 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 setContextMenuData(d);
             });
 
+        const contextMenu2 = d3.select(contextMenuRef2.current);
+        rects.filter(d => d.data.type == 'attribute')
+            .on('contextmenu', function (event, d) {
+                event.preventDefault();
+                // Get the position of the rectangle
+                const rectBounds = this.getBoundingClientRect();
+
+                // Set the position of the context menu near the rectangle
+                contextMenu2.style("left", `${rectBounds.left + window.scrollX}px`) // Right side of the rectangle
+                    .style("top", `${rectBounds.bottom + window.scrollY}px`) // Aligned with the top of the rectangle
+                    .style("display", "block");
+
+                setContextMenuData2(d);
+            });
+
         d3.select("body").on("click", function () {
             contextMenu.style("display", "none");
+            contextMenu2.style("display", "none");
         });
 
         // rects.filter(d => d.data.type == 'attribute')
@@ -440,6 +465,10 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 <div className="context-menu-item" onClick={() => { setIsAddModalOpen(true); }}>Add a child</div>
                 <div className="context-menu-item">Delete</div>
             </div>
+            <div className="context-menu" ref={contextMenuRef2}>
+                <div className="context-menu-item" onClick={() => { setIsRelabelModalOpen(true); }}>Relabel</div>
+                <div className="context-menu-item">Delete</div>
+            </div>
             <ModalTreeEdit
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -450,6 +479,11 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSave={handleAdd}
+            />
+            <ModalTreeRelabel
+                isOpen={isRelabelModalOpen}
+                onClose={() => setIsRelabelModalOpen(false)}
+                onSave={handleRelabel}
             />
             <style jsx>{`
                 .context-menu {

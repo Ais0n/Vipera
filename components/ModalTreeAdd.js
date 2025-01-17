@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Input, Button, Radio } from 'antd';
+import { Modal, Input, Button, Radio, Tooltip } from 'antd';
+import { SyncOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const ModalTreeAdd = ({ isOpen, onClose, onSave }) => {
     const [nodeType, setNodeType] = useState("attribute");
@@ -31,7 +32,7 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave }) => {
                 ]}
             >
                 <div className="modal-tree-add">
-                    <div><b>Type</b></div>
+                    <div><b>Type</b><Tooltip title={"An attribute node denotes an auditing criteria that will be used to label the images for evaluation. An object node denotes an object in the images and will NOT directly be used for evaluation."}><InfoCircleOutlined style={{color: 'grey', 'marginLeft': '5px'}}/></Tooltip></div>
                     <Radio.Group onChange={(e) => { setNodeType(e.target.value) }} value={nodeType}>
                         <Radio value={"attribute"}>Attribute</Radio>
                         <Radio value={"object"}>Object</Radio>
@@ -42,7 +43,7 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave }) => {
                         onChange={(e) => setNodeName(e.target.value)}
                         placeholder="Enter new node name"
                     />
-                    <div><b>Candidate Values (Optional)</b></div>
+                    <div><b>Candidate Values (Optional)</b><Tooltip title={"You may create a list of candidate values for labeling."}><InfoCircleOutlined style={{color: 'grey', 'marginLeft': '5px'}}/></Tooltip></div>
                     <Input
                         value={candidateValues}
                         onChange={(e) => setCandidateValues(e.target.value)}

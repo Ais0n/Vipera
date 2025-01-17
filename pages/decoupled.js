@@ -803,6 +803,10 @@ const Generate = () => {
   }
 
   const handleSuggestionButtonClick = (suggestion, type) => {
+    if (isGenerating) {
+      console.log("Generation in progress. Please wait...");
+      return;
+    }
     if (type == 'promote') {
       handlePromote(suggestion);
     } else if (type == 'external') {
