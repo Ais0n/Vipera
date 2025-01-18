@@ -929,6 +929,27 @@ const Generate = () => {
     
   }
 
+  const handleNodeRelabel = (contextData, candidateValues) => {
+    console.log(contextData, candidateValues);
+    let pathToRoot = [];
+    let curNode = contextData;
+    while (curNode.data.name != 'root') {
+      pathToRoot.push(curNode.data.name);
+      curNode = curNode.parent;
+    }
+    pathToRoot = pathToRoot.reverse();
+    console.log(pathToRoot);
+    let partialSchema = Utils.deepClone(graphSchema);
+    curNode = partialSchema;
+    for (let i = 0; i < pathToRoot.length - 1; i++) {
+      curNode = curNode[pathToRoot[i]];
+    }
+    console.log(curNode);
+    curNode[pathToRoot[pathToRoot.length - 1]] = "...";
+    console.log(partialSchema);
+    tryMetadataGeneration(images, partialSchema, candidateValues);
+  }
+
   // const retryNodeAdd
 
   const handleLabelEditSave = (newData) => {
@@ -981,7 +1002,7 @@ const Generate = () => {
           </div>
         </div> */}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} />
+        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} />
 
       </div>}
 

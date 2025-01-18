@@ -33,7 +33,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
 
     const handleRelabel = (candidateValues) => {
         console.log('Relabel node', candidateValues);
-        // handleNodeRelabel(contextMenuData2, candidateValues);
+        handleNodeRelabel(contextMenuData2, candidateValues);
     }
 
     const createStackedBarchart = (nodes) => {
