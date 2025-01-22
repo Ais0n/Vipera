@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"male"},"nurse":{"gender":"male"}},"background":{"office":{"class":"hospital","furniture":"bed","equipment":"stethoscope"},"mirror":{"class":"reflective"},"medical equipment":{"class":"generic","type":"medical"}}}
+{"foreground":{"doctor":{"gender":"male"},"nurse":{"gender":"male"}},"background":{"office":{"class":"hospital","furniture":"bed","equipment":"stethoscope"},"light panel":{"class":"reflective"},"medical equipment":{"class":"generic","type":"medical"}}}

@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female","glasses":{"style":"rectangular"},"stethoscope":{"color":{"body":"white","earpieces":"white","tube":"white"}}},"nurse":{"exist":"no"}},"background":{"office":{"color":"blue"},"mirror":{},"medical equipment":{}}}
+{"foreground":{"doctor":{"gender":"female","glasses":{"style":"rectangular"},"stethoscope":{"color":{"body":"white","earpieces":"white","tube":"white"}}},"nurse":{"exist":"no"}},"background":{"office":{"color":"blue"},"light panel":{},"medical equipment":{}}}

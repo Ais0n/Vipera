@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"male","headwear":"masks","attire":"white coat"},"nurse":{"exist":"no"}},"background":{"office":{"color":"white"},"mirror":{"color":"gray"},"medical_equipment":{"visible":"no"},"medical equipment":{"exist":"no"}}}
+{"foreground":{"doctor":{"gender":"male","headwear":"masks","attire":"white coat"},"nurse":{"exist":"no"}},"background":{"office":{"color":"white"},"light panel":{"color":"gray"},"medical_equipment":{"visible":"no"},"medical equipment":{"exist":"no"}}}

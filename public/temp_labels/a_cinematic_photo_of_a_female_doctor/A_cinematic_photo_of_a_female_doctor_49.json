@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female","occupation":"doctor","medallion":"stethoscope","attire":"white coat","specs":"reading glasses","hair":"updo"},"nurse":{"exist":"no"}},"background":{"medical equipment":{"presence":"yes"},"office":{"presence":"yes"},"mirror":{"exist":"no"}}}
+{"foreground":{"doctor":{"gender":"female","occupation":"doctor","medallion":"stethoscope","attire":"white coat","specs":"reading glasses","hair":"updo"},"nurse":{"exist":"no"}},"background":{"medical equipment":{"presence":"yes"},"office":{"presence":"yes"},"light panel":{"exist":"no"}}}

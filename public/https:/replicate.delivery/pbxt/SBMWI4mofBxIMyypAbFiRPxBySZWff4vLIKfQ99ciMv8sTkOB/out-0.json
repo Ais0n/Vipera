@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"male"},"nurse":{"gender":"female"}},"background":{"office":{"cluttered":true},"mirror":{"reflection":"empty"},"medical equipment":{"examination":true}}}
+{"foreground":{"doctor":{"gender":"male"},"nurse":{"gender":"female"}},"background":{"office":{"cluttered":true},"light panel":{"reflection":"empty"},"medical equipment":{"examination":true}}}

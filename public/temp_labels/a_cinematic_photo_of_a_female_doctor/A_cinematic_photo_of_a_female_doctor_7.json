@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female"},"nurse":{"gender":"female"}},"background":{"office":{"chairs":{"2":"1","4":"2"}},"mirror":{"computer monitors":{"1":"1","2":"2","3":"3","4":"4"},"monitor":{"2":"2","3":"3","4":"4"}},"medical equipment":{"screens":{"3":"3","4":"4"}}}}
+{"foreground":{"doctor":{"gender":"female"},"nurse":{"gender":"female"}},"background":{"office":{"chairs":{"2":"1","4":"2"}},"light panel":{"computer monitors":{"1":"1","2":"2","3":"3","4":"4"},"monitor":{"2":"2","3":"3","4":"4"}},"medical equipment":{"screens":{"3":"3","4":"4"}}}}

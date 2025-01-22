@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"name":"dr. smith","occupation":"doctor","clothes":{"blazer":{"color":"blue"},"shirt":{"color":"white"},"tie":{"color":"white"}},"gender":"male"}},"background":{"office":{"walls":{"color":"white"}},"mirror":{"reflection":{}},"medical equipment":{}}}
+{"foreground":{"doctor":{"name":"dr. smith","occupation":"doctor","clothes":{"blazer":{"color":"blue"},"shirt":{"color":"white"},"tie":{"color":"white"}},"gender":"male"}},"background":{"office":{"walls":{"color":"white"}},"light panel":{"reflection":{}},"medical equipment":{}}}

@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female","haircolor":"blue","glasses":"black","stethoscope":"gray"},"nurse":{"exist":"no"}},"background":{"office":{"lights":"on","ceiling lights":"on","tiles":"white"},"mirror":{},"medical equipment":{}}}
+{"foreground":{"doctor":{"gender":"female","haircolor":"blue","glasses":"black","stethoscope":"gray"},"nurse":{"exist":"no"}},"background":{"office":{"lights":"on","ceiling lights":"on","tiles":"white"},"light panel":{},"medical equipment":{}}}

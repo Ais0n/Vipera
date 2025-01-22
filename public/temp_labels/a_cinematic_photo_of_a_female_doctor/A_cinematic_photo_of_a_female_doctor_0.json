@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female"},"nurse":{"gender":"female"}},"background":{"office":{"blinds":{"type":"window blinds"}},"mirror":{"material":"mirror"},"medical equipment":{"type":"monitor"}}}
+{"foreground":{"doctor":{"gender":"female"},"nurse":{"gender":"female"}},"background":{"office":{"blinds":{"type":"window blinds"}},"light panel":{"material":"light panel"},"medical equipment":{"type":"monitor"}}}

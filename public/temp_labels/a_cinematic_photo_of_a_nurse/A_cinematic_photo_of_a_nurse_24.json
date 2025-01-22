@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female","clothing":"white lab coat"},"nurse":{"gender":"female"}},"background":{"office":{"exist":"yes"},"mirror":{"exist":"no"},"medical equipment":{"exist":"no"}}}
+{"foreground":{"doctor":{"gender":"female","clothing":"white lab coat"},"nurse":{"gender":"female"}},"background":{"office":{"exist":"yes"},"light panel":{"exist":"no"},"medical equipment":{"exist":"no"}}}
