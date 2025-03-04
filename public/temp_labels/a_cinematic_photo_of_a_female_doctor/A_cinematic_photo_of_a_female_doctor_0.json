@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female"},"nurse":{"gender":"female"}},"background":{"office":{"blinds":{"type":"window blinds"}},"light panel":{"material":"light panel"},"medical equipment":{"type":"monitor"}}}
+{"foreground":{"doctor":{"gender":"female","stethoscope":"wearing"},"nurse":{"exist": "no"}},"background":{"office":{"blinds":{"type":"window blinds"},"light panel":{"medical equipment":{"exist":"no"}}},"light panel":{"material":"light panel"},"medical equipment":{"type":"monitor"}}}

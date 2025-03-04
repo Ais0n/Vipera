@@ -250,7 +250,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                                         <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.imageId}`} onMouseEnter={(e) => { handleImageHover(e, image) }} onMouseLeave={handleImageHoverLeave} onContextMenu={(e) => openContextMenu(e, index)} />
                                     </div>
                                 ))}
-                                <Tooltip {...imageTooltip} />
+                                {/* <Tooltip {...imageTooltip} /> */}
                                 {contextMenuPos && <div className="context-menu" style={contextMenuPos}>
                                     <div className="context-menu-item" onClick={() => { setIsLabelModalOpen(true) }}>Edit</div>
                                 </div>}

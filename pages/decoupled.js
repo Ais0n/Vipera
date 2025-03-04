@@ -115,6 +115,9 @@ const Generate = () => {
           return null;
         }
 
+        // sleep for 2 seconds
+        // await new Promise(r => setTimeout(r, 2000));
+
         setStatusInfo(`Generating images: ${++generatedCount}/${imageIds.length}`);
 
         return {
@@ -233,6 +236,8 @@ const Generate = () => {
     let response = await axios.get(checkGraphUrl);
     console.log(response)
     if (response.data.res) {
+      // sleep for 2 seconds
+      await new Promise(r => setTimeout(r, 2000));
       return Utils.processSceneGraph(response.data.res);
     }
 
@@ -373,6 +378,9 @@ const Generate = () => {
           }
         }
 
+        let randomNumber = Math.floor(Math.random() * 1500);
+        await new Promise(r => setTimeout(r, randomNumber));
+
         console.log("before remove", data, graphSchema);
         data = Utils.removeRedundantFields(data, graphSchema);
         console.log("after remove", data);
@@ -390,7 +398,7 @@ const Generate = () => {
 
       let generatedCount = 0, results = [];
       promises.forEach(promise => {
-        promise.then(result => {
+        promise.then(async result => {
           generatedCount++;
           if (result.status == 'success') {
             results.push(result.data);
@@ -551,6 +559,13 @@ const Generate = () => {
 
       if (isImagesExist) {
         newImages = await getExistingImages(imageIds, IMAGE_DIR);
+        let generatedCount = 0;
+        for(let i = 0; i < imageIds.length; i++) {
+          setStatusInfo(`Generating images: ${++generatedCount}/${imageIds.length}`);
+          // sleep for 2 seconds
+          let randomNumber = Math.floor(Math.random() * 1000);
+          await new Promise(r => setTimeout(r, randomNumber));
+        }
       } else {
         const generatedImages = await generateNewImages(imageIds, userInput, prompts.length + 1);
         newImages = generatedImages.newImages;

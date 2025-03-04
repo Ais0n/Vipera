@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"male","race":"black","age":"young adult","clothing":"white lab coat"},"nurse":{"exist":"no"}},"background":{"office":{"color scheme":"green and white","furniture":"white"},"medical equipment":{"exam table":"white","stainless steel surfaces":"reflection"},"light panel":{"exist":"no"}}}
+{"foreground":{"doctor":{"gender":"male","stethoscope":"not wearing"},"nurse":{"exist":"no"},"wardrobe":{"stethoscope":"not wearing"}},"background":{"office":{},"light panel":{},"medical equipment":{}}}

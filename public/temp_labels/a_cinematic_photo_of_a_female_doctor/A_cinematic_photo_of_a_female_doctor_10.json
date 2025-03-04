@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"female"},"nurse":{"exist":"no"}},"background":{"office":{},"light panel":{},"medical equipment":{"stethoscope":{}}}}
+{"foreground":{"doctor":{"gender":"female","stethoscope":"wearing"},"nurse":{"exist":"no"},"hands":{"clasped":"yes"}},"background":{"office":{},"light panel":{},"medical equipment":{"stethoscope":{}}}}

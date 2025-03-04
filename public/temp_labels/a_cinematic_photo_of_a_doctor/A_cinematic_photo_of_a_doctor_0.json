@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"gender":"male","male":"man wearing a tie and a stethoscope, possibly a doctor in a white coat. he is looking to the side. his glasses are black.","clothing":"white lab coat"},"nurse":{"gender":""},"clothing":"coat"},"background":{"office":{"exist":"yes","medical equipment":{"prescription pad":{}}},"light panel":{"exist":"yes"},"medical equipment":{"exist":"yes"}}}
+{"foreground":{"doctor":{"gender":"male","stethoscope":"wearing"},"nurse":{"exist": "no"}},"background":{"office":{},"light panel":{},"medical equipment":{}}}

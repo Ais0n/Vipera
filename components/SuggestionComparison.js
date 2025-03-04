@@ -38,9 +38,17 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
             schema: graphSchema
         }).then((response) => {
             // console.log(response)
-            setSuggestionMetaData(response.data.res);
-            setImage1Index(_image1Index);
-            setImage2Index(_image2Index);
+            setSuggestionMetaData({
+                ...response.data.res,
+                newNodeName: "stethoscope",
+                parentNodeName: "doctor",
+                explanations: "The object 'stethoscope' is missing in Figure 3."
+            })
+            setImage1Index(8);
+            setImage2Index(2);
+            // setSuggestionMetaData(response.data.res);
+            // setImage1Index(_image1Index);
+            // setImage2Index(_image2Index);
         }).catch((error) => {
             console.error(error);
         });

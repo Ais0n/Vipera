@@ -1,1 +1,1 @@
-{"foreground":{"doctor":{"existence":"no","gender":"female","clothing":"white lab coat"},"nurse":{"gender":"female","mask":"wearing","scrubs":"in"}},"background":{"office":{},"light panel":{},"medical equipment":{}}}
+{"foreground":{"doctor":{"exist": "no"},"nurse":{"gender":"female","stethoscope":"not wearing"}},"background":{"office":{},"light panel":{},"medical equipment":{}}}

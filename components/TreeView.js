@@ -236,7 +236,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
 
     const createTree = () => {
         const width = 880;
-        const height = 600;
+        const height = 1000;
         const barHeight = 60; // Fixed height for the bar chart area
 
         // Clear previous SVG content
