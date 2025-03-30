@@ -120,7 +120,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
                                 </div>
                             )}
                             {
-                                (!selectedLabels[index] || selectedLabels[index].length == 0) && <i style={{'text-align': 'center'}}>No labels available.</i>
+                                (!selectedLabels[index] || selectedLabels[index].length == 0) && <i style={{'textAlign': 'center'}}>No labels available.</i>
                             }
                         </div>
                     ))}
