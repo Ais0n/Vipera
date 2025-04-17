@@ -32,18 +32,18 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
         }
         const path1 = images[_image1Index].path;
         const path2 = images[_image2Index].path;
-        axios.post('/api/suggest-comparison', {
-            path1: path1,
-            path2: path2,
-            schema: graphSchema
-        }).then((response) => {
-            // console.log(response)
-            setSuggestionMetaData(response.data.res);
-            setImage1Index(_image1Index);
-            setImage2Index(_image2Index);
-        }).catch((error) => {
-            console.error(error);
-        });
+        // axios.post('/api/suggest-comparison', {
+        //     path1: path1,
+        //     path2: path2,
+        //     schema: graphSchema
+        // }).then((response) => {
+        //     // console.log(response)
+        //     setSuggestionMetaData(response.data.res);
+        //     setImage1Index(_image1Index);
+        //     setImage2Index(_image2Index);
+        // }).catch((error) => {
+        //     console.error(error);
+        // });
     }
 
     const handleRefresh = () => {

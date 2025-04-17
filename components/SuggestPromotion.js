@@ -15,16 +15,16 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
-        axios.post('/api/suggest-promotion', {
-            prompt: prompt,
-            schema: graphSchema,
-            priorPrompts: priorPrompts,
-        }).then((response) => {
-            // console.log(response)
-            setSuggestionMetaData(response.data.res);
-        }).catch((error) => {
-            console.error(error);
-        });
+        // axios.post('/api/suggest-promotion', {
+        //     prompt: prompt,
+        //     schema: graphSchema,
+        //     priorPrompts: priorPrompts,
+        // }).then((response) => {
+        //     // console.log(response)
+        //     setSuggestionMetaData(response.data.res);
+        // }).catch((error) => {
+        //     console.error(error);
+        // });
     }
 
     const handleRefresh = () => {

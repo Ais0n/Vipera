@@ -8,7 +8,7 @@ import { Modal, Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, handleNodeRelabel, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors }) => {
+const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, handleNodeRelabel, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors, prompts }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -479,6 +479,10 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSave={handleAdd}
+                prompts={prompts}
+                colorScale={colorScale}
+                groups={groups}
+                images={images}
             />
             <ModalTreeRelabel
                 isOpen={isRelabelModalOpen}

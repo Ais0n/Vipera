@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
-import { Button, Tooltip, Input, Modal } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import React, { useState, useRef, useEffect } from 'react';
+import { Button, Tooltip, Input } from 'antd';
+import { DeleteOutlined, EditOutlined, RightOutlined, DownOutlined } from '@ant-design/icons';
 
 const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, groups, setGroups }) => {
     const [draggedItem, setDraggedItem] = useState(null);
     const [highlightedGroup, setHighlightedGroup] = useState(null);
     const [highlightedItem, setHighlightedItem] = useState(null);
     const [editingGroupIndex, setEditingGroupIndex] = useState(null);
+    const [expandedGroups, setExpandedGroups] = useState(groups.map(() => true));
+    const contentRefs = useRef([]);
+
+    const toggleGroup = (groupIndex) => {
+        const newExpanded = [...expandedGroups];
+        newExpanded[groupIndex] = !newExpanded[groupIndex];
+        setExpandedGroups(newExpanded);
+    };
 
     const handleDragStart = (e, index) => {
         setDraggedItem(index);
@@ -16,8 +24,6 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
     const handleDragOver = (e, index) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-
-        // Check if the dragged item is over a group or an individual item
         const groupIndex = groups.findIndex(group => group.items.includes(index));
         if (groupIndex !== -1) {
             setHighlightedGroup(groupIndex);
@@ -38,27 +44,31 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
         const droppedIndex = draggedItem;
         const updatedGroups = [...groups];
 
-        // If the dragged item is already in a group, remove it first
+        if (droppedIndex === null || droppedIndex === index) {
+            return; // Prevent dropping to the same item
+        }
+
         const existingGroupIndex = groups.findIndex(group => group.items.includes(droppedIndex));
         if (existingGroupIndex !== -1) {
             updatedGroups[existingGroupIndex].items = updatedGroups[existingGroupIndex].items.filter(item => item !== droppedIndex);
+            if (updatedGroups[existingGroupIndex].items.length === 0) {
+                updatedGroups.splice(existingGroupIndex, 1);
+                setExpandedGroups(prev => {
+                    const newExpanded = [...prev];
+                    newExpanded.splice(existingGroupIndex, 1);
+                    return newExpanded;
+                });
+            }
         }
 
-        // Add the dragged item to the new location (group or individual item)
         const groupIndex = groups.findIndex(group => group.items.includes(index));
         if (groupIndex !== -1) {
             updatedGroups[groupIndex].items.push(droppedIndex);
         } else {
             const newGroup = { name: `Group ${updatedGroups.length + 1}`, items: [droppedIndex, index], color: colorScale(droppedIndex + 1) };
             updatedGroups.push(newGroup);
+            setExpandedGroups(prev => [...prev, true]);
         }
-
-        // Update the color of the items in the new group
-        // updatedGroups.forEach((group, i) => {
-        //     group.items.forEach(item => {
-        //         changeColor(group.color, item + 1);
-        //     });
-        // });
 
         setGroups(updatedGroups);
         setDraggedItem(null);
@@ -66,15 +76,13 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
         setHighlightedItem(null);
     };
 
+    const handleDragEnd = () => {
+        setDraggedItem(null);
+    }
+
     const handleGroupDelete = (groupIndex) => {
         const updatedGroups = [...groups];
-        const deletedGroup = updatedGroups.splice(groupIndex, 1)[0];
-
-        // Restore the original colors of the items in the deleted group
-        // deletedGroup.items.forEach(item => {
-        //     changeColor(colorScale(item + 1, false), item + 1);
-        // });
-
+        updatedGroups.splice(groupIndex, 1);
         setGroups(updatedGroups);
     };
 
@@ -92,19 +100,61 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
         setEditingGroupIndex(null);
     };
 
+    const handleContainerDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const existingGroupIndex = groups.findIndex(group => group.items.includes(draggedItem));
+        if (existingGroupIndex !== -1) {
+            setHighlightedGroup(null);
+            setHighlightedItem(null);
+        }
+    };
+
+    const handleContainerDrop = (e) => {
+        e.preventDefault();
+        const droppedIndex = draggedItem;
+        const existingGroupIndex = groups.findIndex(group => group.items.includes(droppedIndex));
+
+        if (existingGroupIndex !== -1) {
+            const updatedGroups = [...groups];
+            updatedGroups[existingGroupIndex].items = updatedGroups[existingGroupIndex].items.filter(item => item !== droppedIndex);
+            // Remove group if it becomes empty
+            if (updatedGroups[existingGroupIndex].items.length === 0) {
+                updatedGroups.splice(existingGroupIndex, 1);
+                setExpandedGroups(prev => {
+                    const newExpanded = [...prev];
+                    newExpanded.splice(existingGroupIndex, 1);
+                    return newExpanded;
+                });
+            }
+            setGroups(updatedGroups);
+        }
+
+        setDraggedItem(null);
+        setHighlightedGroup(null);
+        setHighlightedItem(null);
+    };
+
+    const handleContainerDragLeave = () => {
+        setHighlightedGroup(null);
+        setHighlightedItem(null);
+    }
+
     return (
         <div>
-            <h2 style={{ "margin": '15px auto' }}>Prompts</h2>
-            <div className='prompt-items'>
+            <h2 style={{ margin: '15px auto' }}>Prompts</h2>
+            <div className='prompt-items' onDragOver={handleContainerDragOver} onDrop={handleContainerDrop} onDragLeave={handleContainerDragLeave}>
                 {groups.map((group, groupIndex) => (
                     <div
                         key={groupIndex}
                         className={`group ${highlightedGroup === groupIndex ? 'highlighted' : ''}`}
-                        onDragOver={(e) => handleDragOver(e, group.items[0])}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, group.items[0])}
                     >
-                        <div className="group-header">
+                        <div className="group-header" onClick={() => toggleGroup(groupIndex)}>
+                            {expandedGroups[groupIndex] ? (
+                                <DownOutlined style={{ cursor: 'pointer', marginRight: '8px' }} />
+                            ) : (
+                                <RightOutlined style={{ cursor: 'pointer', marginRight: '8px' }} />
+                            )}
                             {editingGroupIndex === groupIndex ? (
                                 <Input
                                     value={group.name}
@@ -113,15 +163,7 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                                     autoFocus
                                 />
                             ) : (
-                                <h3 style={{margin: '5px 5px'}}>
-                                    {group.name}
-                                    <Tooltip title="Rename Group">
-                                        <EditOutlined
-                                            className="group-rename-icon"
-                                            onClick={() => handleGroupRename(groupIndex)}
-                                        />
-                                    </Tooltip>
-                                </h3>
+                                <div className="group-name">{group.name}</div>
                             )}
                         </div>
                         <Tooltip title="Delete Group">
@@ -129,32 +171,43 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                                 <DeleteOutlined />
                             </div>
                         </Tooltip>
-                        {group.items.map((promptIndex) => (
-                            <div
-                                key={promptIndex}
-                                className={`prompt-item ${draggedItem === promptIndex ? 'dragged' : ''} ${highlightedItem === promptIndex ? 'highlighted' : ''}`}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, promptIndex)}
-                                onDragOver={(e) => handleDragOver(e, promptIndex)}
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, promptIndex)}
-                                onDragEnd={(e) => setHighlightedItem(null)}
-                            >
-                                <input
-                                    className='prompt-item-color'
-                                    type="color"
-                                    value={colorScale(promptIndex + 1)}
-                                    onChange={(e) => changeColor(e.target.value, promptIndex + 1)}
-                                ></input>
+                        <div
+                            className="group-content"
+                            style={{
+                                height: expandedGroups[groupIndex] ? contentRefs.current[groupIndex]?.scrollHeight : 0,
+                                transition: 'height 0.3s ease',
+                                overflow: 'hidden',
+                            }}
+                            ref={el => contentRefs.current[groupIndex] = el}
+                        >
+                            {group.items.map((promptIndex) => (
                                 <div
-                                    className='prompt-item-text'
-                                    style={{ 'backgroundColor': colorScale(promptIndex + 1) }}
-                                    onClick={(e) => handlePromptClick(promptIndex + 1)}
+                                    key={promptIndex}
+                                    className={`prompt-item ${draggedItem === promptIndex ? 'dragged' : ''} ${highlightedItem === promptIndex ? 'highlighted' : ''}`}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, promptIndex)}
+                                    onDragOver={(e) => handleDragOver(e, promptIndex)}
+                                    onDragLeave={handleDragLeave}
+                                    onDragEnd={handleDragEnd}
+                                    onDrop={(e) => handleDrop(e, promptIndex)}
+                                    onBlur={handleDragLeave}
+                                    style={{ 'paddingLeft': '23px' }}
                                 >
-                                    Prompt {promptIndex + 1}: {prompts[promptIndex]}
+                                    <input
+                                        className='prompt-item-color'
+                                        type="color"
+                                        value={colorScale(promptIndex + 1)}
+                                        onChange={(e) => changeColor(e.target.value, promptIndex + 1)}
+                                    />
+                                    <div
+                                        className='prompt-item-text'
+                                        onClick={() => handlePromptClick(promptIndex + 1)}
+                                    >
+                                        {prompts[promptIndex]}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 ))}
                 {prompts.map((prompt, index) => (
@@ -166,6 +219,7 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                             onDragStart={(e) => handleDragStart(e, index)}
                             onDragOver={(e) => handleDragOver(e, index)}
                             onDragLeave={handleDragLeave}
+                            onDragEnd={handleDragEnd}
                             onDrop={(e) => handleDrop(e, index)}
                         >
                             <input
@@ -173,86 +227,90 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                                 type="color"
                                 value={colorScale(index + 1)}
                                 onChange={(e) => changeColor(e.target.value, index + 1)}
-                            ></input>
+                            />
                             <div
                                 className='prompt-item-text'
-                                style={{ 'backgroundColor': colorScale(index + 1) }}
-                                onClick={(e) => handlePromptClick(index + 1)}
+                                onClick={() => handlePromptClick(index + 1)}
                             >
-                                Prompt {index + 1}: {prompt}
+                                {prompt}
                             </div>
                         </div>
                     )
                 ))}
             </div>
             <style jsx>{`
-            .prompt-items {
-                display: flex;
-                flex-direction: column;
-                height: 200px;
-                overflow-y: scroll;
-                padding: auto 20px;
-            }
-            .prompt-item {
-                margin: 8px 10px;
-                padding: 5px 10px;
-                color: white;
-                border-radius: 5px;
-                box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-                position: relative;
-                cursor: pointer;
-            }
-            .prompt-item.highlighted {
-                border-color: #1890ff;
-                box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
-            }
-            .prompt-item-color {
-                display: inline-block;
-                width: 18px;
-                height: 20px;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                appearance: none;
-                background-color: transparent;
-                border: none;
-                cursor: pointer;
-                margin-right: 5px;
-            }
-            .prompt-item-color::-webkit-color-swatch {
-                border-radius: 50%;
-            }
-            .prompt-item-color::-moz-color-swatch {
-                border-radius: 50%;
-            }
-            .prompt-item-text {
-                font-weight: bold;
-                padding: 5px 10px;
-                border-radius: 5px;
-                width: calc(100% - 45px);
-                display: inline-block;
-            }
-            .group {
-                // border: 1px solid #ccc;
-                border-radius: 8px;
-                box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-                padding: 10px;
-                margin: 5px 10px;
-                position: relative;
-            }
-            .group.highlighted {
-                border-color: #1890ff;
-                box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
-            }
-            .group-delete {
-                position: absolute;
-                top: 5px;
-                right: 5px;
-                cursor: pointer;
-                color: #ff4d4f;
-            }
-            .dragged {
-                opacity: 0.5;
-            }
+                .prompt-items {
+                    display: flex;
+                    flex-direction: column;
+                    height: 200px;
+                    overflow-y: scroll;
+                    padding: auto 20px;
+                }
+                .prompt-item {
+                    border-radius: 5px;
+                    position: relative;
+                    cursor: pointer;
+                }
+                .prompt-item.highlighted {
+                    border-color: #1890ff;
+                    box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
+                }
+                .prompt-item-color {
+                    display: inline-block;
+                    width: 20px;
+                    height: 22px;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    appearance: none;
+                    background-color: transparent;
+                    border: none;
+                    cursor: pointer;
+                    margin-right: 5px;
+                }
+                .prompt-item-color::-webkit-color-swatch {
+                    border-radius: 50%;
+                }
+                .prompt-item-color::-moz-color-swatch {
+                    border-radius: 50%;
+                }
+                .prompt-item-text {
+                    padding-left: 5px;
+                    line-height: 2.2em;
+                    border-radius: 5px;
+                    display: inline-block;
+                }
+                .group {
+                    border-radius: 8px;
+                    position: relative;
+                }
+                .group-header {
+                    display: flex;
+                    line-height: 2.2em;
+                }
+                .group-name {
+                    flex: 1;
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin-left: 5px;
+                    user-select: none;
+                }
+                .group.highlighted {
+                    border-color: #1890ff;
+                    box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
+                }
+                .group-delete {
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    cursor: pointer;
+                    color: #ff4d4f;
+                }
+                .group-content {
+                    overflow: hidden;
+                }
+                .dragged {
+                    opacity: 0.5;
+                }
             `}</style>
         </div>
     );

@@ -34,9 +34,9 @@ const Generate = () => {
   const [prompts, setPrompts] = useState([]);
   const [statusInfo, setStatusInfo] = useState(0);
   const [imageNum, setImageNum] = useState(10);
-  const [imageIdMap, setImageIdMap] = useState({});
+  const [imageIdMap, setImageIdMap] = useState({}); // (For debug mode only) A map that stores for each prompt the IDs of the images that has been used
   const [switchChecked, setSwitchChecked] = useState(false);
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState([]); // Prompt groups
   const [reviewPanelVisible, setReviewPanelVisible] = useState(false);
   const [userFeedback, setUserFeedback] = useState('');
   const [failedImageIds, setFailedImageIds] = useState([]);
@@ -47,12 +47,6 @@ const Generate = () => {
 
   const isDebug = false;
   const baseUrl = '/api';
-
-  const TRENDING_IMAGES = [
-    { id: 'post1', src: '/post1.svg', alt: 'Post 1' },
-    { id: 'post2', src: '/post2.svg', alt: 'Post 2' },
-    { id: 'post3', src: '/post3.svg', alt: 'Post 3' }
-  ];
 
   const ensureImagesSelected = () => {
     setSelectedCategory('images');
@@ -220,11 +214,18 @@ const Generate = () => {
   }
 
   const generateGraphSchema = async (images, IMAGE_DIR) => {
-    let sample_size = 1;
+    /**
+     * Generates an initial schema of the scene graph based on provided images.
+     * 
+     * @param {Array} images - An array of image objects to sample from.
+     * @param {string} IMAGE_DIR - The directory path for storing generated graphs.
+     * @returns {Object} aggregatedGraph - Merged scene graph data from sampled images.
+     */
+    
     // randomly sample images
+    let sample_size = 1; // could be modified
     let sampleImages = [];
     for (let i = 0; i < sample_size; i++) {
-      // sampleImages.push(images[Math.floor(Math.random() * images.length)]);
       sampleImages.push(images[i]);
     }
 
@@ -270,19 +271,6 @@ const Generate = () => {
     });
 
     console.log(aggregatedGraph);
-
-    // add an option "others" to each leaf node
-    // const addOthers = (graph) => {
-    //   let keys = Object.keys(graph);
-    //   for (let key of keys) {
-    //     if (!(graph[key] instanceof Array)) {
-    //       addOthers(graph[key]);
-    //     } else {
-    //       graph[key].push("others");
-    //     }
-    //   }
-    // }
-    // addOthers(aggregatedGraph);
 
     return aggregatedGraph;
   }
@@ -428,7 +416,7 @@ const Generate = () => {
 
     // Early exit conditions
     if (isGenerating || userInput.trim() === "") {
-      console.debug("Either a generation is in progress or the user input is empty.");
+      alert("Either a generation is in progress or the user input is empty.");
       return;
     }
 
@@ -493,44 +481,32 @@ const Generate = () => {
   // Step 1: Get or generate image IDs
   const getImageIds = async (userInput, IMAGE_DIR) => {
     try {
+      /* 
+        NOTE: For easier debugging, we include a few test prompts (e.g., "A cinematic photo of a doctor").
+        All auditing results will be automatically stored if "SAVE_MODE" is set to true in the environmental variables (".env"), so that the results will NOT be calculated again when the test prompts are reused.
+      */
       let isImagesExist, imageIds;
       const checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
       const response = await axios.get(checkUrl);
 
-      // if (response.data.res) {
-      //   let imageIds = response.data.res.map((item) => item.replace(/\.png$/, ""));
-      //   const currentImageIndex = imageIdMap[userInput] || 0;
-
-      //   // Update image ID map
-      //   setImageIdMap((prevMap) => ({
-      //     ...prevMap,
-      //     [userInput]: currentImageIndex + image_num,
-      //   }));
-
-      //   return imageIds.slice(currentImageIndex, currentImageIndex + image_num);
-      // } else {
-      //   // Generate new image IDs if none exist
-      //   return Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${i}`);
-      // }
-
-      if (response.data.res instanceof Array) { // the image ids exist
+      if (response.data.res instanceof Array) { // the image ids exist (which means the prompt is a test prompt)
         isImagesExist = true;
         imageIds = response.data.res.map(item => {
           return item.substring(0, item.length - 4); // remove the suffix .png
         });
-        if (imageIdMap[userInput] == undefined) {
-          imageIds = imageIds.slice(0, image_num);
+        if (imageIdMap[userInput] == undefined) { // If the user input is new
+          imageIds = imageIds.slice(0, image_num); // get the first image_num images
           let tmp = { ...imageIdMap };
           tmp[userInput] = image_num;
           setImageIdMap(tmp);
         } else {
-          imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num);
+          imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num); // get the next image_num images starting from the last position
           let tmp = { ...imageIdMap };
           tmp[userInput] += image_num;
           setImageIdMap(tmp);
         }
         return {isImagesExist, imageIds};
-      } else if (response.data.res === null) {
+      } else if (response.data.res === null) { // the prompt is new; generate new IDs
         isImagesExist = false;
         imageIds = Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${i}`);
       } else {
@@ -845,7 +821,7 @@ const Generate = () => {
   }
 
   const handleNodeAdd = (dataObj, newNode) => {
-    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues } = newNode;
+    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = newNode;
     // calculate the path to the root
     let pathToRoot = [];
     let curNode = dataObj;

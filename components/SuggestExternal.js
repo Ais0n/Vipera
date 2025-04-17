@@ -14,15 +14,15 @@ const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handle
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
-        axios.post('/api/suggest-external', {
-            prompt: prompt,
-            schema: graphSchema
-        }).then((response) => {
-            // console.log(response)
-            setSuggestionMetaData(response.data.res);
-        }).catch((error) => {
-            console.error(error);
-        });
+        // axios.post('/api/suggest-external', {
+        //     prompt: prompt,
+        //     schema: graphSchema
+        // }).then((response) => {
+        //     // console.log(response)
+        //     setSuggestionMetaData(response.data.res);
+        // }).catch((error) => {
+        //     console.error(error);
+        // });
     }
 
     // in useeffect, send a http request
