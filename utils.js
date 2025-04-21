@@ -26,23 +26,30 @@ function deepClone(target) {
 
 // calculate statistics
 function calculateGraph(metaData, graphSchema, graph) {
-    const buildGraph = (data) => {
+    const buildGraph = (schema) => {
         const result = [];
-        Object.keys(data).forEach((key) => {
-            const node = { name: key, children: [], count: 0, type: "object" };
+        Object.keys(schema).forEach((key) => {
+            if (key.startsWith("_")) {
+                return;
+            }
+            const node = { name: key, children: [], count: 0, type: schema[key]._nodeType || "object" };
             result.push(node);
-            const queue = [{ node, data: data[key] }];
+            const queue = [{ node, data: schema[key] }];
             while (queue.length) {
                 const { node: currentNode, data: currentData } = queue.shift();
-                if (Array.isArray(currentData)) {
+                if (currentData._nodeType === 'attribute') {
                     // currentData.forEach((item) => {
                     //     currentNode.children.push({ name: item, children: [], count: 0 });
                     // });
                     // currentNode.children.push({name: 'values', type: "attribute", children: [], count: 0});
                     currentNode.type = "attribute";
-                } else if (typeof(currentData) === 'object') {
+                } else if (currentData._nodeType === 'object') {
+                    console.assert(typeof(currentData) === 'object', "currentData is not an object");
                     Object.keys(currentData).forEach((subKey) => {
-                        const subNode = { name: subKey, children: [], count: 0, type: "object" };
+                        if (subKey.startsWith("_")) {
+                            return;
+                        }
+                        const subNode = { name: subKey, children: [], count: 0, type: currentData[subKey]._nodeType || "object" };
                         currentNode.children.push(subNode);
                         queue.push({ node: subNode, data: currentData[subKey] });
                     });
@@ -52,7 +59,19 @@ function calculateGraph(metaData, graphSchema, graph) {
         return result;
     };
 
-    const traverseGraph = (curNode, dataItem, itemMetadata) => {
+    const traverseGraph = (curNode, dataItem, itemMetadata, graphSchema) => {
+        // check if itemMetadata.imageId is in graphSchema._scope
+        if (graphSchema._scope && graphSchema._scope.length > 0) {
+            let ok = false;
+            graphSchema._scope.forEach(imageId => {
+                if (imageId == itemMetadata.imageId) {
+                    ok = true;
+                }
+            });
+            if (!ok) {
+                return;
+            }
+        }
         curNode.imageInfo.push(itemMetadata);
         curNode.count = curNode.imageInfo.length;
 
@@ -60,8 +79,8 @@ function calculateGraph(metaData, graphSchema, graph) {
             for (let key in dataItem) {
                 if (curNode.children) {
                     let childNode = curNode.children.find(node => node.name === key);
-                    if (childNode) {
-                        traverseGraph(childNode, dataItem[key], itemMetadata);
+                    if (childNode && graphSchema[key]) {
+                        traverseGraph(childNode, dataItem[key], itemMetadata, graphSchema[key]);
                     }
                 }
             }
@@ -103,23 +122,29 @@ function calculateGraph(metaData, graphSchema, graph) {
             children: buildGraph(graphSchema),
         }
     }
-    // recursively make node.imageInfo = []
-    const makeNodeImageInfo = (node) => {
+    // recursively make node.imageInfo = [] for nodes in graphSchema
+    const makeNodeImageInfo = (node, schema) => {
+        if (!schema || !node || typeof(schema) != 'object') {
+            return;
+        }
         node.imageInfo = [];
         if (node.type == "attribute") {
             node.list = [];
         }
         if (node.children) {
             node.children.forEach(child => {
-                makeNodeImageInfo(child);
+                // makeNodeImageInfo(child);
+                if(schema[child.name]) {
+                    makeNodeImageInfo(child, schema[child.name]);
+                }
             });
         }
     }
-    makeNodeImageInfo(graph);
+    makeNodeImageInfo(graph, graphSchema);
 
     metaData.forEach(item => {
         let itemMetadata = item.metaData;
-        traverseGraph(graph, item, itemMetadata);
+        traverseGraph(graph, item, itemMetadata, graphSchema);
     })
     return graph; // Return the constructed graph
 }
@@ -222,33 +247,15 @@ function arrayBufferToBase64(buffer) {
     return window.btoa(binary);
 }
 
-function processSceneGraph(graph) {
-    // // remove all leaf nodes (set null value)
-    // const removeLeafNodes = (node, depth) => {
-    //     if(depth >= 2) return {};
-    //     let keys = Object.keys(node);
-    //     if (keys.length == 0) {
-    //         return {};
-    //     } else {
-    //         for(let key of keys) {
-    //             if(!node[key] || typeof(node[key]) != 'object') {
-    //                 node[key] = {};
-    //                 continue;
-    //             }
-    //             node[key] = removeLeafNodes(node[key], depth + 1);
-    //         }
-    //         return node;
-    //     }
-    // };
-    // graph = removeLeafNodes(graph, 0);
-    // return graph;
+function processSceneGraph(graph, images) {
+    let imageIds = images.map(image => image.imageId);
     let { foreground, background } = graph;
-    let res = { foreground: {}, background: {} };
+    let res = { foreground: {_nodeType: 'object'}, background: {_nodeType: 'object'} };
     foreground.forEach(item => {
-        res["foreground"][item] = {};
+        res["foreground"][item] = {_nodeType: 'object'};
     });
     background.forEach(item => {
-        res["background"][item] = {};
+        res["background"][item] = {_nodeType: 'object'};
     });
     return res;
 }
@@ -325,7 +332,7 @@ const removeRedundantFields = (data, schema) => {
                     delete curNode[key];
                 }
             } else {
-                if ((!(schemaNode[key] instanceof Array) && typeof (schemaNode[key]) == 'object') || typeof (schemaNode[key]) == 'undefined' || curNode[key] == "") {
+                if (typeof (schemaNode[key]) == 'undefined' || curNode[key] == "") {
                     delete curNode[key];
                 }
             }
@@ -355,4 +362,100 @@ const repairDataWithSchema = (data, schema) => {
     traverse(result, schema);
     return result;
 }
-export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName };
+
+function removeUnderscoreFields(obj) { // remove the fields that start with "_"
+    // Check if the input is an object
+    if (typeof obj !== 'object' || obj === null) {
+        return obj;
+    }
+
+    // Create a new object to hold the filtered properties
+    const result = {};
+
+    // Iterate over the object's properties
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            // If the key does not start with "_", add it to the result
+            if (!key.startsWith('_')) {
+                result[key] = removeUnderscoreFields(obj[key]);
+            }
+        }
+    }
+
+    return result;
+}
+
+function getScope(imageIds, graphSchema) {
+    /**
+     * Get a subschema from the graph schema that contains the imageIds
+     */
+    let res = {};
+    Object.keys(graphSchema).forEach((key) => {
+        if (key.startsWith("_")) {
+            // res[key] = deepClone(graphSchema[key]);
+            return;
+        }
+        if (graphSchema.scope && graphSchema.scope.length > 0) {
+            // check if all imageIds are in the graphSchema.scope
+            let ok = true;
+            imageIds.forEach(imageId => {
+                if (!graphSchema.scope.includes(imageId)) {
+                    ok = false;
+                }
+            });
+            if (ok) {
+                res[key] = getScope(imageIds, graphSchema[key]);
+            }
+        }
+    });
+    return res;
+}
+
+function updateGraphSchemaWithScope(graphSchema, subSchema, imageIds) {
+    /**
+     * Update the graph schema by adding imageIds to the "_scope" for all nodes within the subSchema
+     */
+    if (typeof(subSchema) !== 'object' || subSchema === null) {
+        return;
+    }
+    Object.keys(graphSchema).forEach((key) => {
+        if (key.startsWith("_")) {
+            return;
+        }
+        if (subSchema[key]) {
+            if(!graphSchema[key]._scope) {
+                graphSchema[key]._scope = [];
+            }
+            graphSchema[key]._scope.push(...imageIds);
+        }
+        updateGraphSchemaWithScope(graphSchema[key], subSchema[key], imageIds);
+    });
+}
+
+function wrapSchemaForLabeling(graphSchema) {
+    /**
+     * Wrap the graph schema by (a) modifying all attribute nodes to a string of the format "Choose from the following candidate values: [...]" or "..." (if no candidate values are provided) (b) removing all fields that start with "_" for other nodes
+     * @param {object} graphSchema - The graph schema to be wrapped
+     * @returns {object} - The wrapped graph schema
+     */
+    let res = {};
+    if (typeof(graphSchema) !== 'object' || graphSchema === null) {
+        return graphSchema;
+    }
+    Object.keys(graphSchema).forEach((key) => {
+        if (key.startsWith("_")) {
+            return;
+        }
+        if (graphSchema[key]._nodeType === 'attribute') {
+            let isCandidateValuesSpecified = graphSchema[key]._candidateValues instanceof Array && graphSchema[key]._candidateValues.length > 0; 
+            res[key] = isCandidateValuesSpecified ? `Choose from the following candidate values: ${graphSchema[key]._candidateValues.join(",")}` : `...`;
+        } else if (graphSchema[key]._nodeType === 'object') {
+            res[key] = wrapSchemaForLabeling(graphSchema[key]);
+        } else {
+            res[key] = graphSchema[key];
+        }
+    });
+    return res;
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, wrapSchemaForLabeling };

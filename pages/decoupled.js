@@ -44,6 +44,7 @@ const Generate = () => {
   const [failedImageIdsForMetadata, setFailedImageIdsForMetadata] = useState([]);
   const [retryMetaDataContext, setRetryMetaDataContext] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
+  const [tmpSchemaScope, setTmpSchemaScope] = useState(undefined); // Temporary scope for the new node (used in external prompt suggestion)
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -179,15 +180,21 @@ const Generate = () => {
         // Proceed to further steps only if there are new images
         if (retriedImages.length > 0) {
           // Step 3: Try generating the scene graph
-          const updatedGraphSchema = await trySceneGraphGeneration(retriedImages, IMAGE_DIR);
+          let updatedGraphSchema = await trySceneGraphGeneration(retriedImages, IMAGE_DIR);
 
-          
           if (updatedGraphSchema === null) {
+            setRetrySceneGraphContext({newImages, IMAGE_DIR});
             throw new Error("Scene graph generation failed. You can retry.");
           } 
-          
+
+          // Update the graph schema by adding the scope of the new prompt to each node
+          let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+
+          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId));
+          console.log("after updating graph schema with scope", updatedGraphSchema);
+        
           // Step 4: Try generating metadata
-          await tryMetadataGeneration(retriedImages, updatedGraphSchema);
+          await tryMetadataGeneration(newImages, schemaScope);
         }
 
         setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
@@ -220,6 +227,20 @@ const Generate = () => {
      * @param {Array} images - An array of image objects to sample from.
      * @param {string} IMAGE_DIR - The directory path for storing generated graphs.
      * @returns {Object} aggregatedGraph - Merged scene graph data from sampled images.
+     * 
+     * Example schema of the scene graph:
+     * {
+     *  "foreground": {
+     *    "doctor": {
+     *      // children nodes
+     *    }
+     *  },
+     *  "background": {
+     *    "office": {},
+     *    "light panel": {},
+     *    "medical equipment": {}
+     *  },
+     * }
      */
     
     // randomly sample images
@@ -234,7 +255,7 @@ const Generate = () => {
     let response = await axios.get(checkGraphUrl);
     console.log(response)
     if (response.data.res) {
-      return Utils.processSceneGraph(response.data.res);
+      return Utils.processSceneGraph(response.data.res, images);
     }
 
     // get Scene Graph for each image
@@ -245,7 +266,7 @@ const Generate = () => {
       let response = await axios.get(genGraphUrl);
       console.log(response)
       let metaGraph = response.data.res;
-      sceneGraphs.push(Utils.processSceneGraph(metaGraph));
+      sceneGraphs.push(Utils.processSceneGraph(metaGraph, images));
     }
 
     // aggregate the scene graphs, merge leaf values as a list
@@ -297,10 +318,10 @@ const Generate = () => {
     }
   }
 
-  const getDataItem = (schema, imageId, dataItem) => {
+  const generateDataItemForDebug = (schema, imageId, dataItem) => {
     for (let key in schema) {
       if (typeof (schema[key]) === 'object' && !Array.isArray(schema[key])) {
-        dataItem[key] = getDataItem(schema[key], imageId, dataItem[key] || {});
+        dataItem[key] = generateDataItemForDebug(schema[key], imageId, dataItem[key] || {});
       } else {
         // randomly choose a value from the array
         if (dataItem && typeof (dataItem[key]) == 'undefined') {
@@ -311,7 +332,7 @@ const Generate = () => {
     return dataItem;
   }
 
-  const generateMetaData = async (images, graphSchema, candidateValues) => {
+  const generateMetaData = async (images, graphSchema) => {
     setIsGenerating(true);
     setIsDoneGenerating(false);
     setStatusInfo("Start generating metadata...");
@@ -319,10 +340,10 @@ const Generate = () => {
     let _metaData = [], _failedImageIdsForMetadata = [];
     if (isDebug) {
       for (let i = 0; i < metaData.length; i++) {
-        _metaData.push(getDataItem(graphSchema, "", metaData[i]));
+        _metaData.push(generateDataItemForDebug(graphSchema, "", metaData[i]));
       }
       for (let i = metaData.length; i < images.length; i++) {
-        let currentDataItem = getDataItem(graphSchema, images[i].imageId, {});
+        let currentDataItem = generateDataItemForDebug(graphSchema, images[i].imageId, {});
         currentDataItem.batch = prompts.length + 1;
         currentDataItem.metaData = {
           imageId: images[i].imageId,
@@ -341,13 +362,14 @@ const Generate = () => {
         let data, isGenerateNeeded = true;
         if (response.data.res) {
           data = response.data.res;
-          isGenerateNeeded = !Utils.isObjectSubset(data, graphSchema);
+          isGenerateNeeded = !Utils.isObjectSubset(data, Utils.removeUnderscoreFields(graphSchema));
           console.log(data, graphSchema, isGenerateNeeded);
           // isGenerateNeeded = false;
         }
-
+        
         if (isGenerateNeeded) {
-          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(graphSchema)}&label_dir=${labelFilePath}&feedback=${userFeedback}` + (candidateValues ? `&candidate_values=${candidateValues}` : '');
+          console.log("wrappedSchema: ", Utils.wrapSchemaForLabeling(graphSchema));
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(Utils.wrapSchemaForLabeling(graphSchema))}&label_dir=${labelFilePath}&feedback=${userFeedback}`;
           try {
             response = await axios.get(getLabelURL);
             data = response.data.res;
@@ -362,7 +384,7 @@ const Generate = () => {
         }
 
         console.log("before remove", data, graphSchema);
-        data = Utils.removeRedundantFields(data, graphSchema);
+        data = Utils.removeRedundantFields(data, graphSchema); // Sometimes the LLM-generated labels contain redundant fields not in the provided schema, so we need to remove them
         console.log("after remove", data);
         data.batch = image.batch || prompts.length + 1;
         data.metaData = {
@@ -443,15 +465,21 @@ const Generate = () => {
       // Proceed to further steps only if there are new images
       if (newImages.length > 0) {
         // Step 3: Try generating the scene graph
-        const updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
+        let updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
 
         if(updatedGraphSchema === null) {
           setRetrySceneGraphContext({newImages, IMAGE_DIR});
           throw new Error("Scene graph generation failed. You can retry.");
         } 
+
+        // Update the graph schema by adding the scope of the new prompt to each node
+        let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+
+        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId)); // add the image IDs to the "_scope" field of all nodes in the graph schema
+        console.log("after updating graph schema with scope", updatedGraphSchema);
         
         // Step 4: Try generating metadata
-        await tryMetadataGeneration(newImages, updatedGraphSchema);
+        await tryMetadataGeneration(newImages, schemaScope);
       }
 
       setPrompts((prevPrompts) => [...prevPrompts, userInput]);
@@ -568,15 +596,21 @@ const Generate = () => {
     try {
       initializeGenerationState();
       console.log("Retrying scene graph generation...");
-      const updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
+      let updatedGraphSchema = await trySceneGraphGeneration(newImages, IMAGE_DIR);
       if(updatedGraphSchema === null) {
         setRetrySceneGraphContext({newImages, IMAGE_DIR});
         throw new Error("Scene graph generation failed. You can retry.");
       } 
       setRetrySceneGraphContext(undefined);
-      
+
+      // Update the graph schema by adding the scope of the new prompt to each node
+      let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+
+      Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId));
+      console.log("after updating graph schema with scope", updatedGraphSchema);
+        
       // Step 4: Try generating metadata
-      await tryMetadataGeneration(newImages, updatedGraphSchema);
+      await tryMetadataGeneration(newImages, schemaScope);
 
       setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
     } catch (error) {
@@ -589,7 +623,7 @@ const Generate = () => {
   }
 
   // Try generating metadata
-  async function tryMetadataGeneration(newImages, updatedGraphSchema, candidateValues, newGraph) {
+  async function tryMetadataGeneration(newImages, partialSchema, newGraph) {
     if(!newGraph) {
       newGraph = Utils.deepClone(graph);
     }
@@ -599,10 +633,10 @@ const Generate = () => {
       let newMetaData, allMetaData = [];
       if (prompts.length > 0) {
         setStatusInfo("Generating metadata...");
-        let res = await generateMetaData(newImages, updatedGraphSchema, candidateValues);
+        let res = await generateMetaData(newImages, partialSchema);
         setFailedImageIdsForMetadata(res.failedImageIdsForMetadata);
         newMetaData = res.data;
-        setRetryMetaDataContext({updatedGraphSchema, candidateValues});
+        setRetryMetaDataContext({partialSchema});
 
         // merge metadata with old metadata
         let oldMetaData = Utils.deepClone(metaData);
@@ -633,7 +667,7 @@ const Generate = () => {
       }
 
       // Update the graph with statistics
-      const updatedGraph = Utils.calculateGraph(allMetaData, updatedGraphSchema, newGraph);
+      const updatedGraph = Utils.calculateGraph(allMetaData, partialSchema, newGraph);
       setGraph((prevGraph) => ({...updatedGraph }));
       console.log("Updated Graph:", updatedGraph);
     } catch (error) {
@@ -647,7 +681,7 @@ const Generate = () => {
     try {
       let newImages = images.filter(image => imageIds.includes(image.imageId));
       console.log("Retrying metadata generation...");
-      await tryMetadataGeneration(newImages, retryMetaDataContext.updatedGraphSchema, retryMetaDataContext.candidateValues);
+      await tryMetadataGeneration(newImages, retryMetaDataContext.partialSchema);
     } catch (error) {
       console.error("Retry failed for metadata generation:", error);
     }
@@ -661,15 +695,34 @@ const Generate = () => {
       for (let key of keys) {
         if (key == oldNodeName) {
           schema[newNodeName] = Utils.deepClone(schema[oldNodeName]);
+          let traverseNewNode = (curNode) => {
+            if (!curNode || typeof(curNode) != 'object') return;
+            curNode._scope = [];
+            Object.keys(curNode).forEach((k) => {
+              if(k.startsWith('_')) return;
+              traverseNewNode(curNode[k]);
+            });
+          }
+          traverseNewNode(schema[newNodeName]);
+          let path = {};
+          path[newNodeName] = Utils.deepClone(schema[newNodeName]);
+          return path;
         } else {
           if (typeof (schema[key]) == 'object') {
-            updateSchema(schema[key], oldNodeName, newNodeName);
+            let res = updateSchema(schema[key], oldNodeName, newNodeName);
+            if (res) {
+              let path = {}; 
+              path[key] = res;
+              return path;
+            }
           }
         }
       }
     }
     let _graphSchema = Utils.deepClone(graphSchema);
-    updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
+    let newTmpSchemaScope = updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
+    console.log("newTmpSchemaScope", newTmpSchemaScope);
+    setTmpSchemaScope(newTmpSchemaScope);
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
     let updateGraph = (graph, suggestion) => {
@@ -679,14 +732,26 @@ const Generate = () => {
           let newNode = Utils.deepClone(child);
           newNode.name = suggestion.newNodeName;
           const traverseGraph = (curNode) => {
-            if (!curNode || !curNode.children) return;
-            for (let i = 0; i < curNode.children.length; i++) {
-              if (curNode.children[i].type == "attribute") {
-                curNode.children[i] = { name: curNode.children[i].name, type: "attribute", count: 0, children: [] };
-              } else {
-                traverseGraph(curNode[i]);
-              }
+            // if (!curNode || !curNode.children) return;
+            // for (let i = 0; i < curNode.children.length; i++) {
+            //   if (curNode.children[i].type == "attribute") {
+            //     curNode.children[i] = { name: curNode.children[i].name, type: "attribute", count: 0, children: [] };
+            //   } else {
+            //     traverseGraph(curNode[i]);
+            //   }
+            // }
+            if (!curNode || typeof(curNode) != 'object' || !curNode.type) return;
+            curNode.count = 0;
+            curNode.imageInfo = [];
+            curNode._scope = [];
+            if (curNode.type == 'attribute') {
+              delete curNode.list;
+              delete curNode.values;
             }
+            if (!curNode.children) return;
+            curNode.children.forEach((child) => {
+              traverseGraph(child);
+            });
           }
           traverseGraph(newNode);
           graph.children.push(newNode);
@@ -712,7 +777,11 @@ const Generate = () => {
       let keys = Object.keys(schema);
       for (let key of keys) {
         if (key == suggestion.parentNodeName) {
-          schema[key][suggestion.newNodeName] = Utils.deepClone(suggestion.candidateValues);
+          schema[key][suggestion.newNodeName] = {
+            _nodeType: "attribute",
+            _candidateValues: Utils.deepClone(suggestion.candidateValues), // TO BE MODIFIED
+            _scope: schema[key]._scope ? Utils.deepClone(schema[key]._scope) : []
+          }
         } else if (typeof (schema[key]) == 'object') {
           updateSchema(schema[key], suggestion);
         }
@@ -790,7 +859,8 @@ const Generate = () => {
     }
   }
 
-  const handleNodeEdit = (dataObj, newNodeName) => {
+  const handleNodeEdit = (dataObj, newNode) => {
+    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = newNode;
     // calculate the path to the root
     let pathToRoot = [];
     let curNode = dataObj;
@@ -805,7 +875,7 @@ const Generate = () => {
     for (let i = 0; i < pathToRoot.length - 1; i++) {
       curNode = curNode[pathToRoot[i]];
     }
-    curNode[newNodeName] = Utils.deepClone(curNode[pathToRoot[pathToRoot.length - 1]]);
+    curNode[newNode] = Utils.deepClone(curNode[pathToRoot[pathToRoot.length - 1]]);
     delete curNode[pathToRoot[pathToRoot.length - 1]];
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
@@ -822,6 +892,7 @@ const Generate = () => {
 
   const handleNodeAdd = (dataObj, newNode) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = newNode;
+    candidateValues = candidateValues == '' ? [] : candidateValues.split(',');
     // calculate the path to the root
     let pathToRoot = [];
     let curNode = dataObj;
@@ -836,8 +907,11 @@ const Generate = () => {
     for (let i = 0; i < pathToRoot.length; i++) {
       curNode = curNode[pathToRoot[i]];
     }
-    curNode[newNodeName] = candidateValues == '' ? [] : candidateValues.split(',');
-
+    curNode[newNodeName] = {
+      "_nodeType": newNodeType,
+      ...(newNodeType == "attribute" && { "_candidateValues": candidateValues }),
+      "_scope": scope,
+    }
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
     // update the graph
@@ -855,58 +929,18 @@ const Generate = () => {
       let partialSchema = {}; // The schema for the new node
       curNode = partialSchema;
       for (let i = 0; i < pathToRoot.length; i++) {
-        curNode[pathToRoot[i]] = {};
+        curNode[pathToRoot[i]] = {_nodeType: 'object'};
         curNode = curNode[pathToRoot[i]];
       }
-      curNode[newNodeName] = "...";
+      curNode[newNodeName] = {_nodeType: 'attribute', _candidateValues: candidateValues, _scope: scope};
       console.log("partialSchema", partialSchema);
-      // Generate Meta Data
-      // const updateMetaData = (resMetaData) => {
-      //   if(resMetaData.status == 'failed') {
-      //     setIsGenerating(false);
-      //     setIsDoneGenerating(true);
-      //     setFailedImageIdsForMetadata(resMetaData.failedImageIdsForMetadata);
-      //     messageApi.error("Failed to generate metadata for the new node.");
-      //     return;
-      //   }
-      //   let labeledSchema = resMetaData.data;
-      //   console.log("labeledSchema", labeledSchema);
-      //   // update the metadata
-      //   let newMetaData = Utils.deepClone(metaData);
-      //   images.forEach((image, index) => {
-      //     let item = labeledSchema[index];
-      //     let oldMetaData = newMetaData.find(item => item.metaData.imageId == image.imageId);
-      //     if (oldMetaData == undefined) {
-      //       oldMetaData = {};
-      //     }
-      //     let res = Utils.mergeMetadata(oldMetaData, item);
-      //     let idx = newMetaData.findIndex(item => item.metaData.imageId == image.imageId);
-      //     if (idx != -1) {
-      //       newMetaData[idx] = res;
-      //     } else {
-      //       newMetaData.push(res);
-      //     }
-      //   })
-
-      //   setMetaData(newMetaData);
-      //   console.log("newMetaData", newMetaData);
-      //   // update the graph
-      //   _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
-      //   console.log("newgraph", _graph)
-      //   setGraph(_graph);
-
-      //   // setIsGenerating(false);
-      //   // setIsDoneGenerating(true);
-      //   // setSwitchChecked(true);
-      // }
-      // generateMetaData(images, partialSchema, candidateValues)
-      tryMetadataGeneration(images, partialSchema, candidateValues, _graph);
+      tryMetadataGeneration(images.filter(image => scope.includes(image.imageId)), partialSchema, _graph);
     }
     
   }
 
-  const handleNodeRelabel = (contextData, candidateValues) => {
-    console.log(contextData, candidateValues);
+  const handleNodeRelabel = (contextData) => {
+    console.log("relabel: ", contextData);
     let pathToRoot = [];
     let curNode = contextData;
     while (curNode.data.name != 'root') {
@@ -923,7 +957,7 @@ const Generate = () => {
     console.log(curNode);
     curNode[pathToRoot[pathToRoot.length - 1]] = "...";
     console.log(partialSchema);
-    tryMetadataGeneration(images, partialSchema, candidateValues);
+    tryMetadataGeneration(images, partialSchema);
   }
 
   // const retryNodeAdd

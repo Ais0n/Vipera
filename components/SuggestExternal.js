@@ -4,6 +4,7 @@ import BarChart from './BarChart';
 import { Image, Switch, Popover, Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { removeUnderscoreFields } from '../utils';
 
 const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handleSuggestionButtonClick }) => {
     const _handleSuggestionButtonClick2 = () => {
@@ -16,7 +17,7 @@ const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handle
     const updateSuggestion = () => {
         // axios.post('/api/suggest-external', {
         //     prompt: prompt,
-        //     schema: graphSchema
+        //     schema: removeUnderscoreFields(graphSchema)
         // }).then((response) => {
         //     // console.log(response)
         //     setSuggestionMetaData(response.data.res);

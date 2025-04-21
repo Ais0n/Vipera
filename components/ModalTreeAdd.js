@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Input, Button, Radio, Tooltip, Checkbox, Image } from 'antd';
 import { SyncOutlined, InfoCircleOutlined, RightOutlined, DownOutlined } from '@ant-design/icons';
 
-const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScale, images }) => {
+const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScale, images, nodeData }) => {
     const [nodeType, setNodeType] = useState("attribute");
     const [nodeName, setNodeName] = useState('');
     const [candidateValues, setCandidateValues] = useState("");
@@ -30,12 +30,12 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScal
             return;
         }
         // check if scope is empty
-        if (nodeType === 'attribute' && selectedImageIds.length === 0) {
+        if (selectedImageIds.length === 0) {
             alert("Please select at least one image for the scope");
             return;
         }
 
-        onSave({ nodeName, nodeType, candidateValues, ...(nodeType === 'attribute' && { scope: selectedImageIds }) });
+        onSave({ nodeName, nodeType, candidateValues, scope: selectedImageIds });
         onClose();
         setNodeName('');
         setNodeType("attribute");
@@ -81,135 +81,133 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScal
                         onChange={(e) => setCandidateValues(e.target.value)}
                         placeholder="Enter candidate values (comma separated)"
                     />
-                    {nodeType === 'attribute' && (
-                        <>
-                            <div><b>Scope</b><Tooltip title="Select the prompts on which you want to evaluate with the criteria."><InfoCircleOutlined style={{ color: 'grey', marginLeft: '5px' }} /></Tooltip></div>
-                            <div style={{ display: 'flex', gap: '8px', flexDirection: 'row' }}>
-                                <div className="prompts-checkbox-group">
-                                    {/* 新增全选复选框 */}
-                                    <Checkbox
-                                        indeterminate={promptIndeterminate}
-                                        checked={promptAllChecked}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setSelectedPrompts(prompts.map((_, index) => index));
-                                            } else {
-                                                setSelectedPrompts([]);
-                                            }
-                                        }}
+                    <>
+                        <div><b>Scope</b><Tooltip title="Select the prompts on which you want to evaluate with the criteria."><InfoCircleOutlined style={{ color: 'grey', marginLeft: '5px' }} /></Tooltip></div>
+                        <div style={{ display: 'flex', gap: '8px', flexDirection: 'row' }}>
+                            <div className="prompts-checkbox-group">
+                                {/* 新增全选复选框 */}
+                                <Checkbox
+                                    indeterminate={promptIndeterminate}
+                                    checked={promptAllChecked}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedPrompts(prompts.map((_, index) => index));
+                                        } else {
+                                            setSelectedPrompts([]);
+                                        }
+                                    }}
+                                >
+                                    Select All
+                                </Checkbox>
+                                {groups.map((group, groupIndex) => (
+                                    <div
+                                        key={groupIndex}
+                                        className={`group}`}
                                     >
-                                        Select All
-                                    </Checkbox>
-                                    {groups.map((group, groupIndex) => (
-                                        <div
-                                            key={groupIndex}
-                                            className={`group}`}
-                                        >
-                                            <div className="group-header" onClick={() => toggleGroup(groupIndex)}>
-                                                {expandedGroups[groupIndex] ? (
-                                                    <DownOutlined style={{ cursor: 'pointer', marginRight: '8px' }} />
-                                                ) : (
-                                                    <RightOutlined style={{ cursor: 'pointer', marginRight: '8px' }} />
-                                                )}
-                                                <div className="group-name">{group.name}</div>
-                                            </div>
-                                            <div
-                                                className="group-content"
-                                                style={{
-                                                    height: expandedGroups[groupIndex] ? contentRefs.current[groupIndex]?.scrollHeight : 0,
-                                                    transition: 'height 0.3s ease',
-                                                    overflow: 'hidden',
-                                                }}
-                                                ref={el => contentRefs.current[groupIndex] = el}
-                                            >
-                                                {group.items.map((promptIndex) => (
-                                                    <div
-                                                        key={promptIndex}
-                                                        className={"prompt-item"}
-                                                        style={{ 'paddingLeft': '23px' }}
-                                                    >
-                                                        <span
-                                                            className="prompt-item-color"
-                                                            style={{ backgroundColor: colorScale(promptIndex + 1) }}
-                                                        />
-                                                        <Checkbox
-                                                            checked={selectedPrompts.includes(promptIndex)}
-                                                            onChange={(e) => {
-                                                                const checked = e.target.checked;
-                                                                setSelectedPrompts(prev =>
-                                                                    checked ? [...prev, promptIndex] : prev.filter(i => i !== promptIndex)
-                                                                );
-                                                                setSelectedImageIds(prev =>
-                                                                    checked ? [...prev, ...images.filter(image => image.batch === promptIndex + 1).map(image => image.imageId)] :
-                                                                        prev.filter(id => !images.some(image => image.imageId === id && image.batch === promptIndex + 1))
-                                                                );
-                                                            }}
-                                                        >
-                                                            <div
-                                                                className='prompt-item-text'
-                                                            >
-                                                                {prompts[promptIndex]}
-                                                            </div>
-                                                        </Checkbox>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                        <div className="group-header" onClick={() => toggleGroup(groupIndex)}>
+                                            {expandedGroups[groupIndex] ? (
+                                                <DownOutlined style={{ cursor: 'pointer', marginRight: '8px' }} />
+                                            ) : (
+                                                <RightOutlined style={{ cursor: 'pointer', marginRight: '8px' }} />
+                                            )}
+                                            <div className="group-name">{group.name}</div>
                                         </div>
-                                    ))}
-                                    {prompts.map((prompt, index) => (
-                                        !groups.some(group => group.items.includes(index)) && (
-                                            <div className='prompt-item' key={"modal-pitem-" + String(index)}>
-                                                <span
-                                                    className="prompt-item-color"
-                                                    style={{ backgroundColor: colorScale(index + 1) }}
-                                                />
-                                                <Checkbox
-                                                    checked={selectedPrompts.includes(index)}
-                                                    onChange={(e) => {
-                                                        const checked = e.target.checked;
-                                                        setSelectedPrompts(prev =>
-                                                            checked ? [...prev, index] : prev.filter(i => i !== index)
-                                                        );
-                                                        setSelectedImageIds(prev =>
-                                                            checked ? [...prev, ...images.filter(image => image.batch === index + 1).map(image => image.imageId)] :
-                                                                prev.filter(id => !images.some(image => image.imageId === id && image.batch === index + 1))
-                                                        );
-                                                    }}
+                                        <div
+                                            className="group-content"
+                                            style={{
+                                                height: expandedGroups[groupIndex] ? contentRefs.current[groupIndex]?.scrollHeight : 0,
+                                                transition: 'height 0.3s ease',
+                                                overflow: 'hidden',
+                                            }}
+                                            ref={el => contentRefs.current[groupIndex] = el}
+                                        >
+                                            {group.items.map((promptIndex) => (
+                                                <div
+                                                    key={promptIndex}
+                                                    className={"prompt-item"}
+                                                    style={{ 'paddingLeft': '23px' }}
                                                 >
-                                                    <div className="prompt-item-text">
-                                                        {prompt}
-                                                    </div>
-                                                </Checkbox>
-                                            </div>)
-                                    ))}
-                                </div>
-                                <div className="imageContainer">
-                                    {images.map((image, index) => (
-                                        <div key={index} className="imageItem" style={{ borderTop: '7px solid ' + colorScale(image.batch) }}>
-                                            <div className="image-checkbox-wrapper">
-                                                <Checkbox
-                                                    className="image-checkbox"
-                                                    checked={selectedImageIds.includes(image.imageId)}
-                                                    onChange={(e) => {
-                                                        if (e.target.checked) {
-                                                            setSelectedImageIds([...selectedImageIds, image.imageId]);
-                                                        } else {
-                                                            setSelectedImageIds(selectedImageIds.filter(id => id !== image.imageId));
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                            <Image
-                                                width={'100%'}
-                                                src={`data:image/png;base64,${image.data}`}
-                                                alt={`Image ${image.imageId}`}
+                                                    <span
+                                                        className="prompt-item-color"
+                                                        style={{ backgroundColor: colorScale(promptIndex + 1) }}
+                                                    />
+                                                    <Checkbox
+                                                        checked={selectedPrompts.includes(promptIndex)}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            setSelectedPrompts(prev =>
+                                                                checked ? [...prev, promptIndex] : prev.filter(i => i !== promptIndex)
+                                                            );
+                                                            setSelectedImageIds(prev =>
+                                                                checked ? [...prev, ...images.filter(image => image.batch === promptIndex + 1).map(image => image.imageId)] :
+                                                                    prev.filter(id => !images.some(image => image.imageId === id && image.batch === promptIndex + 1))
+                                                            );
+                                                        }}
+                                                    >
+                                                        <div
+                                                            className='prompt-item-text'
+                                                        >
+                                                            {prompts[promptIndex]}
+                                                        </div>
+                                                    </Checkbox>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                {prompts.map((prompt, index) => (
+                                    !groups.some(group => group.items.includes(index)) && (
+                                        <div className='prompt-item' key={"modal-pitem-" + String(index)}>
+                                            <span
+                                                className="prompt-item-color"
+                                                style={{ backgroundColor: colorScale(index + 1) }}
+                                            />
+                                            <Checkbox
+                                                checked={selectedPrompts.includes(index)}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setSelectedPrompts(prev =>
+                                                        checked ? [...prev, index] : prev.filter(i => i !== index)
+                                                    );
+                                                    setSelectedImageIds(prev =>
+                                                        checked ? [...prev, ...images.filter(image => image.batch === index + 1).map(image => image.imageId)] :
+                                                            prev.filter(id => !images.some(image => image.imageId === id && image.batch === index + 1))
+                                                    );
+                                                }}
+                                            >
+                                                <div className="prompt-item-text">
+                                                    {prompt}
+                                                </div>
+                                            </Checkbox>
+                                        </div>)
+                                ))}
+                            </div>
+                            <div className="imageContainer">
+                                {images.map((image, index) => (
+                                    <div key={index} className="imageItem" style={{ borderTop: '7px solid ' + colorScale(image.batch) }}>
+                                        <div className="image-checkbox-wrapper">
+                                            <Checkbox
+                                                className="image-checkbox"
+                                                checked={selectedImageIds.includes(image.imageId)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedImageIds([...selectedImageIds, image.imageId]);
+                                                    } else {
+                                                        setSelectedImageIds(selectedImageIds.filter(id => id !== image.imageId));
+                                                    }
+                                                }}
                                             />
                                         </div>
-                                    ))}
-                                </div>
+                                        <Image
+                                            width={'100%'}
+                                            src={`data:image/png;base64,${image.data}`}
+                                            alt={`Image ${image.imageId}`}
+                                        />
+                                    </div>
+                                ))}
                             </div>
-                        </>
-                    )}
+                        </div>
+                    </>
                 </div>
             </Modal>
             <style jsx>{`

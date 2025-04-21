@@ -5,6 +5,7 @@ import HighlightedText from './HighlightedText';
 import { Image, Switch, Popover, Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { removeUnderscoreFields } from '../utils';
 
 const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts }) => {
     const _handleSuggestionButtonClick2 = () => {
@@ -15,16 +16,16 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
-        // axios.post('/api/suggest-promotion', {
-        //     prompt: prompt,
-        //     schema: graphSchema,
-        //     priorPrompts: priorPrompts,
-        // }).then((response) => {
-        //     // console.log(response)
-        //     setSuggestionMetaData(response.data.res);
-        // }).catch((error) => {
-        //     console.error(error);
-        // });
+        axios.post('/api/suggest-promotion', {
+            prompt: prompt,
+            schema: removeUnderscoreFields(graphSchema),
+            priorPrompts: priorPrompts,
+        }).then((response) => {
+            // console.log(response)
+            setSuggestionMetaData(response.data.res);
+        }).catch((error) => {
+            console.error(error);
+        });
     }
 
     const handleRefresh = () => {

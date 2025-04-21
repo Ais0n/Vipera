@@ -469,11 +469,15 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 <div className="context-menu-item" onClick={() => { setIsRelabelModalOpen(true); }}>Relabel</div>
                 <div className="context-menu-item">Delete</div>
             </div>
-            <ModalTreeEdit
+            <ModalTreeAdd
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 onSave={handleEdit}
                 nodeData={contextMenuData}
+                prompts={prompts}
+                colorScale={colorScale}
+                groups={groups}
+                images={images}
             />
             <ModalTreeAdd
                 isOpen={isAddModalOpen}

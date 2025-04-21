@@ -4,6 +4,7 @@ import BarChart from './BarChart';
 import { Image, Switch, Popover, Button, Tooltip } from 'antd';
 import { SyncOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { removeUnderscoreFields } from '../utils';
 
 const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick }) => {
     const [image1Index, setImage1Index] = useState(0);
@@ -35,7 +36,7 @@ const SuggestComparison = ({ images, graphSchema, handleSuggestionButtonClick })
         // axios.post('/api/suggest-comparison', {
         //     path1: path1,
         //     path2: path2,
-        //     schema: graphSchema
+        //     schema: removeUnderscoreFields(graphSchema)
         // }).then((response) => {
         //     // console.log(response)
         //     setSuggestionMetaData(response.data.res);
