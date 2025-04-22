@@ -8,7 +8,7 @@ import { Modal, Skeleton } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
-const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, handleNodeRelabel, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors, prompts }) => {
+const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdit, handleNodeAdd, handleNodeRelabel, colorScale, addBookmarkedChart, highlightTreeNodes, groups, customColors, prompts, treeUtils }) => {
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
@@ -470,23 +470,16 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 <div className="context-menu-item">Delete</div>
             </div>
             <ModalTreeAdd
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                onSave={handleEdit}
-                nodeData={contextMenuData}
+                isOpen={isAddModalOpen | isEditModalOpen}
+                modalType={isAddModalOpen ? 'add' : 'edit'}
+                onClose={() => {setIsAddModalOpen(false); setIsEditModalOpen(false);}}
+                onSave={isAddModalOpen ? handleAdd : handleEdit}
                 prompts={prompts}
                 colorScale={colorScale}
                 groups={groups}
                 images={images}
-            />
-            <ModalTreeAdd
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                onSave={handleAdd}
-                prompts={prompts}
-                colorScale={colorScale}
-                groups={groups}
-                images={images}
+                contextMenuData={contextMenuData}
+                treeUtils={treeUtils}
             />
             <ModalTreeRelabel
                 isOpen={isRelabelModalOpen}

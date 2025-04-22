@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Input, Button, Radio, Tooltip, Checkbox, Image } from 'antd';
 import { SyncOutlined, InfoCircleOutlined, RightOutlined, DownOutlined } from '@ant-design/icons';
+import * as Utils from '../utils.js';
 
-const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScale, images, nodeData }) => {
+const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups, colorScale, images, contextMenuData, treeUtils }) => {
     const [nodeType, setNodeType] = useState("attribute");
     const [nodeName, setNodeName] = useState('');
-    const [candidateValues, setCandidateValues] = useState("");
+    const [candidateValues, setCandidateValues] = useState('');
     const [selectedPrompts, setSelectedPrompts] = useState([]);
     const [expandedGroups, setExpandedGroups] = useState(groups.map(() => true));
     const [selectedImageIds, setSelectedImageIds] = useState([]);
@@ -18,10 +19,27 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScal
     };
 
     useEffect(() => {
-        if (prompts.length > 0) {
-            setSelectedPrompts(prompts.map((_, index) => index));
+        // if (prompts.length > 0) {
+        //     setSelectedPrompts(prompts.map((_, index) => index));
+        // }
+        console.log(contextMenuData);
+        if(contextMenuData) {
+            let imageInfo = contextMenuData.data.imageInfo;
+            setSelectedImageIds(Array.from(new Set(imageInfo.map(image => image.imageId))));
+            setSelectedPrompts(Array.from(new Set(imageInfo.map(image => image.batch - 1))));
+            if (modalType == "edit") {
+                setNodeName(contextMenuData.data.name);
+                setNodeType(contextMenuData.data.type);
+                let schemaNode = treeUtils.getSchemaNodeFromTreeNode(contextMenuData);
+                console.log(schemaNode);
+                setCandidateValues(Utils.deepClone(schemaNode._candidateValues) || '');
+            } else {
+                setNodeName('');
+                setNodeType('attribute');
+                setCandidateValues('');
+            }
         }
-    }, [prompts]);
+    }, [contextMenuData, modalType]);
 
     const handleSave = () => {
         // check if nodeName is empty
@@ -39,7 +57,7 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScal
         onClose();
         setNodeName('');
         setNodeType("attribute");
-        setCandidateValues("");
+        setCandidateValues('');
         setSelectedPrompts([]);
     };
 
@@ -78,7 +96,7 @@ const ModalTreeAdd = ({ isOpen, onClose, onSave, prompts = [], groups, colorScal
                     <div><b>Candidate Values (Optional)</b><Tooltip title={"You may create a list of candidate values for labeling."}><InfoCircleOutlined style={{ color: 'grey', 'marginLeft': '5px' }} /></Tooltip></div>
                     <Input
                         value={candidateValues}
-                        onChange={(e) => setCandidateValues(e.target.value)}
+                        onChange={(e) => {setCandidateValues(e.target.value)}}
                         placeholder="Enter candidate values (comma separated)"
                     />
                     <>

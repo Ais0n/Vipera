@@ -190,6 +190,8 @@ const Generate = () => {
           // Update the graph schema by adding the scope of the new prompt to each node
           let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
+          console.log("partial schema:", schemaScope);
+
           Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId));
           console.log("after updating graph schema with scope", updatedGraphSchema);
         
@@ -475,6 +477,8 @@ const Generate = () => {
         // Update the graph schema by adding the scope of the new prompt to each node
         let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
+        console.log("partial schema:", schemaScope);
+
         Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId)); // add the image IDs to the "_scope" field of all nodes in the graph schema
         console.log("after updating graph schema with scope", updatedGraphSchema);
         
@@ -605,6 +609,8 @@ const Generate = () => {
 
       // Update the graph schema by adding the scope of the new prompt to each node
       let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+
+      console.log("partial schema:", schemaScope);
 
       Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId));
       console.log("after updating graph schema with scope", updatedGraphSchema);
@@ -894,19 +900,10 @@ const Generate = () => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = newNode;
     candidateValues = candidateValues == '' ? [] : candidateValues.split(',');
     // calculate the path to the root
-    let pathToRoot = [];
-    let curNode = dataObj;
-    while (curNode.data.name != 'root') {
-      pathToRoot.push(curNode.data.name);
-      curNode = curNode.parent;
-    }
-    pathToRoot = pathToRoot.reverse();
+    let pathToRoot = getTreeNodePath(dataObj);
     // update the schema
     let _graphSchema = Utils.deepClone(graphSchema);
-    curNode = _graphSchema;
-    for (let i = 0; i < pathToRoot.length; i++) {
-      curNode = curNode[pathToRoot[i]];
-    }
+    let curNode = getSchemaNodeFromPath(pathToRoot, _graphSchema);
     curNode[newNodeName] = {
       "_nodeType": newNodeType,
       ...(newNodeType == "attribute" && { "_candidateValues": candidateValues }),
@@ -916,10 +913,7 @@ const Generate = () => {
     console.log("updatedGraphSchema", _graphSchema);
     // update the graph
     let _graph = Utils.deepClone(graph);
-    curNode = _graph;
-    for (let i = 0; i < pathToRoot.length; i++) {
-      curNode = curNode.children.find(node => node.name === pathToRoot[i]);
-    }
+    curNode = getGraphNodeFromPath(pathToRoot, _graph);
     curNode.children.push({ name: newNodeName, children: [], count: 0, type: newNodeType });
     setGraph(_graph);
     console.log("updatedGraph", _graph);
@@ -985,6 +979,69 @@ const Generate = () => {
     }
   }
 
+  //////////////////////////////////////////////////////////////////
+  // Helper functions for tree node and schema node manipulation
+  //////////////////////////////////////////////////////////////////
+  const getTreeNodePath = (graphNode) => {
+    /**
+     * Recursively finds the path from the root to the given tree node.
+     * Note: 'Tree node' is different from 'Graph Node'.
+     * Format of Tree nodes: {data, depth, height, parent, x, y, ...}
+     * Format of Graph nodes: {children, name, type, count, imageInfo, (list), (values), ...}
+     */
+    let path = [];
+    let curNode = graphNode;
+    while (curNode.data.name != 'root') {
+      path.push(curNode.data.name);
+      curNode = curNode.parent;
+    }
+    path = path.reverse();
+    return path;
+  }
+
+  const getSchemaNodeFromPath = (path, schema = graphSchema) => {
+    /**
+     * Recursively finds the schema node corresponding to a given path.
+     */
+    let curNode = schema;
+    for (let i = 0; i < path.length; i++) {
+      if (typeof (curNode) == 'object') {
+        curNode = curNode[path[i]];
+      } else {
+        return null;
+      }
+    }
+    return curNode;
+  }
+
+  const getGraphNodeFromPath = (path, _graph = graph) => {
+    /**
+     * Recursively finds the graph node corresponding to a given path.
+     */
+    let curNode = _graph;
+    for (let i = 0; i < path.length; i++) {
+      if (typeof (curNode) == 'object') {
+        curNode = curNode.children.find(node => node.name === path[i]);
+      } else {
+        return null;
+      }
+    }
+    return curNode; 
+  }
+
+  const getSchemaNodeFromTreeNode = (treeNode, schema = graphSchema) => {
+    /**
+     * Recursively finds the schema node corresponding to a given tree node.
+     */
+
+    // get the path from root to the tree node
+    let path = getTreeNodePath(treeNode);
+    // find the schema node
+    return getSchemaNodeFromPath(path, schema);
+  }
+
+  const treeUtils = {getTreeNodePath, getSchemaNodeFromPath, getSchemaNodeFromTreeNode};
+
   return (
     <div>
       {contextHolder}
@@ -1012,7 +1069,7 @@ const Generate = () => {
           </div>
         </div> */}
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} />
+        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils}/>
 
       </div>}
 
