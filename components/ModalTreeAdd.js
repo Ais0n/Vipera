@@ -9,7 +9,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
     const [candidateValues, setCandidateValues] = useState('');
     const [selectedPrompts, setSelectedPrompts] = useState([]);
     const [expandedGroups, setExpandedGroups] = useState(groups.map(() => true));
-    const [selectedImageIds, setSelectedImageIds] = useState([]);
+    const [selectedImageInfo, setselectedImageInfo] = useState([]);
     const contentRefs = useRef([]);
 
     const toggleGroup = (groupIndex) => {
@@ -24,14 +24,14 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
         // }
         console.log(contextMenuData);
         if(contextMenuData) {
-            let imageInfo = contextMenuData.data.imageInfo;
-            setSelectedImageIds(Array.from(new Set(imageInfo.map(image => image.imageId))));
-            setSelectedPrompts(Array.from(new Set(imageInfo.map(image => image.batch - 1))));
+            // let imageInfo = contextMenuData.data.imageInfo;
+            let schemaNode = treeUtils.getSchemaNodeFromTreeNode(contextMenuData);
+            console.log(schemaNode);
+            setselectedImageInfo(Array.from(new Set(schemaNode._scope)));
+            setSelectedPrompts(Array.from(new Set(schemaNode._scope.map(image => image.batch - 1))));
             if (modalType == "edit") {
                 setNodeName(contextMenuData.data.name);
                 setNodeType(contextMenuData.data.type);
-                let schemaNode = treeUtils.getSchemaNodeFromTreeNode(contextMenuData);
-                console.log(schemaNode);
                 setCandidateValues(Utils.deepClone(schemaNode._candidateValues) || '');
             } else {
                 setNodeName('');
@@ -48,12 +48,12 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             return;
         }
         // check if scope is empty
-        if (selectedImageIds.length === 0) {
+        if (selectedImageInfo.length === 0) {
             alert("Please select at least one image for the scope");
             return;
         }
 
-        onSave({ nodeName, nodeType, candidateValues, scope: selectedImageIds });
+        onSave({ nodeName, nodeType, candidateValues, scope: selectedImageInfo });
         onClose();
         setNodeName('');
         setNodeType("attribute");
@@ -83,21 +83,31 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             >
                 <div className="modal-tree-add">
                     <div><b>Type</b><Tooltip title={"An attribute node denotes an auditing criteria that will be used to label the images for evaluation. An object node denotes an object in the images and will NOT directly be used for evaluation."}><InfoCircleOutlined style={{ color: 'grey', 'marginLeft': '5px' }} /></Tooltip></div>
-                    <Radio.Group onChange={(e) => { setNodeType(e.target.value) }} value={nodeType}>
+                    <Radio.Group onChange={(e) => { setNodeType(e.target.value) }} value={nodeType} disabled={modalType === "edit"}>
                         <Radio value={"attribute"}>Attribute</Radio>
                         <Radio value={"object"}>Object</Radio>
                     </Radio.Group>
-                    <div><b>Name</b></div>
+                    <div><b>Node Name</b></div>
                     <Input
                         value={nodeName}
                         onChange={(e) => setNodeName(e.target.value)}
                         placeholder="Enter new node name"
                     />
-                    <div><b>Candidate Values (Optional)</b><Tooltip title={"You may create a list of candidate values for labeling."}><InfoCircleOutlined style={{ color: 'grey', 'marginLeft': '5px' }} /></Tooltip></div>
+                    <div>
+                        <b>Candidate Values (Optional)</b>
+                        <Tooltip title={"You may create a list of candidate values for labeling."}>
+                            <InfoCircleOutlined style={{ color: 'grey', 'marginLeft': '5px' }} />
+                        </Tooltip>
+                        {<Tooltip title={"Editing this field is not supported for now. Please use the 'relabel' option in the context menu."}>
+                            <InfoCircleOutlined style={{ color: 'red', 'marginLeft': '5px' }} />
+                        </Tooltip>
+                        }
+                    </div>
                     <Input
                         value={candidateValues}
                         onChange={(e) => {setCandidateValues(e.target.value)}}
                         placeholder="Enter candidate values (comma separated)"
+                        disabled={modalType === "edit"}
                     />
                     <>
                         <div><b>Scope</b><Tooltip title="Select the prompts on which you want to evaluate with the criteria."><InfoCircleOutlined style={{ color: 'grey', marginLeft: '5px' }} /></Tooltip></div>
@@ -156,9 +166,9 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                                                             setSelectedPrompts(prev =>
                                                                 checked ? [...prev, promptIndex] : prev.filter(i => i !== promptIndex)
                                                             );
-                                                            setSelectedImageIds(prev =>
-                                                                checked ? [...prev, ...images.filter(image => image.batch === promptIndex + 1).map(image => image.imageId)] :
-                                                                    prev.filter(id => !images.some(image => image.imageId === id && image.batch === promptIndex + 1))
+                                                            setselectedImageInfo(prev =>
+                                                                checked ? [...prev, ...images.filter(image => image.batch === promptIndex + 1).map(image => ({"id": image.imageId, "batch": image.batch}))] :
+                                                                    prev.filter(i => !images.some(image => image.imageId === i.id && image.batch === promptIndex + 1))
                                                             );
                                                         }}
                                                     >
@@ -187,9 +197,9 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                                                     setSelectedPrompts(prev =>
                                                         checked ? [...prev, index] : prev.filter(i => i !== index)
                                                     );
-                                                    setSelectedImageIds(prev =>
-                                                        checked ? [...prev, ...images.filter(image => image.batch === index + 1).map(image => image.imageId)] :
-                                                            prev.filter(id => !images.some(image => image.imageId === id && image.batch === index + 1))
+                                                    setselectedImageInfo(prev =>
+                                                        checked ? [...prev, ...images.filter(image => image.batch === index + 1).map(image => ({"id": image.imageId, "batch": image.batch}))] :
+                                                            prev.filter(i => !images.some(image => image.imageId === i.id && image.batch === index + 1))
                                                     );
                                                 }}
                                             >
@@ -206,12 +216,12 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                                         <div className="image-checkbox-wrapper">
                                             <Checkbox
                                                 className="image-checkbox"
-                                                checked={selectedImageIds.includes(image.imageId)}
+                                                checked={selectedImageInfo.some(i => i.id == image.imageId)}
                                                 onChange={(e) => {
                                                     if (e.target.checked) {
-                                                        setSelectedImageIds([...selectedImageIds, image.imageId]);
+                                                        setselectedImageInfo([...selectedImageInfo, {"id": image.imageId, "batch": image.batch}]);
                                                     } else {
-                                                        setSelectedImageIds(selectedImageIds.filter(id => id !== image.imageId));
+                                                        setselectedImageInfo(selectedImageInfo.filter(id => id !== image.imageId || id.batch !== image.batch));
                                                     }
                                                 }}
                                             />

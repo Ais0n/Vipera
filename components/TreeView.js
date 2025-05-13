@@ -16,7 +16,6 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
     const contextMenuRef2 = useRef(); // for attribute nodes
 
     const [contextMenuData, setContextMenuData] = useState(null);
-    const [contextMenuData2, setContextMenuData2] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isRelabelModalOpen, setIsRelabelModalOpen] = useState(false);
@@ -33,7 +32,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
 
     const handleRelabel = (candidateValues) => {
         console.log('Relabel node', candidateValues);
-        handleNodeRelabel(contextMenuData2, candidateValues);
+        handleNodeRelabel(contextMenuData, candidateValues);
     }
 
     const createStackedBarchart = (nodes) => {
@@ -143,6 +142,19 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                             .on('mouseout', function (event, d) {
                                 event.stopPropagation();
                                 handleBarHover(null);
+                            })
+                            .on('contextmenu', function (event) {
+                                event.preventDefault();
+                                // Get the position of the rectangle
+                                const rectBounds = this.getBoundingClientRect();
+                                
+                                const contextMenu2 = d3.select(contextMenuRef2.current);
+                                // Set the position of the context menu near the rectangle
+                                contextMenu2.style("left", `${rectBounds.left + window.scrollX}px`) // Right side of the rectangle
+                                    .style("top", `${rectBounds.bottom + window.scrollY}px`) // Aligned with the top of the rectangle
+                                    .style("display", "block");
+                                console.log(d);
+                                setContextMenuData(d);
                             });
 
                         // Add count labels on top of each bar
@@ -338,7 +350,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                     .style("top", `${rectBounds.bottom + window.scrollY}px`) // Aligned with the top of the rectangle
                     .style("display", "block");
 
-                setContextMenuData2(d);
+                setContextMenuData(d);
             });
 
         d3.select("body").on("click", function () {
@@ -466,6 +478,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 <div className="context-menu-item">Delete</div>
             </div>
             <div className="context-menu" ref={contextMenuRef2}>
+                <div className="context-menu-item" onClick={() => { setIsEditModalOpen(true); }}>Edit</div>
                 <div className="context-menu-item" onClick={() => { setIsRelabelModalOpen(true); }}>Relabel</div>
                 <div className="context-menu-item">Delete</div>
             </div>

@@ -26,6 +26,7 @@ function deepClone(target) {
 
 // calculate statistics
 function calculateGraph(metaData, graphSchema, graph) {
+    console.log("calculateGraph", metaData, graphSchema, graph);
     const buildGraph = (schema) => {
         const result = [];
         Object.keys(schema).forEach((key) => {
@@ -63,8 +64,8 @@ function calculateGraph(metaData, graphSchema, graph) {
         // check if itemMetadata.imageId is in graphSchema._scope
         if (graphSchema._scope && graphSchema._scope.length > 0) {
             let ok = false;
-            graphSchema._scope.forEach(imageId => {
-                if (imageId == itemMetadata.imageId) {
+            graphSchema._scope.forEach(image => {
+                if (image.id == itemMetadata.imageId && image.batch == itemMetadata.batch) {
                     ok = true;
                 }
             });
@@ -385,9 +386,9 @@ function removeUnderscoreFields(obj) { // remove the fields that start with "_"
     return result;
 }
 
-function getScope(imageIds, graphSchema) {
+function getScope(imageInfo, graphSchema) {
     /**
-     * Get a subschema from the graph schema that contains the imageIds
+     * Get a subschema from the graph schema that contains the imageInfo
      */
     let res = {};
     Object.keys(graphSchema).forEach((key) => {
@@ -396,24 +397,24 @@ function getScope(imageIds, graphSchema) {
             return;
         }
         if (graphSchema.scope && graphSchema.scope.length > 0) {
-            // check if all imageIds are in the graphSchema.scope
+            // check if all imageInfo are in the graphSchema.scope
             let ok = true;
-            imageIds.forEach(imageId => {
-                if (!graphSchema.scope.includes(imageId)) {
+            imageInfo.forEach(i => {
+                if (!graphSchema.scope.some(image => image.imageId == i.id && image.batch == i.batch)) {
                     ok = false;
                 }
             });
             if (ok) {
-                res[key] = getScope(imageIds, graphSchema[key]);
+                res[key] = getScope(imageInfo, graphSchema[key]);
             }
         }
     });
     return res;
 }
 
-function updateGraphSchemaWithScope(graphSchema, subSchema, imageIds) {
+function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
     /**
-     * Update the graph schema by adding imageIds to the "_scope" for all nodes within the subSchema
+     * Update the graph schema by adding imageInfo to the "_scope" for all nodes within the subSchema
      */
     if (typeof(subSchema) !== 'object' || subSchema === null) {
         return;
@@ -426,9 +427,9 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageIds) {
             if(!graphSchema[key]._scope) {
                 graphSchema[key]._scope = [];
             }
-            graphSchema[key]._scope.push(...imageIds);
+            graphSchema[key]._scope.push(...imageInfo);
         }
-        updateGraphSchemaWithScope(graphSchema[key], subSchema[key], imageIds);
+        updateGraphSchemaWithScope(graphSchema[key], subSchema[key], imageInfo);
     });
 }
 

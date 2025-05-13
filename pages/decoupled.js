@@ -188,11 +188,11 @@ const Generate = () => {
           } 
 
           // Update the graph schema by adding the scope of the new prompt to each node
-          let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+          let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"id": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
           console.log("partial schema:", schemaScope);
 
-          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId));
+          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"id": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
           console.log("after updating graph schema with scope", updatedGraphSchema);
         
           // Step 4: Try generating metadata
@@ -475,11 +475,11 @@ const Generate = () => {
         } 
 
         // Update the graph schema by adding the scope of the new prompt to each node
-        let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+        let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"id": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
         console.log("partial schema:", schemaScope);
 
-        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId)); // add the image IDs to the "_scope" field of all nodes in the graph schema
+        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"id": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
         console.log("after updating graph schema with scope", updatedGraphSchema);
         
         // Step 4: Try generating metadata
@@ -608,11 +608,11 @@ const Generate = () => {
       setRetrySceneGraphContext(undefined);
 
       // Update the graph schema by adding the scope of the new prompt to each node
-      let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => image.imageId), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+      let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"id": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
       console.log("partial schema:", schemaScope);
 
-      Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => image.imageId));
+      Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"id": image.imageId, "batch": image.batch})));
       console.log("after updating graph schema with scope", updatedGraphSchema);
         
       // Step 4: Try generating metadata
@@ -630,10 +630,13 @@ const Generate = () => {
 
   // Try generating metadata
   async function tryMetadataGeneration(newImages, partialSchema, newGraph) {
+    if (newImages.length == 0) {
+      return;
+    }
     if(!newGraph) {
       newGraph = Utils.deepClone(graph);
     }
-
+    console.log(newImages, partialSchema)
     try {
       // Generate Meta Data
       let newMetaData, allMetaData = [];
@@ -866,38 +869,77 @@ const Generate = () => {
   }
 
   const handleNodeEdit = (dataObj, newNode) => {
-    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = newNode;
+    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
     // calculate the path to the root
-    let pathToRoot = [];
-    let curNode = dataObj;
-    while (curNode.data.name != 'root') {
-      pathToRoot.push(curNode.data.name);
-      curNode = curNode.parent;
-    }
-    pathToRoot = pathToRoot.reverse();
-    // update the schema
+    let pathToRoot = getTreeNodePath(dataObj);
+    let oldNodeName = pathToRoot[pathToRoot.length - 1];
+    // 1. update the schema
     let _graphSchema = Utils.deepClone(graphSchema);
-    curNode = _graphSchema;
-    for (let i = 0; i < pathToRoot.length - 1; i++) {
-      curNode = curNode[pathToRoot[i]];
+    let curNode = getSchemaNodeFromPath(pathToRoot.slice(0, -1), _graphSchema); // go to the last but one node (the parent of the node to be edited)
+    let oldNode = Utils.deepClone(curNode[oldNodeName]);
+    delete curNode[oldNodeName];
+    curNode[newNodeName] = {
+      ...oldNode,
+      "_nodeType": newNodeType,
+      ...(newNodeType == "attribute" && { "_candidateValues": candidateValues }),
+      "_scope": scope,
     }
-    curNode[newNode] = Utils.deepClone(curNode[pathToRoot[pathToRoot.length - 1]]);
-    delete curNode[pathToRoot[pathToRoot.length - 1]];
+    updateSchemaPathWithScope(pathToRoot.slice(0, -1), scope);
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
-    // update the graph
+    // 2. update the graph
     let _graph = Utils.deepClone(graph);
     curNode = _graph;
     for (let i = 0; i < pathToRoot.length; i++) {
       curNode = curNode.children.find(node => node.name === pathToRoot[i]);
     }
     curNode.name = newNodeName;
-    setGraph(_graph);
+    curNode.type = newNodeType;
+    if (newNodeType == "attribute") {
+      curNode._candidateValues = candidateValues;
+    }
+
+    // 3. update metadata
+    let oldScope = oldNode._scope;
+    let newScope = scope;
+    pathToRoot[pathToRoot.length - 1] = newNodeName;
+    let partialSchema = getPartialSchema(pathToRoot, _graphSchema);
+    console.log("oldScope", oldScope);
+    console.log("newScope", newScope);
+    console.log("partialSchema", partialSchema);
+    let newMetaData = Utils.deepClone(metaData);
+    // For images in the old scope, update the metadata
+    for(let i = 0; i < newMetaData.length; i++) {
+      let item = newMetaData[i];
+      if (oldScope.some(i => i.id == item.metaData.imageId && i.batch == item.metaData.batch)) {
+        let newItem = Utils.deepClone(item);
+        let curNode = getSchemaNodeFromPath(pathToRoot.slice(0, -1), newItem);
+        console.log("curNode", curNode);
+        if (curNode) {
+          curNode[newNodeName] = curNode[oldNodeName];
+          delete curNode[oldNodeName];
+        }
+        newMetaData[i] = newItem;
+      }
+    }
+    setMetaData(newMetaData);
+    console.log("newMetaData", newMetaData);
+    // calculate the graph with statistics
+    _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
     console.log("updatedGraph", _graph);
+    // For images in the new scope but not in the old scope, generate new metadata
+    let newImages = images.filter(image => newScope.some(i => i.id == image.imageId && i.batch == image.batch) && oldScope.every(i => i.id != image.imageId || i.batch != image.batch));
+    console.log("newImages", newImages);
+    if (newImages.length > 0) {
+      tryMetadataGeneration(newImages, partialSchema, _graph);
+    } else {
+      setGraph(_graph);
+    }
+
   }
 
   const handleNodeAdd = (dataObj, newNode) => {
-    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = newNode;
+    let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
     candidateValues = candidateValues == '' ? [] : candidateValues.split(',');
     // calculate the path to the root
     let pathToRoot = getTreeNodePath(dataObj);
@@ -909,6 +951,7 @@ const Generate = () => {
       ...(newNodeType == "attribute" && { "_candidateValues": candidateValues }),
       "_scope": scope,
     }
+    updateSchemaPathWithScope(pathToRoot.slice(0, -1), scope);
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
     // update the graph
@@ -920,15 +963,26 @@ const Generate = () => {
 
     if (newNodeType == 'attribute') {
       // update labels if the new node is an attribute
-      let partialSchema = {}; // The schema for the new node
-      curNode = partialSchema;
-      for (let i = 0; i < pathToRoot.length; i++) {
-        curNode[pathToRoot[i]] = {_nodeType: 'object'};
-        curNode = curNode[pathToRoot[i]];
-      }
-      curNode[newNodeName] = {_nodeType: 'attribute', _candidateValues: candidateValues, _scope: scope};
+      // let partialSchema = {}; // The schema for the new node
+      // let curParSchemaNode = partialSchema;
+      // curNode = _graphSchema;
+      // for (let i = 0; i < pathToRoot.length; i++) {
+      //   curParSchemaNode[pathToRoot[i]] = {
+      //     _nodeType: curNode[pathToRoot[i]]._nodeType, 
+      //     ...(curNode[pathToRoot[i]]._nodeType == "attribute" && { _candidateValues: curNode[pathToRoot[i]]._candidateValues }),
+      //     _scope: curNode[pathToRoot[i]]._scope
+      //   };
+      //   curParSchemaNode = curParSchemaNode[pathToRoot[i]];
+      //   curNode = curNode[pathToRoot[i]];
+      // }
+      // curParSchemaNode[newNodeName] = {
+      //   _nodeType: newNodeType, 
+      //   ...(newNodeType == "attribute" && { _candidateValues: candidateValues }),
+      //   _scope: scope
+      // };
+      let partialSchema = getPartialSchema([...pathToRoot, newNodeName], _graphSchema);
       console.log("partialSchema", partialSchema);
-      tryMetadataGeneration(images.filter(image => scope.includes(image.imageId)), partialSchema, _graph);
+      tryMetadataGeneration(images.filter(image => scope.some(i => i.id == image.imageId && i.batch == image.batch)), partialSchema, _graph);
     }
     
   }
@@ -1038,6 +1092,58 @@ const Generate = () => {
     let path = getTreeNodePath(treeNode);
     // find the schema node
     return getSchemaNodeFromPath(path, schema);
+  }
+
+  const updateSchemaPathWithScope = (path, scope, schema = graphSchema) => {
+    /**
+     * For all nodes on the path within graphSchema, add the scope to the "_scope" field.
+     * This is used to update all ancestor nodes when a schema node is modified.
+     * Note that only image IDs that are in "scope" but not in "_scope" will be added to "_scope".
+     */
+    let curNode = schema;
+    for (let i = 0; i < path.length; i++) {
+      if (typeof (curNode) == 'object') {
+        curNode = curNode[path[i]];
+        if (curNode._scope) {
+          curNode._scope = [...new Set([...curNode._scope, ...scope])];
+        } else {
+          curNode._scope = scope;
+        }
+      } else {
+        return null;
+      }
+    }
+  }
+
+  const getPartialSchema = (path, schema) => {
+    /**
+     * Build a partial schema based on the path within schema.
+     */
+    let partialSchema = {};
+    let curPartialSchemaNode = partialSchema, curNode = schema;
+    for (let i = 0; i < path.length; i++) {
+      if (typeof (curNode) == 'object') {
+        curPartialSchemaNode[path[i]] = {
+          _nodeType: curNode[path[i]]._nodeType,
+          ...(curNode[path[i]]._nodeType == "attribute" && { _candidateValues: curNode[path[i]]._candidateValues }),
+          _scope: curNode[path[i]]._scope
+        };
+        curPartialSchemaNode = curPartialSchemaNode[path[i]];
+        curNode = curNode[path[i]];
+      } else {
+        return null;
+      }
+    }
+
+    if (typeof(curNode) == 'object') {
+      for (let key in curNode) {
+        if (!key.startsWith('_')) {
+          curPartialSchemaNode[key] = Utils.deepClone(curNode[key]);
+        }
+      }
+    }
+    return partialSchema;
+
   }
 
   const treeUtils = {getTreeNodePath, getSchemaNodeFromPath, getSchemaNodeFromTreeNode};
