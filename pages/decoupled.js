@@ -8,7 +8,7 @@ import AnalyzeDistribution from '../components/AnalyzeDistribution';
 import GenerateState from '../components/GenerateState';
 import Footer from '../components/Footer';
 import style from '../styles/GeneratePage.module.css';
-import axios from 'axios';
+import axios, { all } from 'axios';
 import ProcessingIndicator from '../components/Processing.js';
 import ImageSummary from '../components/ImageSummary.js';
 import * as Utils from '../utils.js';
@@ -656,17 +656,18 @@ const Generate = () => {
           if (!newItem) return;
           if (!oldItem) oldItem = {};
           let mergedItem = Utils.mergeMetadata(oldItem, newItem);
-          let idx = newMetaData.findIndex(item => item.metaData && item.metaData.imageId == image.imageId);
+          let idx = oldMetaData.findIndex(item => item.metaData && item.metaData.imageId == image.imageId);
           if (idx != -1) {
-            newMetaData[idx] = mergedItem;
+            oldMetaData[idx] = mergedItem;
           } else {
-            newMetaData.push(mergedItem);
+            oldMetaData.push(mergedItem);
           }
         })
 
-        allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
-        setMetaData(allMetaData);
-        console.log("New Metadata:", allMetaData);
+        // allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
+        allMetaData = oldMetaData;
+        setMetaData(oldMetaData);
+        console.log("New Metadata:", oldMetaData);
 
         if(res.status == 'failed') {
           setIsGenerating(false);
