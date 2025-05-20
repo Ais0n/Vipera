@@ -274,7 +274,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                     <h2 style={{ "margin": 0, 'display': 'inline-block' }}>Notes</h2>
                     <Button style={{'display': 'inline-block', 'marginLeft': '15px'}} onClick={exportToHTML}> Export </Button>
                 </div>
-                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} />
+                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts}/>
             </div>
 
             <style jsx>{`

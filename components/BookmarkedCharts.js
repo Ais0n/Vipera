@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Image } from 'antd';
 import * as d3 from 'd3';
+import axios from 'axios';
 
-const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments }) => {
+const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts }) => {
+    const [dynamicPlaceholders, setDynamicPlaceholders] = useState({});
+    const [loadingStates, setLoadingStates] = useState({});
+    const abortControllers = useRef({});
     useEffect(() => {
         if (bookmarkedCharts.length > 0) {
             renderBookmarkedCharts();
@@ -97,11 +101,61 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments 
         });
     };
 
+    const handleFocus = async (index) => {
+        // Only fetch suggestion if the comment box is empty
+        if (!comments[index]) {
+            setLoadingStates(prev => ({ ...prev, [index]: true }));
+            try {
+                const suggestion = await fetchSuggestion(index);
+                setDynamicPlaceholders(prev => ({
+                    ...prev, 
+                    [index]: suggestion || "Please write your insights here..."
+                }));
+            } catch (err) {
+                setDynamicPlaceholders(prev => ({
+                    ...prev, 
+                    [index]: "Failed to fetch suggestion. Please enter manually."
+                }));
+            } finally {
+                setLoadingStates(prev => ({ ...prev, [index]: false }));
+            }
+        }
+    };
+
     const handleCommentChange = (index, event) => {
-        setComments({
-            ...comments,
-            [index]: event.target.value
+        const text = event.target.value;
+        setComments({ ...comments, [index]: text });
+        // Reset placeholder if user starts typing
+        if (text) setDynamicPlaceholders(prev => ({ ...prev, [index]: "" }));
+    };
+
+    const handleKeyDown = (index, e) => {
+        // When placeholder exists and user presses Tab
+        if (e.key === 'Tab' && dynamicPlaceholders[index]) {
+            e.preventDefault();
+            setComments(prev => ({
+                ...prev,
+                [index]: dynamicPlaceholders[index]
+            }));
+            setDynamicPlaceholders(prev => ({ ...prev, [index]: "" }));
+        }
+    };
+
+    const fetchSuggestion = async (index) => {
+        let usedBatchIds = new Set(), usedPrompts = {};
+        bookmarkedCharts[index].data.forEach((item) => {
+            usedBatchIds.add(item.batch);
+        })
+
+        usedBatchIds.forEach((batchId) => {
+            usedPrompts[batchId] = priorPrompts[batchId - 1];
         });
+        console.log("Request sent: ", bookmarkedCharts[index], usedPrompts);
+        const response = await axios.post('/api/suggest-note', {
+            chart: bookmarkedCharts[index],
+            priorPrompts: usedPrompts,
+        });
+        return response.data.res;
     };
 
     return (
@@ -131,9 +185,24 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments 
                                 <div>
                                     <textarea
                                         value={comments[index] || ''}
-                                        onChange={(event) => handleCommentChange(index, event)}
-                                        placeholder="Write down your insights here..."
-                                        style={{ width: 'calc(100% - 30px)', height: '170px', padding: '8px', margin: '10px' }}
+                                        placeholder={loadingStates[index] 
+                                            ? "Loading AI-generated suggestions..." 
+                                            : dynamicPlaceholders[index] ? (dynamicPlaceholders[index] + ' (Press [Tab] to apply)') : "Write down your insights here..."
+                                        }
+                                        onChange={(e) => handleCommentChange(index, e)}
+                                        onFocus={() => handleFocus(index)}
+                                        onBlur={() => {
+                                            setDynamicPlaceholders(prev => ({ ...prev, [index]: "" }));
+                                            setLoadingStates(prev => ({ ...prev, [index]: false }));
+                                        }}
+                                        onKeyDown={(e) => handleKeyDown(index, e)}
+                                        style={{ 
+                                            width: 'calc(100% - 30px)', 
+                                            height: '170px', 
+                                            padding: '8px',
+                                            margin: '10px',
+                                            position: 'relative',
+                                        }}
                                     />
                                 </div>
                             </td>
