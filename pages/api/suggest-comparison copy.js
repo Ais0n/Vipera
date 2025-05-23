@@ -5,11 +5,8 @@ import Replicate from "replicate";
 import fs from 'fs';
 import { fal } from "@fal-ai/client";
 
-import OpenAI from 'openai';
-import process from 'process';
-const openai = new OpenAI({
-    apiKey: process.env.NEXT_ALI_KEY,
-    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+fal.config({
+  credentials: process.env.NEXT_FAL_AI_KEY
 });
 
 const getImageData = async (imagePath) => {
@@ -44,7 +41,7 @@ const convertImageToBase64 = (imageBuffer) => {
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        let { path1, path2, keywords, schema } = req.body;
+        let { path1, path2, schema } = req.body;
         try {
             // Get image data as buffers
             const imageData1 = await getImageData(path1);
@@ -56,7 +53,7 @@ export default async function handler(req, res) {
             // Convert merged image to Base64
             const imageData = convertImageToBase64(mergedImageBuffer);
 
-            let result = await suggestComparison(imageData, keywords, schema);
+            let result = await suggestComparison(imageData, schema);
             return res.status(200).json({ res: result });
         } catch (error) {
             console.error(error);
@@ -68,35 +65,36 @@ export default async function handler(req, res) {
     }
 }
 
-async function suggestComparison(imageData, keywords, schema) {
+async function suggestComparison(imageData, schema) {
     // return {'parentNodeName': 'foreground', 'newNodeName': 'clothing', 'candidateValues': ['coat', 'shirt', 'others']};
     let maxTries = 5;
 
     for (let i = 0; i < maxTries; i++) {
         try {
-            const input = `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that can be added to the children of an existing node in the tree (the two images should be *significantly different* in terms of the additional node so that the difference is meaningful for auditing; and the node to be added must be *different* from the nodes in the tree). ${keywords.length > 0 ? 'If possible, focus on differences that are relevant to the following user-interested keywords: ' + keywords.join() + '. ' : ''}Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`;
-            console.log("input: ", input)
+            const input = {
+                image_url: imageData,
+                top_p: 1,
+                prompt: `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that can be added to the children of an existing node in the tree (the two images should be *significantly different* in terms of the additional node so that the difference is meaningful for auditing; and the node to be added must be *different* from the nodes in the tree).  Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`,
+                max_tokens: 1024,
+                temperature: 0.6
+            };
+            const {request_id} = await fal.queue.submit("fal-ai/llava-next", {
+                input: input,
+                webhookUrl: "https://optional.webhook.url/for/results",
+              });
+            
+            let status;
+            do {
+                status = await fal.queue.status("fal-ai/llava-next", { requestId: request_id, logs: true });
+                // console.log(status);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+            } while (status.status !== 'COMPLETED');
 
-            let messages = [{
-                role: "system",
-                content: [{
-                  type: "text",
-                  text: "You are a helpful assistant."
-                }]
-            },  {
-                role: "user",
-                content: [
-                    { type: "image_url", image_url: { "url": imageData } },
-                    { type: "text", text: input },
-                ]
-            }]
-
-            const response = await openai.chat.completions.create({
-                model: 'qwen-vl-max-latest',
-                messages: messages,
-            });
-    
-            let output = response.choices[0].message.content;
+            // Fetch the result
+            let { data: output } = await fal.queue.result("fal-ai/llava-next", { requestId: request_id });
+            output = output.output;
+            
+            console.log("input: ", input.prompt)
             console.log("output: ", output);
             // Find the JSON part from the output
             let start = output.indexOf('{');

@@ -39,7 +39,7 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     }, [priorPrompts]);
 
     return (
-        <>
+        <div className="suggestion-item">
             {Object.keys(suggestionMetaData).length === 0 ? <div>Loading...</div> :
                 <>
 
@@ -75,11 +75,6 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
                 }
                 .image-info, .suggestions {
                     margin-bottom: 20px;
-                }
-                .suggestion-items {
-                    display: flex;
-                    flex-direction: row;
-                    gap: 20px;
                 }
                 .suggestion-item {
                     flex: 1;
@@ -138,7 +133,7 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
                     font-size: 12px;
                 }
             `}</style>
-        </>
+        </div>
     );
 };
 

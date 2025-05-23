@@ -9,7 +9,7 @@ import Heatmap from './Heatmap';
 import BarChart from './BarChart';
 import SuggestPromotion from './SuggestPromotion';
 import SuggestExternal from './SuggestExternal';
-import SuggestComparison from './SuggestionComparison';
+import SuggestComparison from './SuggestComparison';
 import BookmarkedCharts from './BookmarkedCharts';
 import * as Utils from '../utils';
 import * as d3 from 'd3';
@@ -201,36 +201,12 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                     <PromptManager prompts={prompts} colorScale={colorScale} changeColor={changeColor} handlePromptClick={handlePromptClick} groups={groups} setGroups={setGroups} />
                     <div><i>Features below are powered by LLaVA v1.6 and may contain errors.</i></div>
                     <h2>Audit Analysis Support</h2>
-                    <div className="suggestion-items">
-                        <div className="suggestion-item">
-                            <SuggestComparison images={images} graphSchema={graphSchema} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestComparison>
-                        </div>
-                        {/* <div className="suggestion-item">
-                            <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
-                        </div> */}
-                        {/* <div className="suggestion-item">
-                            <SuggestExternal prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} dataForExternalKnowledge={dataForExternalKnowledge} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestExternal>
-                        </div> */}
-                        {/* {prompts.length > 1 && <div className="suggestion-item">
-                            <h4 className='suggestion-itemTitle'>Correlation</h4>
-                            <div className="suggestion-text">
-                                Female doctors are more likely to be smiling.
-                            </div>
-                            <div className='graphNode'>Gender / Smiling?</div>
-                            <div className="barchart">
-                                <Heatmap></Heatmap>
-                            </div>
-                            <div className="suggestion-toolbar">
-                                <Button className="suggestion-button" disabled={true}>Update the labels</Button>
-                            </div>
-                        </div>} */}
-                    </div>
+                    <SuggestComparison prompts={prompts} images={images} graphSchema={graphSchema} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestComparison>
+                    
+                    
                     <h2>Prompt Suggestion</h2>
-                    <div className="suggestion-items">
-                        <div className="suggestion-item">
-                            <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} priorPrompts={prompts} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
-                        </div>
-                    </div>
+                    <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} priorPrompts={prompts} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
+                    
                 </div>
 
                 {/* Right Column */}
@@ -312,18 +288,6 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                 }
                 .image-info, .suggestions {
                     margin-bottom: 20px;
-                }
-                .suggestion-items {
-                    display: flex;
-                    flex-direction: row;
-                    gap: 20px;
-                }
-                .suggestion-item {
-                    flex: 1;
-                    padding: 15px;
-                    background-color: #fff;
-                    border-radius: 5px;
-                    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
                 }
                 .suggestion-itemTitle {
                     padding: 0;

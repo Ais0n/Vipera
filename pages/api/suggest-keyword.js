@@ -11,14 +11,14 @@ const openai = new OpenAI({
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        // let prompt = req.body.prompt;
+        let prompts = req.body.prompts;
         let schema = req.body.schema;
         try {
-            let result = await suggest(schema);
+            let result = await suggest(prompts, schema);
             return res.status(200).json({ res: result });
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Graph generation failed' });
+            return res.status(500).json({ error: 'Suggest keywords failed' });
         }
     } else {
         res.setHeader('Allow', ['POST']);
@@ -26,11 +26,11 @@ export default async function handler(req, res) {
     }
 }
 
-async function suggest(graphSchema) {
+async function suggest(prompts, graphSchema) {
     let maxTries = 5;
     for (let i = 0; i < maxTries; i++) {
         try {
-            const input = `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset, suggest an additional node that can be added to the children of one existing node, and provide some candidate label values. Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', candidateValues: ['...', ...]}. For example, if the user mentions a person and there is a 'person' node in the tree, you can suggest to add the node 'race', and the candidate values can be ['white', 'black', 'asian']. \nSchema: ${JSON5.stringify(graphSchema)}\nPut your answer JSON in '\\boxed{}'. Your suggestion:`;
+            const input = `You are auditing a generative text-to-image model, and you have tried the following prompts and auditing criteria. Please suggest potential auditing directions in the form of keywords (5-7 keywords; Keep each keyword in one word if possible and no more than 2 words).\nPrompts (from oldest to latest): ${JSON5.stringify(prompts)}\nCriteria: ${JSON5.stringify(graphSchema)}\nThe keywords should include both those that encourage further insights into existing directions and those that inspire unexplored avenues. Output your suggested keywords in a comma-separated format and put them in '\\boxed{}'. Your suggestion:`;
 
             console.log("input: ", input)
             
@@ -42,7 +42,6 @@ async function suggest(graphSchema) {
                 ],
             });
             
-            // console.log(completion.choices[0].message);
             let output = completion.choices[0].message.content;
             console.log("output: ", output);
 
@@ -56,13 +55,15 @@ async function suggest(graphSchema) {
                 throw new Error("Output does not have the required fields: " + JSON.stringify(output));
             }
             output = output.trim().substring(start + 7, end);
-            output = JSON5.parse(output);
             
-            // check if the json has the required fields
-            if (!output.hasOwnProperty('parentNodeName') || !output.hasOwnProperty('newNodeName') || !output.hasOwnProperty('candidateValues')) {
-                throw new Error("Output does not have the required fields: " + JSON.stringify(output));
+            // Check if the output is in the comma-separated string format
+            if (!output || !output.includes(',')) {
+                throw new Error("Output is not in the expected comma-separated format: " + JSON.stringify(output));
             }
-            return output;
+
+            // Optionally, you can split and trim each keyword
+            const keywords = output.split(',').map(keyword => keyword.trim());
+            return keywords;
         } catch (error) {
             console.log(error);
             if (i == maxTries - 1) {
