@@ -45,28 +45,6 @@ const Home = () => {
             </div>
           </div>
         </div>
-        <div className={styles.stepContainer}>
-          <div className={styles.firstTitle}>Vipera</div>
-          <div className={styles.secondTitle}>3 Key Steps to Fight Bias</div>
-          <div className={styles.steps}>
-            {STEPS_IMAGES.map(image => (
-              <div key={image.id} className={styles.stepImageWrapper}>
-                <img src={image.src} alt={image.alt} className={styles.stepImage} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className={styles.trendingContainer}>
-          <div className={styles.firstTitle}>WEAUDIT</div>
-          <div className={styles.secondTitle}>Trending discussion posts</div>
-          <div className={styles.trendingPosts}>
-            {TRENDING_IMAGES.map(image => (
-              <div key={image.id} className={styles.trendingImageWrapper}>
-                <img src={image.src} alt={image.alt} className={styles.trendingImage} />
-              </div>
-            ))}
-          </div>
-        </div>
       <Footer />
 
       {/* <footer>
