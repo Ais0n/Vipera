@@ -193,6 +193,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
                     if(!imageValue || imageValue == "") {continue;}
                     imageMetadata[key] = {
                         value: `${key}: ${imageValue}`,
+                        values: values,
                         percentage: values.filter(val => val === imageValue).length / values.length
                     }
                 }

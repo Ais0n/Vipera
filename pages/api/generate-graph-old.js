@@ -4,9 +4,10 @@ import path from 'path';
 import axios from 'axios';
 import JSON5 from 'json5';
 import fs from 'fs';
+import { fal } from "@fal-ai/client";
 
-const replicate = new Replicate({
-    auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
+fal.config({
+  credentials: process.env.NEXT_FAL_AI_KEY
 });
 
 export default async function handler(req, res) {
@@ -51,20 +52,29 @@ async function generateGraph(imageData) {
 
     for(let i = 0; i < maxTries; i++) {
         try {
-            let output = await replicate.run(
-                "yorickvp/llava-13b:80537f9eead1a5bfa72d5ac6ea6414379be41d4d4f6679fd776e9535d1eb58bb",
-                {
-                  input: {
-                    image: imageData,
-                    top_p: 1,
-                    prompt: "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}",
-                    max_tokens: 1024,
-                    temperature: 0.6
-                    // "Extract descriptive objects from the image, and organize them as a tree. Output the tree as a JSON string. The root node should contain only two children 'foreground' and 'background'. Do not include more than 5 objects in the response. Example: {\"foreground\":{obj1, obj2, ...},\"background\":{obj1, ...}}"
-                  }
-                }
-              );
-            output = output.join("");
+            const input = {
+                image_url: imageData,
+                top_p: 1,
+                prompt: "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}",
+                max_tokens: 1024,
+                temperature: 0.6
+                // "Extract descriptive objects from the image, and organize them as a tree. Output the tree as a JSON string. The root node should contain only two children 'foreground' and 'background'. Do not include more than 5 objects in the response. Example: {\"foreground\":{obj1, obj2, ...},\"background\":{obj1, ...}}"
+            }
+            const {request_id} = await fal.queue.submit("fal-ai/llava-next", {
+                input: input,
+                webhookUrl: "https://optional.webhook.url/for/results",
+              });
+            
+            let status;
+            do {
+                status = await fal.queue.status("fal-ai/llava-next", { requestId: request_id, logs: true });
+                // console.log(status);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+            } while (status.status !== 'COMPLETED');
+
+            // Fetch the result
+            let { data: output } = await fal.queue.result("fal-ai/llava-next", { requestId: request_id });
+            output = output.output;
             console.log(output);
 
             // check if the output is valid

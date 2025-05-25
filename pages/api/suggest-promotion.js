@@ -14,14 +14,14 @@ export default async function handler(req, res) {
         let schema = req.body.schema;
         let priorPrompts = req.body.priorPrompts;
         try {
-            // let result = await suggest(prompt, schema);
-            // let suggestedPrompt = await suggestPrompt(prompt, result, priorPrompts);
-            // result = {...result, newPrompt: suggestedPrompt};
-            let result = {
-                "oldNodeName": "doctor",
-                "newNodeName": "nurse",
-                "newPrompt": "A cinematic photo of a nurse"
-            }
+            let result = await suggest(prompt, schema);
+            let suggestedPrompt = await suggestPrompt(prompt, result, priorPrompts);
+            result = {...result, newPrompt: suggestedPrompt};
+            // let result = {
+            //     "oldNodeName": "doctor",
+            //     "newNodeName": "nurse",
+            //     "newPrompt": "A cinematic photo of a nurse"
+            // }
             return res.status(200).json({ res: result });
         } catch (error) {
             console.error(error);

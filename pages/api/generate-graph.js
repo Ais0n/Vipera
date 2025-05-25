@@ -4,10 +4,16 @@ import path from 'path';
 import axios from 'axios';
 import JSON5 from 'json5';
 import fs from 'fs';
-import { fal } from "@fal-ai/client";
+// import { fal } from "@fal-ai/client";
 
-fal.config({
-  credentials: process.env.NEXT_FAL_AI_KEY
+// fal.config({
+//   credentials: process.env.NEXT_FAL_AI_KEY
+// });
+import OpenAI from 'openai';
+import process from 'process';
+const openai = new OpenAI({
+    apiKey: process.env.NEXT_ALI_KEY,
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 });
 
 export default async function handler(req, res) {
@@ -34,6 +40,7 @@ export default async function handler(req, res) {
                     fs.mkdirSync(path.dirname(file_path), { recursive: true });
                 }
                 fs.writeFileSync(file_path, JSON.stringify(result));
+                console.log("Graph saved to: ", file_path);
             }
             
             return res.status(200).json({ res: result});
@@ -52,30 +59,30 @@ async function generateGraph(imageData) {
 
     for(let i = 0; i < maxTries; i++) {
         try {
-            const input = {
-                image_url: imageData,
-                top_p: 1,
-                prompt: "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}",
-                max_tokens: 1024,
-                temperature: 0.6
-                // "Extract descriptive objects from the image, and organize them as a tree. Output the tree as a JSON string. The root node should contain only two children 'foreground' and 'background'. Do not include more than 5 objects in the response. Example: {\"foreground\":{obj1, obj2, ...},\"background\":{obj1, ...}}"
-            }
-            const {request_id} = await fal.queue.submit("fal-ai/llava-next", {
-                input: input,
-                webhookUrl: "https://optional.webhook.url/for/results",
-              });
-            
-            let status;
-            do {
-                status = await fal.queue.status("fal-ai/llava-next", { requestId: request_id, logs: true });
-                // console.log(status);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-            } while (status.status !== 'COMPLETED');
+            const input = "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}";
 
-            // Fetch the result
-            let { data: output } = await fal.queue.result("fal-ai/llava-next", { requestId: request_id });
-            output = output.output;
-            console.log(output);
+            console.log("input: ", input);
+            let messages = [{
+                role: "system",
+                content: [{
+                  type: "text",
+                  text: "You are a helpful assistant."
+                }]
+            },  {
+                role: "user",
+                content: [
+                    { type: "image_url", image_url: { "url": imageData } },
+                    { type: "text", text: input },
+                ]
+            }]
+
+            const response = await openai.chat.completions.create({
+                model: 'qwen-vl-max-latest',
+                messages: messages,
+            });
+    
+            let output = response.choices[0].message.content;
+            console.log("output: ", output);
 
             // check if the output is valid
             let start = output.indexOf('{');

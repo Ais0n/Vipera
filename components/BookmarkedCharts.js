@@ -103,7 +103,7 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
 
     const handleFocus = async (index) => {
         // Only fetch suggestion if the comment box is empty
-        if (!comments[index]) {
+        if (!comments[index] && bookmarkedCharts[index] && bookmarkedCharts[index].type == 'bar') {
             setLoadingStates(prev => ({ ...prev, [index]: true }));
             try {
                 const suggestion = await fetchSuggestion(index);

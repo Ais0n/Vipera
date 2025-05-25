@@ -232,6 +232,7 @@ function getImageMetadata(graph, batch, imageId) {
         let imageValue = graphMetadata[key][JSON.stringify({ batch: batch, imageId: imageId })];
         imageMetadata[key] = {
             value: `${imageValue}`,
+            values: values,
             percentage: values.filter(val => val === imageValue).length / values.length
         }
     }

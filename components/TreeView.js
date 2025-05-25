@@ -247,7 +247,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
     }
 
     const createTree = () => {
-        const width = 880;
+        const width = svgRef.current ? svgRef.current.parentElement.clientWidth : 880; // 40px padding on each side
         const height = 600;
         const barHeight = 60; // Fixed height for the bar chart area
 
@@ -262,7 +262,27 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
         const rectHeight = 30;
         let _data = Utils.deepClone(data);
         const root = d3.hierarchy(_data);
-        const treeLayout = d3.tree().size([height, width - 20]);
+        const treeLayout = d3.tree()
+        .size([height, width - 20])
+        .separation((a, b) => {
+            const baseUnit = 100;
+            const baseMargin = 30;
+            let minSpacing = 1;
+            
+            if (a.parent === b.parent) {
+                const index = a.parent.children.indexOf(a);
+                if (index === 0) return 1;
+                
+                minSpacing = (getNodeHeight(a) + getNodeHeight(b) + baseMargin) / baseUnit;
+            }
+        
+            if (a.depth === b.depth) {
+                minSpacing = (getNodeHeight(a) + getNodeHeight(b) + baseMargin) / baseUnit;
+            }
+            
+            // console.log(a, b, minSpacing);
+            return minSpacing;
+        })
 
         treeLayout(root);
 
@@ -358,19 +378,6 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
             contextMenu2.style("display", "none");
         });
 
-        // rects.filter(d => d.data.type == 'attribute')
-        //     .on('mouseover', function (event, d) {
-        //         console.log(d);
-        //         let imageIds = [];
-        //         d.data.list.forEach(dataItem => {
-        //             imageIds.push(...dataItem.imageId);
-        //         });
-        //         handleBarHover({ imageId: imageIds });
-        //     })
-        //     .on('mouseout', function (event, d) {
-        //         handleNodeHover(null);
-        //     });
-
         nodes.append('text')
             .attr('dy', '1.2em')
             .attr('x', d => {
@@ -429,7 +436,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
 
         svg.transition()
             .duration(750)
-            .call(zoom.transform, d3.zoomIdentity.translate(40, 20).scale(0.8));
+            .call(zoom.transform, d3.zoomIdentity.translate(20, 20).scale(0.8));
     };
 
     useEffect(() => {
@@ -475,12 +482,12 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
             <div className="context-menu" ref={contextMenuRef}>
                 <div className="context-menu-item" onClick={() => { setIsEditModalOpen(true); }}>Edit</div>
                 <div className="context-menu-item" onClick={() => { setIsAddModalOpen(true); }}>Add a child</div>
-                <div className="context-menu-item">Delete</div>
+                {/* <div className="context-menu-item">Delete</div> */}
             </div>
             <div className="context-menu" ref={contextMenuRef2}>
                 <div className="context-menu-item" onClick={() => { setIsEditModalOpen(true); }}>Edit</div>
                 <div className="context-menu-item" onClick={() => { setIsRelabelModalOpen(true); }}>Relabel</div>
-                <div className="context-menu-item">Delete</div>
+                {/* <div className="context-menu-item">Delete</div> */}
             </div>
             <ModalTreeAdd
                 isOpen={isAddModalOpen | isEditModalOpen}

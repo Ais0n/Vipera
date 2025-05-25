@@ -57,7 +57,7 @@ const Generate = () => {
 
   // Function to generate a single image
   async function generateImage(imageId, userInput, maxTries = 10) {
-    const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&image_id=${imageId}`;
+    const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&imageId=${imageId}`;
     let tryCount = 0;
 
     while (tryCount < maxTries) {

@@ -5,10 +5,17 @@ import axios from 'axios';
 import JSON5 from 'json5';
 import * as Utils from '../../utils.js';
 import fs from 'fs';
-import { fal } from "@fal-ai/client";
+// import { fal } from "@fal-ai/client";
 
-fal.config({
-  credentials: process.env.NEXT_FAL_AI_KEY
+// fal.config({
+//   credentials: process.env.NEXT_FAL_AI_KEY
+// });
+
+import OpenAI from 'openai';
+import process from 'process';
+const openai = new OpenAI({
+    apiKey: process.env.NEXT_ALI_KEY,
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 });
 
 export default async function handler(req, res) {
@@ -71,31 +78,30 @@ async function generateLabel(imageData, schema, candidateValues, userFeedback) {
 
     for (let i = 0; i < maxTries; i++) {
         try {
-            const input = {
-                image_url: imageData,
-                top_p: 1,
-                // prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node whose corresponding value is an array in the schema, generate a label that describes the object or attribute in the image, and replace the array with the generated label. If all candidate values in the array cannot describe the image, replace the array with a label that you think is appropriate. Schema: ${schema}`,
-                prompt: `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the placeholder value '...' or 'Choose from candidate values ...' with the generated label (For placeholders of the latter type, choose one from the given values). All labels must be strings, and should NOT be numbers, booleans, or arrays. If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Your output should *NOT* include the placeholder '...'. Schema: ${schema}${userFeedback ? '. Additional user feedback: ' + userFeedback : ''}`,
-                max_tokens: 1024,
-                temperature: 0.8
-            };
-            const {request_id} = await fal.queue.submit("fal-ai/llava-next", {
-                input: input,
-                webhookUrl: "https://optional.webhook.url/for/results",
-              });
-            
-            let status;
-            do {
-                status = await fal.queue.status("fal-ai/llava-next", { requestId: request_id, logs: true });
-                // console.log(status);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-            } while (status.status !== 'COMPLETED');
+            const input = `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the placeholder value '...' or 'Choose from candidate values ...' with the generated label (For placeholders of the latter type, choose one from the given values). All labels must be strings, and should NOT be numbers, booleans, or arrays. If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Your output should *NOT* include the placeholder '...'. Schema: ${schema}${userFeedback ? '. Additional user feedback: ' + userFeedback : ''}`
 
-            // Fetch the result
-            let { data: output } = await fal.queue.result("fal-ai/llava-next", { requestId: request_id });
-            output = output.output;
+            console.log("input:", input);
 
-            console.log("input:", input.prompt);
+            let messages = [{
+                role: "system",
+                content: [{
+                  type: "text",
+                  text: "You are a helpful assistant."
+                }]
+            },  {
+                role: "user",
+                content: [
+                    { type: "image_url", image_url: { "url": imageData } },
+                    { type: "text", text: input },
+                ]
+            }]
+
+            const response = await openai.chat.completions.create({
+                model: 'qwen-vl-max-latest',
+                messages: messages,
+            });
+    
+            let output = response.choices[0].message.content;
             console.log("output:", output);
             // Find the JSON part from the output
             let start = output.indexOf('{');

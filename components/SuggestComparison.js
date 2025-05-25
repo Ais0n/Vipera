@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Heatmap from './Heatmap';
-import BarChart from './BarChart';
 import { Image, Switch, Popover, Button, Tooltip, Tag, Popconfirm, Input, Space, Select, Checkbox, Row, Col } from 'antd';
 import { SyncOutlined, InfoCircleOutlined, BulbOutlined, PlusOutlined } from '@ant-design/icons';
 import { FixedSizeList } from 'react-window';

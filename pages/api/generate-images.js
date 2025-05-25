@@ -23,10 +23,12 @@ export default async function handler(req, res) {
             if(process.env.SAVE_MODE == 'true') {
                 let image_path = path.join(output_dir, `${imageId}.png`);
                 fs.writeFileSync(image_path, imageBuffer);
+                console.log("Image saved to: ", image_path);
                 newPath = '/temp_images/' + prompt.replace(/ /g, '_') + `/${imageId}.png`;
             } else {
                 newPath = imagePath[0];
             }
+            console.log("Image generated: ", newPath);
             return res.status(200).json({ image_path: newPath });
         } catch (error) {
             console.error(error);

@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Heatmap from './Heatmap';
-import BarChart from './BarChart';
 import HighlightedText from './HighlightedText';
 import { Image, Switch, Popover, Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
