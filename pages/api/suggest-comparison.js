@@ -1,6 +1,7 @@
 import axios from 'axios';
 import JSON5 from 'json5';
 import { createCanvas, loadImage } from 'canvas'; // Ensure you install 'canvas' package
+import path from 'path';
 import Replicate from "replicate";
 import fs from 'fs';
 import { fal } from "@fal-ai/client";
@@ -17,11 +18,16 @@ const getImageData = async (imagePath) => {
         const response = await axios.get(imagePath, { responseType: 'arraybuffer' });
         return Buffer.from(response.data);
     } else {
-        // get current working directory
-        const cwd = process.cwd();
         // get the image path
-        imagePath = `${cwd}/public${imagePath}`;
-        return await fs.promises.readFile(imagePath);
+        // imagePath = `public${imagePath}`;
+        // return await fs.promises.readFile(imagePath);
+        try {
+            imagePath = path.join(process.cwd(), 'public', imagePath);
+            return await fs.promises.readFile(imagePath);
+        } catch (fsError) {
+            console.error(`Error reading image from path ${imagePath}:`, fsError);
+            throw new Error(`Image not found at ${imagePath}`);
+        }
     }
 };
 
