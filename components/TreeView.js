@@ -12,6 +12,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
     if (!data || data == {}) { return null; }
 
     const svgRef = useRef();
+    const tooltipRef = useRef(null);
     const contextMenuRef = useRef(); // for non-attribute nodes
     const contextMenuRef2 = useRef(); // for attribute nodes
 
@@ -136,11 +137,30 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                             .attr('height', height)
                             .attr('fill', colorScale(dataItem.batch))
                             .on('mouseover', function (event, d) {
-                                event.stopPropagation();
+                                // event.stopPropagation();
+                                const rect = this;
+                                const rectBounds = rect.getBoundingClientRect();
+
+                                const tooltip = d3.select(tooltipRef.current)
+                                    .style('display', 'block')
+                                    .html(`
+                                    <strong>${d.dataItem}</strong>
+                                    <strong>Count:</strong> ${d.count}<br/>
+                                    `)
+                                    .style('left', `${rectBounds.left + window.scrollX + 10}px`)
+                                    .style('top', `${rectBounds.top + window.scrollY - 30}px`)
+                                    .style('opacity', 0.95);
                                 handleBarHover(dataItem);
                             })
                             .on('mouseout', function (event, d) {
-                                event.stopPropagation();
+                                // event.stopPropagation();
+                                console.log('d3 mouseout', d);
+                                setTimeout(() => {
+                                    d3.select(tooltipRef.current)
+                                    .transition().duration(500)
+                                    .style('opacity', 0)
+                                    .style('display', 'none');
+                                }, 200);
                                 handleBarHover(null);
                             })
                             .on('contextmenu', function (event) {
@@ -479,6 +499,12 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
     return (
         <>
             <svg ref={svgRef}></svg>
+            {/* Tooltip element */}
+            <div
+            ref={tooltipRef}
+            className="bar-tooltip"
+            style={{ display: 'none', pointerEvents: 'none' }}
+            ></div>
             <div className="context-menu" ref={contextMenuRef}>
                 <div className="context-menu-item" onClick={() => { setIsEditModalOpen(true); }}>Edit</div>
                 <div className="context-menu-item" onClick={() => { setIsAddModalOpen(true); }}>Add a child</div>
@@ -521,6 +547,18 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 }
                 .context-menu-item:hover {
                     background-color: #f0f0f0;
+                }
+                .bar-tooltip {
+                    position: absolute;
+                    background-color: white;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    padding: 8px;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                    font-size: 12px;
+                    z-index: 1000;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
                 }
             `}</style>
         </>

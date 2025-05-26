@@ -81,7 +81,7 @@ const ModalReview = ({ isOpen, onClose, onSave, images, metaData, graph }) => {
     };
 
     const handleLabelChange = (index, path, value) => {
-        let newMetadata = Utils.deepClone(updatedMetaData);
+        let newMetadata = Utils.deepClone(metaData);
         let tmp = newMetadata[index];
         let keys = path.split('.');
         keys.forEach((key, i) => {
