@@ -276,6 +276,10 @@ const Generate = () => {
     const aggregateGraphs = (graph, curGraph) => {
       let keys = Object.keys(curGraph);
       for (let key of keys) {
+        if (key.startsWith('_')) {
+          graph[key] = curGraph[key];
+          continue; // skip internal fields
+        }
         if (typeof (curGraph[key]) === 'object') {
           if (typeof (graph[key]) === 'undefined') {
             graph[key] = {};
