@@ -197,7 +197,7 @@ const ImageSummary = ({ images, metaData, prompts, graph, setGraph, graphSchema,
                 {/* Left Column */}
                 <div className="left-column">
                     <PromptManager prompts={prompts} colorScale={colorScale} changeColor={changeColor} handlePromptClick={handlePromptClick} groups={groups} setGroups={setGroups} />
-                    <div><i>Features below are powered by Qwen-VL-Max and may contain errors.</i></div>
+                    <div style={{'margin': '10px'}}><i>Features below are powered by Qwen-VL-Max and may contain errors.</i></div>
                     <h2>Audit Analysis Support</h2>
                     <SuggestComparison prompts={prompts} images={images} graphSchema={graphSchema} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestComparison>
                     

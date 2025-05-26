@@ -245,6 +245,8 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                     height: 200px;
                     overflow-y: scroll;
                     padding: auto 20px;
+                    white-space: nowrap;
+                    overflow-x: scroll;
                 }
                 .prompt-item {
                     border-radius: 5px;

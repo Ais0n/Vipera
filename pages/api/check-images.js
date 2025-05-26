@@ -23,6 +23,8 @@ export default async function handler(req, res) {
                 let files = fs.readdirSync(dir);
                 // sort the file names
                 files = files.sort();
+                // filter out non-image files
+                files = files.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file));
                 return res.status(200).json({ res: files });
             }
         } catch (error) {

@@ -474,7 +474,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
         if (!chartGroup) return;
         chartGroup.selectAll('*').remove();
         createStackedBarchart(nodes);
-    }, [groups, customColors]);
+    }, [groups, customColors, colorScale]);
 
     return (
         <>

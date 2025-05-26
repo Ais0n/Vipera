@@ -524,6 +524,7 @@ const Generate = () => {
       let isImagesExist, imageIds;
       const checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
       const response = await axios.get(checkUrl);
+      console.log("Response from check-images:", response.data);
 
       if (response.data.res instanceof Array) { // the image ids exist (which means the prompt is a test prompt)
         isImagesExist = true;
@@ -705,8 +706,10 @@ const Generate = () => {
     setPromptStr(suggestion.newPrompt);
     let updateSchema = (schema, oldNodeName, newNodeName) => {
       if (typeof (schema) != 'object') return;
+      let newTmpSchemaScope = {'_nodeType': schema._nodeType || 'object', '_scope': []};
       let keys = Object.keys(schema);
       for (let key of keys) {
+        if (key.startsWith('_')) continue;
         if (key == oldNodeName) {
           schema[newNodeName] = Utils.deepClone(schema[oldNodeName]);
           let traverseNewNode = (curNode) => {
@@ -718,20 +721,19 @@ const Generate = () => {
             });
           }
           traverseNewNode(schema[newNodeName]);
-          let path = {};
-          path[newNodeName] = Utils.deepClone(schema[newNodeName]);
-          return path;
+          newTmpSchemaScope[newNodeName] = Utils.deepClone(schema[newNodeName]);
+          // return newTmpSchemaScope;
         } else {
           if (typeof (schema[key]) == 'object') {
             let res = updateSchema(schema[key], oldNodeName, newNodeName);
             if (res) {
-              let path = {}; 
-              path[key] = res;
-              return path;
+              newTmpSchemaScope[key] = res;
+              // return newTmpSchemaScope;
             }
           }
         }
       }
+      return newTmpSchemaScope;
     }
     let _graphSchema = Utils.deepClone(graphSchema);
     let newTmpSchemaScope = updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
@@ -1206,8 +1208,8 @@ const Generate = () => {
       /* total width */
       *::-webkit-scrollbar {
           background-color:#fff;
-          width:10px;
-          height: 10px;
+          width: 8px;
+          height: 8px;
       }
 
       /* background of the scrollbar except button or resizer */
