@@ -78,7 +78,7 @@ async function generateLabel(imageData, schema, candidateValues, userFeedback) {
 
     for (let i = 0; i < maxTries; i++) {
         try {
-            const input = `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image, and replace the placeholder value '...' or 'Choose from candidate values ...' with the generated label (For placeholders of the latter type, choose one from the given values). All labels must be strings, and should NOT be numbers, booleans, or arrays. If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Your output should *NOT* include the placeholder '...'. Schema: ${schema}${userFeedback ? '. Additional user feedback: ' + userFeedback : ''}`
+            const input = `Given the image, finish the label tree based on the provided schema. Specifically, for each leaf node, generate a label according to the scene in the image. Replace ONLY the placeholders ('...' or 'Choose from candidate values ...') with the generated label. All labels must be strings, and should NOT be numbers, booleans, or arrays. If a specific node (no matter if it is a leaf or not) is not present in the image, replace the node value (subtree) with the object {'EXIST': 'no'}. Output the results in JSON. Make sure the output strictly follows the provided schema without altering its structure. Do not include any placeholders in the final output. Schema: ${schema}${userFeedback ? '. Additional user feedback: ' + userFeedback : ''}`
 
             console.log("input:", input);
 
