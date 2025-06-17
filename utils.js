@@ -420,17 +420,21 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
     if (typeof(subSchema) !== 'object' || subSchema === null) {
         return;
     }
+    if (!graphSchema._scope) {
+        graphSchema._scope = [];
+    }
+    graphSchema._scope.push(...imageInfo);
+
+    // Recursively update children that exist in subSchema
     Object.keys(graphSchema).forEach((key) => {
+        // Skip keys starting with "_"
         if (key.startsWith("_")) {
             return;
         }
+
         if (subSchema[key]) {
-            if(!graphSchema[key]._scope) {
-                graphSchema[key]._scope = [];
-            }
-            graphSchema[key]._scope.push(...imageInfo);
+            updateGraphSchemaWithScope(graphSchema[key], subSchema[key], imageInfo);
         }
-        updateGraphSchemaWithScope(graphSchema[key], subSchema[key], imageInfo);
     });
 }
 
