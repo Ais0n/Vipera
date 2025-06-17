@@ -5,8 +5,8 @@ import JSON5 from 'json5';
 
 import OpenAI from 'openai';
 const openai = new OpenAI({
-    apiKey: process.env.NEXT_ALI_KEY,
-    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    apiKey: process.env.NEXT_OPENROUTER_KEY,
+    baseURL: "https://openrouter.ai/api/v1"
 });
 
 export default async function handler(req, res) {
@@ -42,7 +42,7 @@ async function suggestNote(chart, priorPrompts) {
             console.log("input: ", input)
             
             const completion = await openai.chat.completions.create({
-                model: "qwen-plus",  
+                model: "openai/gpt-4.1",  
                 messages: [
                     { role: "system", content: "You are a helpful assistant." },
                     { role: "user", content: input }

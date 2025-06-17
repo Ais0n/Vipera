@@ -9,8 +9,8 @@ import { fal } from "@fal-ai/client";
 import OpenAI from 'openai';
 import process from 'process';
 const openai = new OpenAI({
-    apiKey: process.env.NEXT_ALI_KEY,
-    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    apiKey: process.env.NEXT_OPENROUTER_KEY,
+    baseURL: "https://openrouter.ai/api/v1"
 });
 
 const getImageData = async (imagePath) => {
@@ -98,7 +98,7 @@ async function suggestComparison(imageData, keywords, schema) {
             }]
 
             const response = await openai.chat.completions.create({
-                model: 'qwen-vl-max-latest',
+                model: 'openai/gpt-4.1',
                 messages: messages,
             });
     

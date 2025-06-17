@@ -12,8 +12,8 @@ import fs from 'fs';
 import OpenAI from 'openai';
 import process from 'process';
 const openai = new OpenAI({
-    apiKey: process.env.NEXT_ALI_KEY,
-    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    apiKey: process.env.NEXT_OPENROUTER_KEY,
+    baseURL: "https://openrouter.ai/api/v1"
 });
 
 export default async function handler(req, res) {
@@ -59,7 +59,7 @@ async function generateGraph(imageData) {
 
     for(let i = 0; i < maxTries; i++) {
         try {
-            const input = "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}";
+            const input = "What physical objects or notable features (that can be used to understand/evaluate an image) are in the foreground and background of the image? Output the objects as a JSON string. Do not include more than 5 objects. Keep the objects' names concise. Example: {\"foreground\":[\"obj1\", \"obj2\", ...],\"background\":[\"obj1\", ...]}";
 
             console.log("input: ", input);
             let messages = [{
@@ -77,7 +77,7 @@ async function generateGraph(imageData) {
             }]
 
             const response = await openai.chat.completions.create({
-                model: 'qwen-vl-max-latest',
+                model: 'openai/gpt-4.1',
                 messages: messages,
             });
     
