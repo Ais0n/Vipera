@@ -3,7 +3,7 @@ import { Modal, Input, Button, Radio, Tooltip, Checkbox, Image } from 'antd';
 import { SyncOutlined, InfoCircleOutlined, RightOutlined, DownOutlined } from '@ant-design/icons';
 import * as Utils from '../utils.js';
 
-const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups, colorScale, images, contextMenuData, treeUtils }) => {
+const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups, colorScale, images, contextMenuData, treeUtils, useSceneGraph = true }) => {
     const [nodeType, setNodeType] = useState("attribute");
     const [nodeName, setNodeName] = useState('');
     const [candidateValues, setCandidateValues] = useState('');
@@ -23,7 +23,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
         //     setSelectedPrompts(prompts.map((_, index) => index));
         // }
         console.log(contextMenuData);
-        if(contextMenuData) {
+        if (contextMenuData) {
             // let imageInfo = contextMenuData.data.imageInfo;
             let schemaNode = treeUtils.getSchemaNodeFromTreeNode(contextMenuData);
             console.log(schemaNode);
@@ -38,6 +38,12 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                 setNodeType('attribute');
                 setCandidateValues('');
             }
+        } else if (!useSceneGraph) {
+            setselectedImageInfo(Utils.deepClone(images.map(image => ({ "id": image.imageId, "batch": image.batch }))));
+            setSelectedPrompts(prompts.map((_, index) => index));
+            setNodeName('');
+            setNodeType('attribute');
+            setCandidateValues('');
         }
     }, [contextMenuData, modalType]);
 
@@ -82,11 +88,11 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                 width={800}
             >
                 <div className="modal-tree-add">
-                    <div><b>Type</b><Tooltip title={"An attribute node denotes an auditing criteria that will be used to label the images for evaluation. An object node denotes an object in the images and will NOT directly be used for evaluation."}><InfoCircleOutlined style={{ color: 'grey', 'marginLeft': '5px' }} /></Tooltip></div>
+                    {useSceneGraph && (<><div><b>Type</b><Tooltip title={"An attribute node denotes an auditing criteria that will be used to label the images for evaluation. An object node denotes an object in the images and will NOT directly be used for evaluation."}><InfoCircleOutlined style={{ color: 'grey', 'marginLeft': '5px' }} /></Tooltip></div>
                     <Radio.Group onChange={(e) => { setNodeType(e.target.value) }} value={nodeType} disabled={modalType === "edit"}>
                         <Radio value={"attribute"}>Attribute</Radio>
                         <Radio value={"object"}>Object</Radio>
-                    </Radio.Group>
+                    </Radio.Group></>)}
                     <div><b>Node Name</b></div>
                     <Input
                         value={nodeName}

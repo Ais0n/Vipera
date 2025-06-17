@@ -30,7 +30,6 @@ const Generate = () => {
   const [graphSchema, setGraphSchema] = useState({});
   const [metaData, setMetaData] = useState([]);
   const [aggregatedGraph, setAggregatedGraph] = useState({});
-  const [useSceneGraph, setUseSceneGraph] = useState(true);
   const [badgeContents, setBadgeContents] = useState(undefined);
   const [prompts, setPrompts] = useState([]);
   const [statusInfo, setStatusInfo] = useState(0);
@@ -1160,31 +1159,13 @@ const Generate = () => {
     <div>
       {contextHolder}
       <Header mode={mode} setMode={setMode}/>
-      {/* <button onClick={setUseSceneGraph}> Use Scene Graph</button> */}
-      {/* <h1 className={style.mainTitle}>Ouroboros</h1> */}
-      {/* <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} /> */}
-      {/* {images.length <= 0 && (
-        <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} />
-      )} */}
       <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} retrySceneGraphContext={retrySceneGraphContext} retrySceneGraphGeneration={retrySceneGraphGeneration} failedImageIdsForMetadata={failedImageIdsForMetadata} retryMetadataGeneration={retryMetadataGeneration}/>
 
       {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible} />}
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
-      {useSceneGraph && prompts.length > 0 && <div className={style.analyzeView}>
-        {/* <div className={style.imageView}>
-          {!isDoneImage && <ProcessingIndicator />}
-          <div className={style.imageContainer}>
-            {images.map((image, index) => (
-              <div key={image.id} className={style.imageItem}>
-                <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.id}`} />
-                {badgeContents && <div className={style.imageBadge}> {badgeContents[index]} </div>}
-              </div>
-            ))}
-          </div>
-        </div> */}
+      {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils}/>
-
+        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils}/>
       </div>}
 
 

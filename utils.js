@@ -252,7 +252,7 @@ function arrayBufferToBase64(buffer) {
 function processSceneGraph(graph, images) {
     let imageIds = images.map(image => image.imageId);
     let { foreground, background } = graph;
-    let res = { foreground: {_nodeType: 'object'}, background: {_nodeType: 'object'} };
+    let res = { foreground: {_nodeType: 'object'}, background: {_nodeType: 'object'}, _nodeType: 'object' };
     foreground.forEach(item => {
         res["foreground"][item] = {_nodeType: 'object'};
     });
@@ -460,4 +460,29 @@ function wrapSchemaForLabeling(graphSchema) {
     return res;
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, wrapSchemaForLabeling };
+function getLeafNodes(graph) {
+    /**
+     * Return a list of all leaf nodes in the given scene graph.
+     * A leaf node is defined as a node with no children.
+     */
+    const leafNodes = [];
+
+    function traverse(nodeId) {
+        const node = graph[nodeId];
+        if (!node.children || node.children.length === 0) {
+            leafNodes.push(nodeId);
+        } else {
+            for (const childId of node.children) {
+                traverse(childId);
+            }
+        }
+    }
+
+    for (const nodeId in graph) {
+        traverse(nodeId);
+    }
+
+    return leafNodes;
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, wrapSchemaForLabeling, getLeafNodes };
