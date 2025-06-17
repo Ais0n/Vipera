@@ -1108,6 +1108,13 @@ const Generate = () => {
      * Note that only image IDs that are in "scope" but not in "_scope" will be added to "_scope".
      */
     let curNode = schema;
+    // Update the root node's _scope first
+    if (schema._scope) {
+        schema._scope = [...new Set([...schema._scope, ...scope])];
+    } else {
+        schema._scope = scope;
+    }
+    
     for (let i = 0; i < path.length; i++) {
       if (typeof (curNode) == 'object') {
         curNode = curNode[path[i]];
