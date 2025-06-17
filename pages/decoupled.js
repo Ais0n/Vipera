@@ -17,6 +17,7 @@ import ModalReview from '../components/ModalReview.js';
 import { message } from 'antd';
 
 const Generate = () => {
+  const [mode, setMode] = useState("A");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDoneGenerating, setIsDoneGenerating] = useState(true);
   const [isDoneImage, setIsDoneImage] = useState(true);
@@ -1158,7 +1159,7 @@ const Generate = () => {
   return (
     <div>
       {contextHolder}
-      <Header />
+      <Header mode={mode} setMode={setMode}/>
       {/* <button onClick={setUseSceneGraph}> Use Scene Graph</button> */}
       {/* <h1 className={style.mainTitle}>Ouroboros</h1> */}
       {/* <GenerateState isGenerating={isGenerating} isDoneGenerating={isDoneGenerating} /> */}
