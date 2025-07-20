@@ -4,7 +4,7 @@ import * as Utils from '../utils.js';
 import ModalTreeEdit from './ModalTreeEdit.js';
 import ModalTreeAdd from './ModalTreeAdd.js';
 import ModalTreeRelabel from './ModalTreeRelabel.js';
-import { Modal, Skeleton } from 'antd';
+import { Modal, Skeleton, message } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 
 
@@ -424,6 +424,11 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                     .style('cursor', 'pointer')
                     .on('click', () => {
                         console.log(d);
+                        if(!d.data.imageInfo || d.data.imageInfo.length == 0) {
+                            message.error('No images found for this node');
+                            return;
+                        }
+
                         // Store the raw data when clicked
                         let pathStr = "", curNode = d;
                         while (curNode && curNode.data.name != 'root') {
