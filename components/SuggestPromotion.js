@@ -14,6 +14,11 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
+        if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
+            setSuggestionMetaData({});
+            return;
+        }
+        
         axios.post('/api/suggest-promotion', {
             prompt: prompt,
             schema: removeUnderscoreFields(graphSchema),

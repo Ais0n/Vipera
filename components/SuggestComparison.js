@@ -32,6 +32,10 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
 
     const updateSuggestion = () => {
         if (images.length <= 1) return;
+        if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
+            setSuggestionMetaData({});
+            return;
+        }
         
         if (abortController) {
             abortController.abort();
@@ -107,6 +111,11 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     }
 
     const generateInitialKeywords = () => {
+        if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
+            setKeywordViewMetaData([]);
+            return;
+        }
+
         axios.post('/api/suggest-keyword', {
             prompts: prompts,
             schema: removeUnderscoreFields(graphSchema)

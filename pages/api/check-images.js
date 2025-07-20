@@ -17,7 +17,7 @@ export default async function handler(req, res) {
             let dir = path.join(process.cwd(), 'public', _path);
             if (!fs.existsSync(dir)) {
                 // create a new folder
-                if(process.env.SAVE_MODE == 'true') fs.mkdirSync(dir, { recursive: true });
+                if(process.env.NEXT_PUBLIC_SAVE_MODE == 'true') fs.mkdirSync(dir, { recursive: true });
                 return res.status(200).json({ res: null });
             } else {
                 let files = fs.readdirSync(dir);

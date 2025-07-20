@@ -20,7 +20,7 @@ export default async function handler(req, res) {
             // read the images from the paths and save them to output_dir
             let response = await axios.get(imagePath[0], { responseType: 'arraybuffer' });
             let imageBuffer = Buffer.from(response.data);
-            if(process.env.SAVE_MODE == 'true') {
+            if(process.env.NEXT_PUBLIC_SAVE_MODE == 'true') {
                 let image_path = path.join(output_dir, `${imageId}.png`);
                 fs.writeFileSync(image_path, imageBuffer);
                 console.log("Image saved to: ", image_path);
