@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             let result = await generateGraph(input);
 
             // save result to image_dir
-            if (image_dir && process.env.SAVE_MODE == 'true') {
+            if (image_dir && process.env.NEXT_PUBLIC_SAVE_MODE == 'true') {
                 let file_path = path.join(process.cwd(), 'public', image_dir);
                 // create the path if doesn't exist
                 if (!fs.existsSync(file_path)) {

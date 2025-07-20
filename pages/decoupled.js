@@ -519,7 +519,7 @@ const Generate = () => {
     try {
       /* 
         NOTE: For easier debugging, we include a few test prompts (e.g., "A cinematic photo of a doctor").
-        All auditing results will be automatically stored if "SAVE_MODE" is set to true in the environmental variables (".env"), so that the results will NOT be calculated again when the test prompts are reused.
+        All auditing results will be automatically stored if "NEXT_PUBLIC_SAVE_MODE" is set to true in the environmental variables (".env"), so that the results will NOT be calculated again when the test prompts are reused.
       */
       let isImagesExist, imageIds;
       const checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;

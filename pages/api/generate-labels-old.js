@@ -34,7 +34,7 @@ export default async function handler(req, res) {
             result = JSON.parse(JSON.stringify(result).toLowerCase());
 
             // save result to label_dir
-            if (label_dir && process.env.SAVE_MODE == 'true') {
+            if (label_dir && process.env.NEXT_PUBLIC_SAVE_MODE == 'true') {
                 let promise = new Promise(async (resolve, reject) => {
                     let file_path = path.join(process.cwd(), 'public', label_dir);
                     // read the existing file

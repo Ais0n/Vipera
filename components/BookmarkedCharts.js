@@ -142,6 +142,10 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
     };
 
     const fetchSuggestion = async (index) => {
+        if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
+            return "";
+        }
+
         let usedBatchIds = new Set(), usedPrompts = {};
         bookmarkedCharts[index].data.forEach((item) => {
             usedBatchIds.add(item.batch);
