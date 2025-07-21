@@ -10,6 +10,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
     const [selectedPrompts, setSelectedPrompts] = useState([]);
     const [expandedGroups, setExpandedGroups] = useState(groups.map(() => true));
     const [selectedImageInfo, setselectedImageInfo] = useState([]);
+    const [scopeType, setScopeType] = useState("auto-extended"); // "fixed" or "auto-extended"
     const contentRefs = useRef([]);
 
     const toggleGroup = (groupIndex) => {
@@ -25,8 +26,15 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
         console.log(contextMenuData);
         if (!useSceneGraph) {
             if (contextMenuData) {
-                setselectedImageInfo(Array.from(new Set(contextMenuData._scope)));
-                setSelectedPrompts(Array.from(new Set(contextMenuData._scope.map(image => image.batch - 1))));
+                // Handle both new scope structure and legacy array format
+                const scopeImages = contextMenuData._scope?.images || 
+                                  (Array.isArray(contextMenuData._scope) ? contextMenuData._scope : []);
+                const scopeType = contextMenuData._scope?.type || 'auto-extended';
+                const scopePromptIndices = contextMenuData._scope?.promptIndices || [];
+                
+                setselectedImageInfo(Array.from(new Set(scopeImages)));
+                setSelectedPrompts(Array.from(new Set(scopeImages.map(image => image.batch - 1))));
+                setScopeType(scopeType);
                 setNodeName(contextMenuData.name);
                 setNodeType(contextMenuData._nodeType);
                 setCandidateValues(contextMenuData._candidateValues);
@@ -41,8 +49,17 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             // let imageInfo = contextMenuData.data.imageInfo;
             let schemaNode = treeUtils.getSchemaNodeFromTreeNode(contextMenuData);
             console.log(schemaNode);
-            setselectedImageInfo(Array.from(new Set(schemaNode._scope)));
-            setSelectedPrompts(Array.from(new Set(schemaNode._scope.map(image => image.batch - 1))));
+            
+            // Handle both new scope structure and legacy array format
+            const scopeImages = schemaNode._scope?.images || 
+                              (Array.isArray(schemaNode._scope) ? schemaNode._scope : []);
+            const scopeType = schemaNode._scope?.type || 'fixed';
+            const scopePromptIndices = schemaNode._scope?.promptIndices || [];
+            
+            setselectedImageInfo(Array.from(new Set(scopeImages)));
+            setSelectedPrompts(Array.from(new Set(scopeImages.map(image => image.batch - 1))));
+            setScopeType(scopeType);
+            
             if (modalType == "edit") {
                 setNodeName(contextMenuData.data.name);
                 setNodeType(contextMenuData.data.type);
@@ -67,12 +84,20 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             return;
         }
 
-        onSave({ nodeName, nodeType, candidateValues, scope: selectedImageInfo });
+        // Create new scope structure
+        const newScope = {
+            type: scopeType,
+            promptIndices: selectedPrompts,
+            images: selectedImageInfo
+        };
+
+        onSave({ nodeName, nodeType, candidateValues, scope: newScope });
         onClose();
         setNodeName('');
         setNodeType("attribute");
         setCandidateValues('');
         setSelectedPrompts([]);
+        setScopeType("fixed");
     };
 
     const promptAllChecked = selectedPrompts.length === prompts.length; // whether all prompts are selected
@@ -123,6 +148,15 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                         placeholder="Enter candidate values (comma separated)"
                         disabled={modalType === "edit"}
                     />
+                    <div><b>Scope Type</b>
+                        <Tooltip title="Fixed: This scope will not change when new prompts are added. Auto-extended: This scope will automatically include new prompts.">
+                            <InfoCircleOutlined style={{ color: 'grey', marginLeft: '5px' }} />
+                        </Tooltip>
+                    </div>
+                    <Radio.Group onChange={(e) => setScopeType(e.target.value)} value={scopeType}>
+                        <Radio value={"fixed"}>Fixed</Radio>
+                        <Radio value={"auto-extended"}>Auto-extended</Radio>
+                    </Radio.Group>
                     <>
                         <div><b>Scope</b><Tooltip title="Select the prompts on which you want to evaluate with the criteria."><InfoCircleOutlined style={{ color: 'grey', marginLeft: '5px' }} /></Tooltip></div>
                         <div style={{ display: 'flex', gap: '8px', flexDirection: 'row' }}>

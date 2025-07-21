@@ -62,13 +62,26 @@ function calculateGraph(metaData, graphSchema, graph) {
 
     const traverseGraph = (curNode, dataItem, itemMetadata, graphSchema) => {
         // check if itemMetadata.imageId is in graphSchema._scope
-        if (graphSchema._scope && graphSchema._scope.length > 0) {
+        if (graphSchema._scope) {
             let ok = false;
-            graphSchema._scope.forEach(image => {
-                if (image.imageId == itemMetadata.imageId && image.batch == itemMetadata.batch) {
-                    ok = true;
-                }
-            });
+            
+            // Handle new scope structure
+            if (graphSchema._scope.images) {
+                graphSchema._scope.images.forEach(image => {
+                    if (image.imageId == itemMetadata.imageId && image.batch == itemMetadata.batch) {
+                        ok = true;
+                    }
+                });
+            } 
+            // Handle legacy scope structure (array)
+            else if (Array.isArray(graphSchema._scope)) {
+                graphSchema._scope.forEach(image => {
+                    if (image.imageId == itemMetadata.imageId && image.batch == itemMetadata.batch) {
+                        ok = true;
+                    }
+                });
+            }
+            
             if (!ok) {
                 return;
             }
@@ -420,10 +433,33 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
     if (typeof(subSchema) !== 'object' || subSchema === null) {
         return;
     }
+    
+    // Handle new scope structure
     if (!graphSchema._scope) {
-        graphSchema._scope = [];
+        graphSchema._scope = {
+            type: "fixed",
+            promptIndices: [],
+            images: []
+        };
     }
-    graphSchema._scope.push(...imageInfo);
+    
+    // If legacy scope (array), convert to new format
+    if (Array.isArray(graphSchema._scope)) {
+        graphSchema._scope = {
+            type: "fixed",
+            promptIndices: [],
+            images: [...graphSchema._scope]
+        };
+    }
+    
+    // Add new images to scope
+    if (imageInfo && Array.isArray(imageInfo)) {
+        const existingImages = graphSchema._scope.images || [];
+        const newImages = imageInfo.filter(info => 
+            !existingImages.some(img => img.imageId === info.imageId && img.batch === info.batch)
+        );
+        graphSchema._scope.images = [...existingImages, ...newImages];
+    }
 
     // Recursively update children that exist in subSchema
     Object.keys(graphSchema).forEach((key) => {
@@ -436,6 +472,32 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
             updateGraphSchemaWithScope(graphSchema[key], subSchema[key], imageInfo);
         }
     });
+}
+
+// Simple utility to handle auto-extended scopes when new prompts are added
+function updateAutoExtendedScopes(graphSchema, newPromptIndex) {
+    /**
+     * Update all auto-extended scopes when a new prompt is added
+     */
+    function traverse(node) {
+        if (node && typeof node === 'object') {
+            // Check if this node has an auto-extended scope
+            if (node._scope && node._scope.type === 'auto-extended') {
+                if (!node._scope.promptIndices.includes(newPromptIndex)) {
+                    node._scope.promptIndices.push(newPromptIndex);
+                }
+            }
+            
+            // Recursively traverse children
+            Object.keys(node).forEach(key => {
+                if (!key.startsWith('_')) {
+                    traverse(node[key]);
+                }
+            });
+        }
+    }
+    
+    traverse(graphSchema);
 }
 
 function wrapSchemaForLabeling(graphSchema) {
@@ -486,4 +548,4 @@ function getLeafNodes(graph) {
     return leafNodes;
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, wrapSchemaForLabeling, getLeafNodes };
+export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, updateAutoExtendedScopes, wrapSchemaForLabeling, getLeafNodes };

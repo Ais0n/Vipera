@@ -188,17 +188,28 @@ const Generate = () => {
           } 
 
           // Update the graph schema by adding the scope of the new prompt to each node
-          let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"imageId": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+          let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(retriedImages, updatedGraphSchema);
 
           console.log("partial schema:", schemaScope);
 
-          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
-          console.log("after updating graph schema with scope", updatedGraphSchema);
-        
-          // Step 4: Try generating metadata
-          await tryMetadataGeneration(newImages, schemaScope);
+          if (schemaScope) {
+            Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
+            console.log("after updating graph schema with scope", updatedGraphSchema);
+          
+            // Step 4: Try generating metadata
+            await tryMetadataGeneration(newImages, schemaScope);
+          } else {
+            console.log("No auto-extended nodes found, skipping metadata generation for retried images");
+          }
         }
 
+        // Update auto-extended scopes before adding the new prompt
+        if (Object.keys(graphSchema).length > 0) {
+          const newPromptIndex = prompts.length;
+          Utils.updateAutoExtendedScopes(graphSchema, newPromptIndex);
+          setGraphSchema({...graphSchema}); // Trigger re-render
+        }
+        
         setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
       }
     } catch (error) {
@@ -479,17 +490,28 @@ const Generate = () => {
         } 
 
         // Update the graph schema by adding the scope of the new prompt to each node
-        let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"imageId": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+        let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
 
         console.log("partial schema:", schemaScope);
 
-        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
-        console.log("after updating graph schema with scope", updatedGraphSchema);
-        
-        // Step 4: Try generating metadata
-        await tryMetadataGeneration(newImages, schemaScope);
+        if (schemaScope) {
+          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
+          console.log("after updating graph schema with scope", updatedGraphSchema);
+          
+          // Step 4: Try generating metadata
+          await tryMetadataGeneration(newImages, schemaScope);
+        } else {
+          console.log("No auto-extended nodes found, skipping metadata generation for new prompt");
+        }
       }
 
+      // Update auto-extended scopes before adding the new prompt
+      if (Object.keys(graphSchema).length > 0) {
+        const newPromptIndex = prompts.length;
+        Utils.updateAutoExtendedScopes(graphSchema, newPromptIndex);
+        setGraphSchema({...graphSchema}); // Trigger re-render
+      }
+      
       setPrompts((prevPrompts) => [...prevPrompts, userInput]);
     } catch (error) {
       console.error("Error during generation process:", error);
@@ -613,16 +635,27 @@ const Generate = () => {
       setRetrySceneGraphContext(undefined);
 
       // Update the graph schema by adding the scope of the new prompt to each node
-      let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"imageId": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+      let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
 
       console.log("partial schema:", schemaScope);
 
-      Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch})));
-      console.log("after updating graph schema with scope", updatedGraphSchema);
-        
-      // Step 4: Try generating metadata
-      await tryMetadataGeneration(newImages, schemaScope);
+      if (schemaScope) {
+        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch})));
+        console.log("after updating graph schema with scope", updatedGraphSchema);
+          
+        // Step 4: Try generating metadata
+        await tryMetadataGeneration(newImages, schemaScope);
+      } else {
+        console.log("No auto-extended nodes found, skipping metadata generation for scene graph retry");
+      }
 
+      // Update auto-extended scopes before adding the new prompt
+      if (Object.keys(graphSchema).length > 0) {
+        const newPromptIndex = prompts.length;
+        Utils.updateAutoExtendedScopes(graphSchema, newPromptIndex);
+        setGraphSchema({...graphSchema}); // Trigger re-render
+      }
+      
       setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
     } catch (error) {
       console.error("Retry failed for scene graph generation:", error);
@@ -669,10 +702,9 @@ const Generate = () => {
           }
         })
 
-        // allMetaData = [...Utils.deepClone(metaData), ...newMetaData];
         allMetaData = oldMetaData;
-        setMetaData(oldMetaData);
-        console.log("New Metadata:", oldMetaData);
+        setMetaData(allMetaData);
+        console.log("New Metadata:", allMetaData);
 
         if(res.status == 'failed') {
           setIsGenerating(false);
@@ -877,6 +909,7 @@ const Generate = () => {
 
   const handleNodeEdit = (contextMenuData, newNode, useSceneGraph=true) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
+    candidateValues = candidateValues == '' ? [] : candidateValues.split(',').map(v => v.trim());
     // calculate the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
     let oldNodeName = pathToRoot[pathToRoot.length - 1];
@@ -915,10 +948,14 @@ const Generate = () => {
     console.log("newScope", newScope);
     console.log("partialSchema", partialSchema);
     let newMetaData = Utils.deepClone(metaData);
+    // Extract scope images for both old and new scopes
+    const oldScopeImages = oldScope.images || (Array.isArray(oldScope) ? oldScope : []);
+    const newScopeImages = newScope.images || (Array.isArray(newScope) ? newScope : []);
+    
     // For images in the old scope, update the metadata
     for(let i = 0; i < newMetaData.length; i++) {
       let item = newMetaData[i];
-      if (oldScope.some(i => i.imageId == item.metaData.imageId && i.batch == item.metaData.batch)) {
+      if (oldScopeImages.some(scopeImg => scopeImg.imageId == item.metaData.imageId && scopeImg.batch == item.metaData.batch)) {
         let newItem = Utils.deepClone(item);
         let curNode = getSchemaNodeFromPath(pathToRoot.slice(0, -1), newItem);
         console.log("curNode", curNode);
@@ -935,7 +972,10 @@ const Generate = () => {
     _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
     console.log("updatedGraph", _graph);
     // For images in the new scope but not in the old scope, generate new metadata
-    let newImages = images.filter(image => newScope.some(i => i.imageId == image.imageId && i.batch == image.batch) && oldScope.every(i => i.imageId != image.imageId || i.batch != image.batch));
+    let newImages = images.filter(image => 
+      newScopeImages.some(scopeImg => scopeImg.imageId == image.imageId && scopeImg.batch == image.batch) && 
+      oldScopeImages.every(scopeImg => scopeImg.imageId != image.imageId || scopeImg.batch != image.batch)
+    );
     console.log("newImages", newImages);
     if (newImages.length > 0) {
       tryMetadataGeneration(newImages, partialSchema, _graph);
@@ -947,7 +987,7 @@ const Generate = () => {
 
   const handleNodeAdd = (contextMenuData, newNode, useSceneGraph=true) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
-    candidateValues = candidateValues == '' ? [] : candidateValues.split(',');
+    candidateValues = candidateValues == '' ? [] : candidateValues.split(',').map(v => v.trim());
     // calculate the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [];
     // update the schema
@@ -971,7 +1011,8 @@ const Generate = () => {
     if (newNodeType == 'attribute') {
       let partialSchema = getPartialSchema([...pathToRoot, newNodeName], _graphSchema);
       console.log("partialSchema", partialSchema);
-      tryMetadataGeneration(images.filter(image => scope.some(i => i.imageId == image.imageId && i.batch == image.batch)), partialSchema, _graph);
+      const scopeImages = scope.images || (Array.isArray(scope) ? scope : []);
+      tryMetadataGeneration(images.filter(image => scopeImages.some(scopeImg => scopeImg.imageId == image.imageId && scopeImg.batch == image.batch)), partialSchema, _graph);
     }
     
   }
@@ -979,6 +1020,7 @@ const Generate = () => {
   const handleNodeRelabel = (contextMenuData, config, useSceneGraph=true) => {
     console.log("relabel: ", contextMenuData, config, useSceneGraph);
     let { newCandidateValues, relabelMode } = Utils.deepClone(config);
+    newCandidateValues = newCandidateValues == '' ? [] : newCandidateValues.split(',').map(v => v.trim());
     // get the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
     let partialSchema = Utils.deepClone(graphSchema);
@@ -1078,23 +1120,57 @@ const Generate = () => {
     /**
      * For all nodes on the path within graphSchema, add the scope to the "_scope" field.
      * This is used to update all ancestor nodes when a schema node is modified.
-     * Note that only image IDs that are in "scope" but not in "node._scope" will be added to "node._scope".
+     * Enhanced to handle new scope structure.
      */
     let curNode = schema;
+    
+    // Helper function to merge scopes
+    const mergeScopes = (existingScope, newScope) => {
+      // Handle new scope structure
+      if (newScope && typeof newScope === 'object' && newScope.type) {
+        return newScope; // Replace with new scope structure
+      }
+      
+      // Handle legacy scope (array) being merged with new scope
+      if (Array.isArray(existingScope) && newScope && typeof newScope === 'object' && newScope.images) {
+        return {
+          type: newScope.type || 'fixed',
+          promptIndices: newScope.promptIndices || [],
+          images: [...new Set([...existingScope, ...(newScope.images || [])])]
+        };
+      }
+      
+      // Handle both being new scope structure
+      if (existingScope && existingScope.type && newScope && newScope.type) {
+        const existingImages = existingScope.images || [];
+        const newImages = newScope.images || [];
+        const existingIndices = existingScope.promptIndices || [];
+        const newIndices = newScope.promptIndices || [];
+        
+        return {
+          type: newScope.type, // Use the new scope's type
+          promptIndices: [...new Set([...existingIndices, ...newIndices])],
+          images: [...new Set([...existingImages, ...newImages])]
+        };
+      }
+      
+      // Handle legacy array scope
+      if (Array.isArray(existingScope) && Array.isArray(newScope)) {
+        return [...new Set([...existingScope, ...newScope])];
+      }
+      
+      // Default case
+      return newScope || existingScope;
+    };
+    
     // Update the root node's _scope first
-    if (schema._scope) {
-        schema._scope = [...new Set([...schema._scope, ...scope])];
-    } else {
-        schema._scope = scope;
-    }
+    schema._scope = mergeScopes(schema._scope, scope);
     
     for (let i = 0; i < path.length; i++) {
       if (typeof (curNode) == 'object') {
         curNode = curNode[path[i]];
-        if (curNode._scope) {
-          curNode._scope = [...new Set([...curNode._scope, ...scope])];
-        } else {
-          curNode._scope = scope;
+        if (curNode) {
+          curNode._scope = mergeScopes(curNode._scope, scope);
         }
       } else {
         return null;
@@ -1132,6 +1208,88 @@ const Generate = () => {
     return partialSchema;
 
   }
+
+  // Helper function to generate schema scope based on auto-extended criteria
+  const generateSchemaScope = (newImages, currentGraphSchema) => {
+    if (prompts.length === 0) {
+      // For the first prompt, use the entire schema
+      return currentGraphSchema;
+    }
+
+    // Convert new images to scope format
+    const newImageScope = newImages.map(image => ({
+      imageId: image.imageId,
+      batch: image.batch
+    }));
+
+    // Create a partial schema containing only auto-extended nodes
+    const createAutoExtendedSchema = (schema) => {
+      const result = {};
+      
+      Object.keys(schema).forEach(key => {
+        if (key.startsWith('_')) {
+          // Copy metadata fields
+          result[key] = schema[key];
+          return;
+        }
+        
+        const node = schema[key];
+        if (node && typeof node === 'object') {
+          // Check if this node has auto-extended scope
+          if (node._scope && node._scope.type === 'auto-extended') {
+            // Include this node and its children, and add new images to scope
+            const clonedNode = Utils.deepClone(node);
+            
+            // Add new images to the scope
+            if (clonedNode._scope.images) {
+              // Merge existing images with new images, avoiding duplicates
+              const existingImages = clonedNode._scope.images;
+              const mergedImages = [...existingImages];
+              
+              newImageScope.forEach(newImg => {
+                if (!existingImages.some(existing => 
+                  existing.imageId === newImg.imageId && existing.batch === newImg.batch
+                )) {
+                  mergedImages.push(newImg);
+                }
+              });
+              
+              clonedNode._scope.images = mergedImages;
+            } else {
+              // If no images array exists, create one with new images
+              clonedNode._scope.images = [...newImageScope];
+            }
+            
+            result[key] = clonedNode;
+          } else if (node._scope && node._scope.type !== 'auto-extended') {
+            // Skip fixed nodes
+            return;
+          } else {
+            // For nodes without scope, recursively check children
+            const childSchema = createAutoExtendedSchema(node);
+            if (Object.keys(childSchema).some(k => !k.startsWith('_'))) {
+              // Only include if there are non-metadata children
+              result[key] = {
+                ...node,
+                ...childSchema
+              };
+            }
+          }
+        }
+      });
+      
+      return result;
+    };
+
+    const autoExtendedSchema = createAutoExtendedSchema(currentGraphSchema);
+    
+    // If no auto-extended nodes found, return null to skip labeling
+    if (Object.keys(autoExtendedSchema).every(k => k.startsWith('_'))) {
+      return null;
+    }
+    
+    return autoExtendedSchema;
+  };
 
   const treeUtils = {getTreeNodePath, getSchemaNodeFromPath, getSchemaNodeFromTreeNode};
 
