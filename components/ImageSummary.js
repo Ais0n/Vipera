@@ -16,7 +16,7 @@ import ModalLabelEdit from './ModalLabelEdit';
 import PromptManager from './PromptManager';
 import CriteriaView from './CriteriaView';
 
-const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils, handleNodeAdd_NoSceneGraph }) => {
+const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils }) => {
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
@@ -248,7 +248,7 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
             </div>
 
             <div className="notebook">
-                <CriteriaView data={graph} prompts={prompts} colorScale={colorScale} groups={groups} images={images} handleBarHover={handleBarHover} addBookmarkedChart={addBookmarkedChart} handleNodeAdd_NoSceneGraph={handleNodeAdd_NoSceneGraph}></CriteriaView>
+                <CriteriaView graph={graph} graphSchema={graphSchema} prompts={prompts} colorScale={colorScale} groups={groups} images={images} handleBarHover={handleBarHover} addBookmarkedChart={addBookmarkedChart} treeUtils={treeUtils} handleNodeAdd={handleNodeAdd} handleNodeEdit={handleNodeEdit} handleNodeRelabel={handleNodeRelabel}></CriteriaView>
             </div>
 
             <div className="notebook">

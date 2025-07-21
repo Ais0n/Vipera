@@ -188,11 +188,11 @@ const Generate = () => {
           } 
 
           // Update the graph schema by adding the scope of the new prompt to each node
-          let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"id": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+          let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"imageId": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
           console.log("partial schema:", schemaScope);
 
-          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"id": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
+          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
           console.log("after updating graph schema with scope", updatedGraphSchema);
         
           // Step 4: Try generating metadata
@@ -355,7 +355,7 @@ const Generate = () => {
           imageId: images[i].imageId,
           batch: prompts.length + 1,
         }
-        // currentDataItem.id = i;
+        // currentDataItem.imageId = i;
         _metaData.push(currentDataItem);
       }
     } else {
@@ -479,11 +479,11 @@ const Generate = () => {
         } 
 
         // Update the graph schema by adding the scope of the new prompt to each node
-        let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"id": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+        let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"imageId": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
         console.log("partial schema:", schemaScope);
 
-        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"id": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
+        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
         console.log("after updating graph schema with scope", updatedGraphSchema);
         
         // Step 4: Try generating metadata
@@ -613,11 +613,11 @@ const Generate = () => {
       setRetrySceneGraphContext(undefined);
 
       // Update the graph schema by adding the scope of the new prompt to each node
-      let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"id": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
+      let schemaScope = tmpSchemaScope ? tmpSchemaScope : prompts.length == 0 ? updatedGraphSchema : Utils.getScope(images.filter(image => image.batch == prompts.length - 1).map(image => ({"imageId": image.imageId, "batch": image.batch})), updatedGraphSchema); // use the scope of the last prompt by default; use tmpScope if it has been set (in external prompt suggestion)
 
       console.log("partial schema:", schemaScope);
 
-      Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"id": image.imageId, "batch": image.batch})));
+      Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch})));
       console.log("after updating graph schema with scope", updatedGraphSchema);
         
       // Step 4: Try generating metadata
@@ -875,10 +875,10 @@ const Generate = () => {
     }
   }
 
-  const handleNodeEdit = (dataObj, newNode) => {
+  const handleNodeEdit = (contextMenuData, newNode, useSceneGraph=true) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
     // calculate the path to the root
-    let pathToRoot = getTreeNodePath(dataObj);
+    let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
     let oldNodeName = pathToRoot[pathToRoot.length - 1];
     // 1. update the schema
     let _graphSchema = Utils.deepClone(graphSchema);
@@ -918,7 +918,7 @@ const Generate = () => {
     // For images in the old scope, update the metadata
     for(let i = 0; i < newMetaData.length; i++) {
       let item = newMetaData[i];
-      if (oldScope.some(i => i.id == item.metaData.imageId && i.batch == item.metaData.batch)) {
+      if (oldScope.some(i => i.imageId == item.metaData.imageId && i.batch == item.metaData.batch)) {
         let newItem = Utils.deepClone(item);
         let curNode = getSchemaNodeFromPath(pathToRoot.slice(0, -1), newItem);
         console.log("curNode", curNode);
@@ -935,7 +935,7 @@ const Generate = () => {
     _graph = Utils.calculateGraph(newMetaData, _graphSchema, Utils.deepClone(_graph));
     console.log("updatedGraph", _graph);
     // For images in the new scope but not in the old scope, generate new metadata
-    let newImages = images.filter(image => newScope.some(i => i.id == image.imageId && i.batch == image.batch) && oldScope.every(i => i.id != image.imageId || i.batch != image.batch));
+    let newImages = images.filter(image => newScope.some(i => i.imageId == image.imageId && i.batch == image.batch) && oldScope.every(i => i.imageId != image.imageId || i.batch != image.batch));
     console.log("newImages", newImages);
     if (newImages.length > 0) {
       tryMetadataGeneration(newImages, partialSchema, _graph);
@@ -945,11 +945,11 @@ const Generate = () => {
 
   }
 
-  const handleNodeAdd = (dataObj, newNode) => {
+  const handleNodeAdd = (contextMenuData, newNode, useSceneGraph=true) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
     candidateValues = candidateValues == '' ? [] : candidateValues.split(',');
     // calculate the path to the root
-    let pathToRoot = getTreeNodePath(dataObj);
+    let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [];
     // update the schema
     let _graphSchema = Utils.deepClone(graphSchema);
     let curNode = getSchemaNodeFromPath(pathToRoot, _graphSchema);
@@ -969,83 +969,26 @@ const Generate = () => {
     console.log("updatedGraph", _graph);
 
     if (newNodeType == 'attribute') {
-      // update labels if the new node is an attribute
-      // let partialSchema = {}; // The schema for the new node
-      // let curParSchemaNode = partialSchema;
-      // curNode = _graphSchema;
-      // for (let i = 0; i < pathToRoot.length; i++) {
-      //   curParSchemaNode[pathToRoot[i]] = {
-      //     _nodeType: curNode[pathToRoot[i]]._nodeType, 
-      //     ...(curNode[pathToRoot[i]]._nodeType == "attribute" && { _candidateValues: curNode[pathToRoot[i]]._candidateValues }),
-      //     _scope: curNode[pathToRoot[i]]._scope
-      //   };
-      //   curParSchemaNode = curParSchemaNode[pathToRoot[i]];
-      //   curNode = curNode[pathToRoot[i]];
-      // }
-      // curParSchemaNode[newNodeName] = {
-      //   _nodeType: newNodeType, 
-      //   ...(newNodeType == "attribute" && { _candidateValues: candidateValues }),
-      //   _scope: scope
-      // };
       let partialSchema = getPartialSchema([...pathToRoot, newNodeName], _graphSchema);
       console.log("partialSchema", partialSchema);
-      tryMetadataGeneration(images.filter(image => scope.some(i => i.id == image.imageId && i.batch == image.batch)), partialSchema, _graph);
+      tryMetadataGeneration(images.filter(image => scope.some(i => i.imageId == image.imageId && i.batch == image.batch)), partialSchema, _graph);
     }
     
   }
 
-  const handleNodeAdd_NoSceneGraph = (newNode) => {
-    let { nodeName, nodeType, candidateValues, scope } = Utils.deepClone(newNode);
-    candidateValues = candidateValues === '' ? [] : candidateValues.split(',');
-    console.log("Add node: ", nodeName, nodeType, candidateValues, scope);
-    // update the schema
-    let _graphSchema = Utils.deepClone(graphSchema);
-    // in criteria mode, the graphSchema tree has only one level, so _graphSchema is the current node
-    let curNode = _graphSchema;
-    curNode[nodeName] = {
-        "_nodeType": nodeType,
-        ...(nodeType == "attribute" && { "_candidateValues": candidateValues }),
-        "_scope": scope,
-    }
-    setGraphSchema(_graphSchema);
-    // update the graph
-    let _graph = Utils.deepClone(graph);
-    curNode = _graph;
-    curNode.children.push({ name: nodeName, children: [], count: 0, type: nodeType });
-    setGraph(_graph);
-    // update partial schema
-    let partialSchema = {};
-    partialSchema[nodeName] = {
-        "_nodeType": nodeType,
-        ...(nodeType == "attribute" && { "_candidateValues": candidateValues }),
-        "_scope": scope,
-    };
-    console.log("partialSchema", partialSchema);
-    tryMetadataGeneration(images.filter(image => scope.some(i => i.id == image.imageId && i.batch == image.batch)), partialSchema, _graph);
-  }
-
-  const handleNodeRelabel = (contextData) => {
-    console.log("relabel: ", contextData);
-    let pathToRoot = [];
-    let curNode = contextData;
-    while (curNode.data.name != 'root') {
-      pathToRoot.push(curNode.data.name);
-      curNode = curNode.parent;
-    }
-    pathToRoot = pathToRoot.reverse();
-    console.log(pathToRoot);
+  const handleNodeRelabel = (contextMenuData, config, useSceneGraph=true) => {
+    console.log("relabel: ", contextMenuData, config, useSceneGraph);
+    let { newCandidateValues, relabelMode } = Utils.deepClone(config);
+    // get the path to the root
+    let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
     let partialSchema = Utils.deepClone(graphSchema);
     curNode = partialSchema;
     for (let i = 0; i < pathToRoot.length - 1; i++) {
       curNode = curNode[pathToRoot[i]];
     }
     console.log(curNode);
-    curNode[pathToRoot[pathToRoot.length - 1]] = "...";
-    console.log(partialSchema);
-    tryMetadataGeneration(images, partialSchema);
+    // placeholder. todo.
   }
-
-  // const retryNodeAdd
 
   const handleLabelEditSave = (newData) => {
     console.log(newData);
@@ -1135,7 +1078,7 @@ const Generate = () => {
     /**
      * For all nodes on the path within graphSchema, add the scope to the "_scope" field.
      * This is used to update all ancestor nodes when a schema node is modified.
-     * Note that only image IDs that are in "scope" but not in "_scope" will be added to "_scope".
+     * Note that only image IDs that are in "scope" but not in "node._scope" will be added to "node._scope".
      */
     let curNode = schema;
     // Update the root node's _scope first
@@ -1202,7 +1145,7 @@ const Generate = () => {
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} handleNodeAdd_NoSceneGraph={handleNodeAdd_NoSceneGraph}/>
+        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils}/>
       </div>}
 
 

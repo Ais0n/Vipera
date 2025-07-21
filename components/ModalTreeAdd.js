@@ -23,7 +23,21 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
         //     setSelectedPrompts(prompts.map((_, index) => index));
         // }
         console.log(contextMenuData);
-        if (contextMenuData) {
+        if (!useSceneGraph) {
+            if (contextMenuData) {
+                setselectedImageInfo(Array.from(new Set(contextMenuData._scope)));
+                setSelectedPrompts(Array.from(new Set(contextMenuData._scope.map(image => image.batch - 1))));
+                setNodeName(contextMenuData.name);
+                setNodeType(contextMenuData._nodeType);
+                setCandidateValues(contextMenuData._candidateValues);
+            } else {
+                setselectedImageInfo(Utils.deepClone(images.map(image => ({ "imageId": image.imageId, "batch": image.batch }))));
+                setSelectedPrompts(prompts.map((_, index) => index));
+                setNodeName('');
+                setNodeType('attribute');
+                setCandidateValues('');
+            }            
+        } else if (contextMenuData) {
             // let imageInfo = contextMenuData.data.imageInfo;
             let schemaNode = treeUtils.getSchemaNodeFromTreeNode(contextMenuData);
             console.log(schemaNode);
@@ -38,12 +52,6 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                 setNodeType('attribute');
                 setCandidateValues('');
             }
-        } else if (!useSceneGraph) {
-            setselectedImageInfo(Utils.deepClone(images.map(image => ({ "id": image.imageId, "batch": image.batch }))));
-            setSelectedPrompts(prompts.map((_, index) => index));
-            setNodeName('');
-            setNodeType('attribute');
-            setCandidateValues('');
         }
     }, [contextMenuData, modalType]);
 
@@ -173,8 +181,8 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                                                                 checked ? [...prev, promptIndex] : prev.filter(i => i !== promptIndex)
                                                             );
                                                             setselectedImageInfo(prev =>
-                                                                checked ? [...prev, ...images.filter(image => image.batch === promptIndex + 1).map(image => ({"id": image.imageId, "batch": image.batch}))] :
-                                                                    prev.filter(i => !images.some(image => image.imageId === i.id && image.batch === promptIndex + 1))
+                                                                checked ? [...prev, ...images.filter(image => image.batch === promptIndex + 1).map(image => ({"imageId": image.imageId, "batch": image.batch}))] :
+                                                                    prev.filter(i => !images.some(image => image.imageId === i.imageId && image.batch === promptIndex + 1))
                                                             );
                                                         }}
                                                     >
@@ -204,8 +212,8 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                                                         checked ? [...prev, index] : prev.filter(i => i !== index)
                                                     );
                                                     setselectedImageInfo(prev =>
-                                                        checked ? [...prev, ...images.filter(image => image.batch === index + 1).map(image => ({"id": image.imageId, "batch": image.batch}))] :
-                                                            prev.filter(i => !images.some(image => image.imageId === i.id && image.batch === index + 1))
+                                                        checked ? [...prev, ...images.filter(image => image.batch === index + 1).map(image => ({"imageId": image.imageId, "batch": image.batch}))] :
+                                                            prev.filter(i => !images.some(image => image.imageId === i.imageId && image.batch === index + 1))
                                                     );
                                                 }}
                                             >
@@ -222,10 +230,10 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                                         <div className="image-checkbox-wrapper">
                                             <Checkbox
                                                 className="image-checkbox"
-                                                checked={selectedImageInfo.some(i => i.id == image.imageId)}
+                                                checked={selectedImageInfo.some(i => i.imageId == image.imageId)}
                                                 onChange={(e) => {
                                                     if (e.target.checked) {
-                                                        setselectedImageInfo([...selectedImageInfo, {"id": image.imageId, "batch": image.batch}]);
+                                                        setselectedImageInfo([...selectedImageInfo, {"imageId": image.imageId, "batch": image.batch}]);
                                                     } else {
                                                         setselectedImageInfo(selectedImageInfo.filter(id => id !== image.imageId || id.batch !== image.batch));
                                                     }

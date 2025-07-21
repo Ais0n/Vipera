@@ -65,7 +65,7 @@ function calculateGraph(metaData, graphSchema, graph) {
         if (graphSchema._scope && graphSchema._scope.length > 0) {
             let ok = false;
             graphSchema._scope.forEach(image => {
-                if (image.id == itemMetadata.imageId && image.batch == itemMetadata.batch) {
+                if (image.imageId == itemMetadata.imageId && image.batch == itemMetadata.batch) {
                     ok = true;
                 }
             });
@@ -401,7 +401,7 @@ function getScope(imageInfo, graphSchema) {
             // check if all imageInfo are in the graphSchema.scope
             let ok = true;
             imageInfo.forEach(i => {
-                if (!graphSchema.scope.some(image => image.imageId == i.id && image.batch == i.batch)) {
+                if (!graphSchema.scope.some(image => image.imageId == i.imageId && image.batch == i.batch)) {
                     ok = false;
                 }
             });

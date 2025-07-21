@@ -3,9 +3,10 @@ import HighlightedText from './HighlightedText';
 import { Image, Switch, Popover, Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import * as d3 from 'd3'; // Import d3
+import * as d3 from 'd3';
 import * as Utils from '../utils.js';
 import ModalTreeAdd from './ModalTreeAdd';
+import ModalTreeRelabel from './ModalTreeRelabel.js';
 
 /**
  * A reusable React component to render a stacked bar chart using D3.
@@ -169,25 +170,37 @@ const StackedBarChart = ({ node, colorScale, groups, handleBarHover, tooltipRef 
 
 // Main CriteriaView Component
 const CriteriaView = ({ 
-    data, 
+    graph, 
+    graphSchema,
     prompts = [], 
     colorScale, 
     groups, 
     images, 
-    handleBarHover, // New prop
-    addBookmarkedChart, // New prop
-    handleNodeAdd_NoSceneGraph
+    handleBarHover,
+    addBookmarkedChart,
+    handleNodeAdd,
+    handleNodeEdit,
+    handleNodeRelabel,
+    treeUtils
 }) => {
-    const attributeNodes = Utils.getLeafNodes(data).filter(node => node.type === 'attribute');
+    const attributeNodes = Utils.getLeafNodes(graph).filter(node => node.type === 'attribute');
     
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isRelabelModalOpen, setIsRelabelModalOpen] = useState(false);
     const tooltipRef2 = useRef(null);
-    const handleAdd = (newNode) => { 
-        handleNodeAdd_NoSceneGraph(newNode);
-    };
+    const [contextMenuData, setContextMenuData] = useState(null);
+    const handleAdd = (newNode) => {
+        handleNodeAdd(null, newNode, false);
+    }
+    const handleEdit = (newNode) => {
+        handleNodeEdit(contextMenuData, newNode, false);
+    }
 
-    const handleEdit = () => { };
+    const handleRelabel = (candidateValues) => {
+        console.log('Relabel node', candidateValues);
+        handleNodeRelabel(contextMenuData, candidateValues, false);
+    }
 
     // Handler for the bookmark click
     const handleBookmarkClick = (node) => {
@@ -210,6 +223,15 @@ const CriteriaView = ({
         });
     };
 
+    const handleEditClick = (node) => {
+        setContextMenuData({...graphSchema[node.name], name: node.name});
+        setIsEditModalOpen(true);
+    };
+
+    const handleRelabelClick = () => {
+        setIsRelabelModalOpen(true);
+    }
+
     return (
         <>
             <div
@@ -227,8 +249,16 @@ const CriteriaView = ({
                         <div className="criteria-view-item" key={node.id || index}>
                             <div className="criteria-item-header">
                                 <h4 className="criteria-item-title">{node.name}</h4>
-                                <div className="bookmark-icon" onClick={() => handleBookmarkClick(node)} title="Bookmark this chart">
-                                    <img src="/bookmark.svg" alt="Bookmark Icon" width="20" height="20" />
+                                <div className="card-actions">
+                                    <div className="action-icon" onClick={() => handleEditClick(node)} title="Edit this criterion">
+                                        <img src="/edit.svg" alt="Edit Icon" width="18" height="18" />
+                                    </div>
+                                    <div className="action-icon" onClick={() => handleRelabelClick(node)} title="Relabel images on this criterion">
+                                        <img src="/refresh-cw.svg" alt="Relabel Icon" width="18" height="18" />
+                                    </div>
+                                    <div className="action-icon" onClick={() => handleBookmarkClick(node)} title="Bookmark this chart">
+                                        <img src="/bookmark.svg" alt="Bookmark Icon" width="18" height="18" />
+                                    </div>
                                 </div>
                             </div>
                             <div className="chart-container">
@@ -253,13 +283,28 @@ const CriteriaView = ({
                 colorScale={colorScale}
                 groups={groups}
                 images={images}
-                contextMenuData={null}
-                treeUtils={() => {}}
+                contextMenuData={contextMenuData}
+                treeUtils={treeUtils}
                 useSceneGraph={false}
             />
-
+            <ModalTreeRelabel
+                isOpen={isRelabelModalOpen}
+                onClose={() => setIsRelabelModalOpen(false)}
+                onSave={handleRelabel}
+            />
             <style jsx>{`
                 h2 { color: #333; }
+                .bookmark-icon {
+                    cursor: pointer;
+                    color: #888;
+                    padding: 5px;
+                    border-radius: 50%;
+                    transition: background-color 0.2s, color 0.2s;
+                }
+                .bookmark-icon:hover {
+                    background-color: #f0f0f0;
+                    color: #1a1a1a;
+                }
                 .criteria-view-content {
                     display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; padding: 10px 0;
                 }
@@ -273,25 +318,44 @@ const CriteriaView = ({
                 .criteria-view-item:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
                 .criteria-item-header {
                     display: flex;
-                    justify-content: space-between;
+                    justify-content: center; /* This will center the title */
                     align-items: center;
+                    position: relative; /* Essential for positioning the action icons */
                     border-bottom: 1px solid #f0f0f0;
-                    padding: 0 10px 0 15px; /* Adjust padding */
                 }
                 .criteria-item-title {
-                    margin: 0; padding: 12px 0;
-                    font-size: 16px; font-weight: 600; color: #333;
-                    flex-grow: 1; /* Allow title to take available space */
+                    margin: 0;
+                    padding: 12px 15px; /* Give the title some padding */
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #333;
                     text-align: center;
                 }
-                .bookmark-icon {
+                .card-actions {
+                    position: absolute; /* Take icons out of the layout flow */
+                    right: 10px;        /* Pin them to the right */
+                    top: 50%;           /* Center them vertically */
+                    transform: translateY(-50%);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .card-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px; /* Space between icons */
+                }
+                .action-icon {
                     cursor: pointer;
                     color: #888;
                     padding: 5px;
                     border-radius: 50%;
                     transition: background-color 0.2s, color 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
-                .bookmark-icon:hover {
+                .action-icon:hover {
                     background-color: #f0f0f0;
                     color: #1a1a1a;
                 }
