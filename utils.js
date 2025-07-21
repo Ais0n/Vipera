@@ -471,20 +471,17 @@ function getLeafNodes(graph) {
      */
     const leafNodes = [];
 
-    function traverse(nodeId) {
-        const node = graph[nodeId];
+    function traverse(node) {
         if (!node.children || node.children.length === 0) {
-            leafNodes.push(nodeId);
+            leafNodes.push(node);
         } else {
-            for (const childId of node.children) {
-                traverse(childId);
+            for (const child of node.children) {
+                traverse(child);
             }
         }
     }
 
-    for (const nodeId in graph) {
-        traverse(nodeId);
-    }
+    traverse(graph);
 
     return leafNodes;
 }

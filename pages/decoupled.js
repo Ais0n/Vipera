@@ -994,6 +994,36 @@ const Generate = () => {
     
   }
 
+  const handleNodeAdd_NoSceneGraph = (newNode) => {
+    let { nodeName, nodeType, candidateValues, scope } = Utils.deepClone(newNode);
+    candidateValues = candidateValues === '' ? [] : candidateValues.split(',');
+    console.log("Add node: ", nodeName, nodeType, candidateValues, scope);
+    // update the schema
+    let _graphSchema = Utils.deepClone(graphSchema);
+    // in criteria mode, the graphSchema tree has only one level, so _graphSchema is the current node
+    let curNode = _graphSchema;
+    curNode[nodeName] = {
+        "_nodeType": nodeType,
+        ...(nodeType == "attribute" && { "_candidateValues": candidateValues }),
+        "_scope": scope,
+    }
+    setGraphSchema(_graphSchema);
+    // update the graph
+    let _graph = Utils.deepClone(graph);
+    curNode = _graph;
+    curNode.children.push({ name: nodeName, children: [], count: 0, type: nodeType });
+    setGraph(_graph);
+    // update partial schema
+    let partialSchema = {};
+    partialSchema[nodeName] = {
+        "_nodeType": nodeType,
+        ...(nodeType == "attribute" && { "_candidateValues": candidateValues }),
+        "_scope": scope,
+    };
+    console.log("partialSchema", partialSchema);
+    tryMetadataGeneration(images.filter(image => scope.some(i => i.id == image.imageId && i.batch == image.batch)), partialSchema, _graph);
+  }
+
   const handleNodeRelabel = (contextData) => {
     console.log("relabel: ", contextData);
     let pathToRoot = [];
@@ -1172,7 +1202,7 @@ const Generate = () => {
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils}/>
+        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} handleNodeAdd_NoSceneGraph={handleNodeAdd_NoSceneGraph}/>
       </div>}
 
 
