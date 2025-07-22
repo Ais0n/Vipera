@@ -202,12 +202,14 @@ const Generate = () => {
             console.log("No auto-extended nodes found, skipping metadata generation for retried images");
           }
         }
-
-        // Update auto-extended scopes before adding the new prompt
+        
+        // Step 5: Update auto-extended scopes before adding the new prompt
         if (Object.keys(graphSchema).length > 0) {
           const newPromptIndex = prompts.length;
-          Utils.updateAutoExtendedScopes(graphSchema, newPromptIndex);
-          setGraphSchema({...graphSchema}); // Trigger re-render
+          let newGraphSchema = Utils.deepClone(graphSchema)
+          Utils.updateAutoExtendedScopes(newGraphSchema, newPromptIndex, newImages);
+          console.log("new graph schema:", newGraphSchema);
+          setGraphSchema(newGraphSchema); // Trigger re-render
         }
         
         setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
@@ -503,13 +505,15 @@ const Generate = () => {
         } else {
           console.log("No auto-extended nodes found, skipping metadata generation for new prompt");
         }
-      }
 
-      // Update auto-extended scopes before adding the new prompt
-      if (Object.keys(graphSchema).length > 0) {
-        const newPromptIndex = prompts.length;
-        Utils.updateAutoExtendedScopes(graphSchema, newPromptIndex);
-        setGraphSchema({...graphSchema}); // Trigger re-render
+        // Step 5: Update auto-extended scopes before adding the new prompt
+        if (Object.keys(graphSchema).length > 0) {
+          const newPromptIndex = prompts.length;
+          let newGraphSchema = Utils.deepClone(graphSchema)
+          Utils.updateAutoExtendedScopes(newGraphSchema, newPromptIndex, newImages);
+          console.log("new graph schema:", newGraphSchema);
+          setGraphSchema(newGraphSchema); // Trigger re-render
+        }
       }
       
       setPrompts((prevPrompts) => [...prevPrompts, userInput]);
@@ -649,11 +653,13 @@ const Generate = () => {
         console.log("No auto-extended nodes found, skipping metadata generation for scene graph retry");
       }
 
-      // Update auto-extended scopes before adding the new prompt
+      // Step 5: Update auto-extended scopes before adding the new prompt
       if (Object.keys(graphSchema).length > 0) {
         const newPromptIndex = prompts.length;
-        Utils.updateAutoExtendedScopes(graphSchema, newPromptIndex);
-        setGraphSchema({...graphSchema}); // Trigger re-render
+        let newGraphSchema = Utils.deepClone(graphSchema)
+        Utils.updateAutoExtendedScopes(newGraphSchema, newPromptIndex, newImages);
+        console.log("new graph schema:", newGraphSchema);
+        setGraphSchema(newGraphSchema); // Trigger re-render
       }
       
       setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
@@ -1017,19 +1023,132 @@ const Generate = () => {
     
   }
 
-  const handleNodeRelabel = (contextMenuData, config, useSceneGraph=true) => {
+  const handleNodeRelabel = async (contextMenuData, config, useSceneGraph=true) => {
     console.log("relabel: ", contextMenuData, config, useSceneGraph);
     let { newCandidateValues, relabelMode } = Utils.deepClone(config);
     newCandidateValues = newCandidateValues == '' ? [] : newCandidateValues.split(',').map(v => v.trim());
+    
     // get the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
     let partialSchema = Utils.deepClone(graphSchema);
-    curNode = partialSchema;
+    let curNode = partialSchema;
     for (let i = 0; i < pathToRoot.length - 1; i++) {
       curNode = curNode[pathToRoot[i]];
     }
-    console.log(curNode);
-    // placeholder. todo.
+    
+    // Get the target node to relabel
+    let targetNodeName = pathToRoot[pathToRoot.length - 1];
+    let targetNode = curNode[targetNodeName];
+    
+    if (!targetNode) {
+      console.error("Target node not found for relabeling");
+      messageApi.error("Target node not found for relabeling");
+      return;
+    }
+    
+    // Store old candidate values for comparison
+    let oldCandidateValues = targetNode._candidateValues || [];
+    
+    // Update candidate values in the schema
+    if (newCandidateValues.length > 0) {
+      targetNode._candidateValues = Utils.deepClone(newCandidateValues);
+    } else {
+      delete targetNode._candidateValues;
+    }
+    
+    // Get images in scope for the target node
+    let scopeImages = [];
+    if (targetNode._scope && targetNode._scope.images) {
+      scopeImages = targetNode._scope.images;
+    } else if (Array.isArray(targetNode._scope)) {
+      // Legacy scope format
+      scopeImages = targetNode._scope.map(idx => images[idx]).filter(img => img);
+    } else {
+      // If no specific scope, use all images
+      scopeImages = images.map((img, idx) => ({ 
+        imageId: img.imageId, 
+        batch: img.batch || prompts.length + 1 
+      }));
+    }
+    
+    console.log("Scope images for relabeling:", scopeImages);
+    
+    let imagesToRelabel = [];
+    
+    if (relabelMode === 1) {
+      // Mode 1: Relabel all images within scope
+      imagesToRelabel = scopeImages;
+    } else if (relabelMode === 2) {
+      // Mode 2: Only relabel images affected by candidate value changes
+      if (arraysEqual(oldCandidateValues, newCandidateValues)) {
+        messageApi.info("No changes in candidate values, no relabeling needed");
+        return;
+      }
+      
+      // Find images that need relabeling based on label changes
+      imagesToRelabel = scopeImages.filter(scopeImg => {
+        let existingMetadata = metaData.find(m => 
+          m.metaData.imageId === scopeImg.imageId && 
+          m.metaData.batch === scopeImg.batch
+        );
+        
+        if (!existingMetadata) return true; // New images need labeling
+        
+        // Check if existing label might be affected by candidate value changes
+        let existingLabel = getNestedValue(existingMetadata, pathToRoot);
+        
+        // If old candidate values existed and current label is not in new values
+        if (oldCandidateValues.length > 0 && newCandidateValues.length > 0) {
+          return oldCandidateValues.includes(existingLabel) && !newCandidateValues.includes(existingLabel);
+        }
+        
+        // If transitioning from no constraints to constraints or vice versa
+        return oldCandidateValues.length !== newCandidateValues.length;
+      });
+    }
+    
+    if (imagesToRelabel.length === 0) {
+      messageApi.info("No images need relabeling");
+      return;
+    }
+    
+    console.log(`Relabeling ${imagesToRelabel.length} images in mode ${relabelMode}`);
+    
+    // Convert scope images back to full image objects for relabeling
+    let imageObjectsToRelabel = imagesToRelabel.map(scopeImg => 
+      images.find(img => img.imageId === scopeImg.imageId && img.batch === scopeImg.batch)
+    ).filter(img => img);
+    
+    // Update the global schema
+    setGraphSchema(partialSchema);
+    
+    // Trigger metadata generation for the affected images
+    try {
+      await generateMetaData(imageObjectsToRelabel, partialSchema);
+      messageApi.success(`Successfully relabeled ${imageObjectsToRelabel.length} images`);
+    } catch (error) {
+      console.error("Error during relabeling:", error);
+      messageApi.error("Error occurred during relabeling");
+    }
+  }
+  
+  // Helper function to check if two arrays are equal
+  const arraysEqual = (a, b) => {
+    if (a.length !== b.length) return false;
+    return a.every((val, i) => val === b[i]);
+  }
+  
+  // Helper function to get nested value from metadata
+  const getNestedValue = (obj, path) => {
+    let current = obj;
+    for (let key of path) {
+      if (current && typeof current === 'object' && key in current) {
+        current = current[key];
+      } else {
+        return undefined;
+      }
+    }
+    return current;
   }
 
   const handleLabelEditSave = (newData) => {

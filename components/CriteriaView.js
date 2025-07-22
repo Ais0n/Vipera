@@ -197,9 +197,9 @@ const CriteriaView = ({
         handleNodeEdit(contextMenuData, newNode, false);
     }
 
-    const handleRelabel = (candidateValues) => {
-        console.log('Relabel node', candidateValues);
-        handleNodeRelabel(contextMenuData, candidateValues, false);
+    const handleRelabel = (config) => {
+        console.log('Relabel node', config);
+        handleNodeRelabel(contextMenuData, config, false);
     }
 
     // Handler for the bookmark click
@@ -228,7 +228,8 @@ const CriteriaView = ({
         setIsEditModalOpen(true);
     };
 
-    const handleRelabelClick = () => {
+    const handleRelabelClick = (node) => {
+        setContextMenuData({...graphSchema[node.name], name: node.name});
         setIsRelabelModalOpen(true);
     }
 
@@ -291,6 +292,7 @@ const CriteriaView = ({
                 isOpen={isRelabelModalOpen}
                 onClose={() => setIsRelabelModalOpen(false)}
                 onSave={handleRelabel}
+                contextMenuData={contextMenuData}
             />
             <style jsx>{`
                 h2 { color: #333; }

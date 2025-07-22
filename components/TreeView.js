@@ -31,9 +31,9 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
         handleNodeAdd(contextMenuData, newName);
     }
 
-    const handleRelabel = (candidateValues) => {
-        console.log('Relabel node', candidateValues);
-        handleNodeRelabel(contextMenuData, candidateValues);
+    const handleRelabel = (config) => {
+        console.log('Relabel node', config);
+        handleNodeRelabel(contextMenuData, config);
     }
 
     const createStackedBarchart = (nodes) => {
@@ -536,6 +536,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 isOpen={isRelabelModalOpen}
                 onClose={() => setIsRelabelModalOpen(false)}
                 onSave={handleRelabel}
+                contextMenuData={contextMenuData}
             />
             <style jsx>{`
                 .context-menu {

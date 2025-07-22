@@ -475,7 +475,7 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
 }
 
 // Simple utility to handle auto-extended scopes when new prompts are added
-function updateAutoExtendedScopes(graphSchema, newPromptIndex) {
+function updateAutoExtendedScopes(graphSchema, newPromptIndex, newImages) {
     /**
      * Update all auto-extended scopes when a new prompt is added
      */
@@ -486,6 +486,11 @@ function updateAutoExtendedScopes(graphSchema, newPromptIndex) {
                 if (!node._scope.promptIndices.includes(newPromptIndex)) {
                     node._scope.promptIndices.push(newPromptIndex);
                 }
+                newImages.forEach(item => {
+                    if(!node._scope.images.includes(item)) {
+                        node._scope.images.push(item);
+                    }
+                })
             }
             
             // Recursively traverse children
