@@ -8,6 +8,7 @@ import ImageSummaryVis from './ImageSummaryVis';
 import SuggestPromotion from './SuggestPromotion';
 import SuggestExternal from './SuggestExternal';
 import SuggestComparison from './SuggestComparison';
+import SuggestComparisonFlat from './SuggestComparisonFlat';
 import BookmarkedCharts from './BookmarkedCharts';
 import * as Utils from '../utils';
 import * as d3 from 'd3';
@@ -16,7 +17,7 @@ import ModalLabelEdit from './ModalLabelEdit';
 import PromptManager from './PromptManager';
 import CriteriaView from './CriteriaView';
 
-const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils }) => {
+const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils, setPromptStr }) => {
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
@@ -28,10 +29,32 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
     const [imageTooltip, setImageTooltip] = React.useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [customColors, setCustomColors] = React.useState({});
     const [comments, setComments] = React.useState({}); // State to hold comments for each chart
+    const [existingCriteria, setExistingCriteria] = React.useState([]); // For Mode C flat criteria
 
     const useSceneGraph = (mode == 'B' || mode == 'D');
     const useAIAuditingSupport = (mode == 'C' || mode == 'D');
     const defaultColorScale = Utils.getColorScale;
+
+    // Initialize existing criteria from graphSchema for Mode C
+    React.useEffect(() => {
+        if (mode === 'C' && graphSchema && Object.keys(graphSchema).length > 0) {
+            const criteria = Object.keys(graphSchema).filter(key => !key.startsWith('_')).map(key => key.toLowerCase());
+            setExistingCriteria(criteria);
+        }
+    }, [mode, graphSchema]);
+
+    // Ensure graph has proper structure for Mode C (flat criteria)
+    React.useEffect(() => {
+        if (mode === 'C' && (!graph || !graph.children)) {
+            // Initialize graph with empty children array for Mode C
+            setGraph({ 
+                name: 'root', 
+                children: [], 
+                type: 'root',
+                count: 0 
+            });
+        }
+    }, [mode, graph, setGraph]);
 
     const colorScale = (batch) => {
         if (unselectedPrompts.includes(batch)) {
@@ -64,12 +87,34 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
         setBookmarkedCharts(prev => [...prev, data]);
     };
 
-    const _handleSuggestionButtonClick = () => {
-        handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "addValue": "smiling" });
-    }
 
-    const _handleSuggestionButtonClick2 = () => {
-        handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
+    const _handleSuggestionButtonClickFlat = (suggestion, type) => {
+        if (type === 'add-criterion') {
+            // For Mode C, add the criterion to existing criteria and handle it appropriately
+            const newCriterion = suggestion.criterionName.toLowerCase();
+            if (!existingCriteria.includes(newCriterion)) {
+                setExistingCriteria(prev => [...prev, newCriterion]);
+                
+                // Call the original handler for adding the node (it will handle schema and graph updates)
+                // For Mode C (flat), useSceneGraph=false means pathToRoot will be empty []
+                handleNodeAdd(null, {
+                    nodeName: newCriterion,
+                    nodeType: 'attribute',
+                    candidateValues: (suggestion.candidateValues || []).join(', '),
+                    scope: {
+                        type: 'auto-extended',
+                        images: images.map(img => ({ imageId: img.imageId, batch: img.batch }))
+                    }
+                }, false); // useSceneGraph=false for Mode C
+            }
+        } else if (type === 'promote') {
+            // For Mode C, "Try out this prompt" should just update the prompt
+            // The user can then generate new images with the new prompt
+            setPromptStr(suggestion.newPrompt);
+        } else {
+            // Handle other types
+            handleSuggestionButtonClick(suggestion, type);
+        }
     }
 
     const handleImageHover = (e, d) => {
@@ -111,19 +156,6 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
         { category: 'Nurse', values: { 'male': 0.3, 'female': 0.6, 'others': 0.1 } },
         { category: 'Firefighter', values: { 'male': 0.9, 'female': 0.05, 'others': 0.05 } },
         { category: 'Policeman', values: { 'male': 0.9, 'female': 0.05, 'others': 0.05 } },
-    ]
-
-    const dataForComparison = [
-        { category: 'True', value: 0.3 },
-        { category: 'False', value: 0.7 },
-    ]
-
-    const dataForExternalKnowledge = [
-        { category: 'White', value: 0.5 },
-        { category: 'Black', value: 0.2 },
-        { category: 'Asian', value: 0.1 },
-        { category: 'Hispanic', value: 0.1 },
-        { category: 'Other', value: 0.1 },
     ]
 
     const handleBarHover = (data) => {
@@ -200,14 +232,46 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
                 {/* Left Column */}
                 <div className="left-column">
                     <PromptManager prompts={prompts} colorScale={colorScale} changeColor={changeColor} handlePromptClick={handlePromptClick} groups={groups} setGroups={setGroups} />
+                    
+                    {/* Mode B: Show criteria view in AI auditing support position */}
+                    {mode === 'B' && (
+                        <div className="criteria-in-left-column">
+                            <CriteriaView graph={graph} graphSchema={graphSchema} prompts={prompts} colorScale={colorScale} groups={groups} images={images} handleBarHover={handleBarHover} addBookmarkedChart={addBookmarkedChart} treeUtils={treeUtils} handleNodeAdd={handleNodeAdd} handleNodeEdit={handleNodeEdit} handleNodeRelabel={handleNodeRelabel}></CriteriaView>
+                        </div>
+                    )}
+                    
+                    {/* Modes C and D: Show AI auditing support */}
                     {useAIAuditingSupport && <>
                         <div style={{ 'margin': '10px' }}><i>Features below are powered by GPT-4.1 and may contain errors.</i></div>
                         <h2>Audit Analysis Support</h2>
-                        <SuggestComparison prompts={prompts} images={images} graphSchema={graphSchema} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestComparison>
-
+                        
+                        {/* Mode C: Use flat comparison component */}
+                        {mode === 'C' ? (
+                            <SuggestComparisonFlat 
+                                prompts={prompts} 
+                                images={images} 
+                                existingCriteria={existingCriteria}
+                                handleSuggestionButtonClick={_handleSuggestionButtonClickFlat}
+                            />
+                        ) : (
+                            /* Mode D: Use original scene graph-based component */
+                            <SuggestComparison 
+                                prompts={prompts} 
+                                images={images} 
+                                graphSchema={graphSchema} 
+                                handleSuggestionButtonClick={handleSuggestionButtonClick}
+                            />
+                        )}
 
                         <h2>Prompt Suggestion</h2>
-                        <SuggestPromotion prompt={prompts[prompts.length - 1]} graphSchema={graphSchema} priorPrompts={prompts} dataForPromotion={dataForPromotion} handleSuggestionButtonClick={handleSuggestionButtonClick}></SuggestPromotion>
+                        <SuggestPromotion 
+                            prompt={prompts[prompts.length - 1]} 
+                            graphSchema={mode === 'C' ? graphSchema : graphSchema} 
+                            priorPrompts={prompts} 
+                            dataForPromotion={dataForPromotion} 
+                            handleSuggestionButtonClick={mode === 'C' ? _handleSuggestionButtonClickFlat : handleSuggestionButtonClick}
+                            mode={mode}
+                        />
                     </>}
                 </div>
 
@@ -237,19 +301,28 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
                         <ModalLabelEdit isOpen={isLabelModalOpen} onClose={() => setIsLabelModalOpen(false)}
                             onSave={handleLabelEditSave} nodeData={contextMenuData} graphSchema={graphSchema} />
                     </div>
-                    {useSceneGraph ? <div className="label-view">
+                    {/* Scene Graph for Modes B and D */}
+                    {useSceneGraph && <div className="label-view">
                         <div style={{ "display": "flex", "alignItems": "center", "justifyContent": "space-between" }}>
                             <h2 style={{ "margin": 0 }}>Scene Graph</h2>
                             <i>Generated by GPT-4.1 and may contain errors.</i>
                         </div>
                         <TreeView images={images} data={graph} handleBarHover={handleBarHover} handleNodeHover={handleNodeHover} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} highlightTreeNodes={highlightTreeNodes} groups={groups} customColors={customColors} prompts={prompts} treeUtils={treeUtils} />
-                    </div> : <></>}
+                    </div>}
+                    
+                    {/* Mode C: Show criteria view in scene graph position */}
+                    {mode === 'C' && (
+                        <div className="label-view">
+                            <CriteriaView graph={graph} graphSchema={graphSchema} prompts={prompts} colorScale={colorScale} groups={groups} images={images} handleBarHover={handleBarHover} addBookmarkedChart={addBookmarkedChart} treeUtils={treeUtils} handleNodeAdd={handleNodeAdd} handleNodeEdit={handleNodeEdit} handleNodeRelabel={handleNodeRelabel}></CriteriaView>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <div className="notebook">
+            {/* Only show criteria view in notebook section for Mode D */}
+            {mode === 'D' && <div className="notebook">
                 <CriteriaView graph={graph} graphSchema={graphSchema} prompts={prompts} colorScale={colorScale} groups={groups} images={images} handleBarHover={handleBarHover} addBookmarkedChart={addBookmarkedChart} treeUtils={treeUtils} handleNodeAdd={handleNodeAdd} handleNodeEdit={handleNodeEdit} handleNodeRelabel={handleNodeRelabel}></CriteriaView>
-            </div>
+            </div>}
 
             <div className="notebook">
                 <div>

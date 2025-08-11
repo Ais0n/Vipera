@@ -915,6 +915,7 @@ const Generate = () => {
 
   const handleNodeEdit = (contextMenuData, newNode, useSceneGraph=true) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
+    newNodeName = newNodeName.toLowerCase(); // Normalize to lowercase
     candidateValues = candidateValues == '' ? [] : candidateValues.split(',').map(v => v.trim());
     // calculate the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
@@ -993,6 +994,7 @@ const Generate = () => {
 
   const handleNodeAdd = (contextMenuData, newNode, useSceneGraph=true) => {
     let { nodeName: newNodeName, nodeType: newNodeType, candidateValues, scope } = Utils.deepClone(newNode);
+    newNodeName = newNodeName.toLowerCase(); // Normalize to lowercase
     candidateValues = candidateValues == '' ? [] : candidateValues.split(',').map(v => v.trim());
     // calculate the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [];
@@ -1422,7 +1424,7 @@ const Generate = () => {
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils}/>
+        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr}/>
       </div>}
 
 

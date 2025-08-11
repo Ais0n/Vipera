@@ -50,7 +50,7 @@ const convertImageToBase64 = (imageBuffer) => {
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        let { path1, path2, keywords, schema } = req.body;
+        let { path1, path2, keywords, existingCriteria } = req.body;
         try {
             // Get image data as buffers
             const imageData1 = await getImageData(path1);
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
             // Convert merged image to Base64
             const imageData = convertImageToBase64(mergedImageBuffer);
 
-            let result = await suggestComparison(imageData, keywords, schema);
+            let result = await suggestComparisonFlat(imageData, keywords, existingCriteria);
             return res.status(200).json({ res: result });
         } catch (error) {
             console.error(error);
@@ -74,13 +74,24 @@ export default async function handler(req, res) {
     }
 }
 
-async function suggestComparison(imageData, keywords, schema) {
-    // return {'parentNodeName': 'foreground', 'newNodeName': 'clothing', 'candidateValues': ['coat', 'shirt', 'others']};
+async function suggestComparisonFlat(imageData, keywords, existingCriteria) {
+    // For Mode C (flat criteria), we suggest a new criterion name directly
     let maxTries = 5;
 
     for (let i = 0; i < maxTries; i++) {
         try {
-            const input = `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset and two randomly selected images from this dataset, find differences between these two images and suggest an additional node that can be added to the children of an existing node in the tree (the two images should be *significantly different* in terms of the additional node so that the difference is meaningful for auditing; and the node to be added must be *different* from the nodes in the tree). ${keywords.length > 0 ? 'If possible, focus on differences that are relevant to the following user-interested keywords: ' + keywords.join() + '. ' : ''}Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest to add the node 'gender' to the children of 'person', and the candidateValues are ["male", "female"]. \nSchema: ${JSON5.stringify(schema)}\nYour suggestion (JSON):`;
+            const existingCriteriaList = existingCriteria && existingCriteria.length > 0 
+                ? existingCriteria.join(', ') 
+                : 'None';
+            
+            const input = `You are a helpful assistant. Given two randomly selected images from a dataset, find differences between these two images and suggest a new auditing criterion that can help distinguish between them (the two images should be *significantly different* in terms of the new criterion so that the difference is meaningful for auditing; and the criterion must be *different* from the existing criteria). ${keywords.length > 0 ? 'If possible, focus on differences that are relevant to the following user-interested keywords: ' + keywords.join() + '. ' : ''}
+            
+Existing criteria: ${existingCriteriaList}
+
+Output in the JSON form: {'criterionName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest the criterion 'gender' with candidateValues ["male", "female"]. The criterion name should be concise and descriptive.
+
+Your suggestion (JSON):`;
+            
             console.log("input: ", input)
 
             let messages = [{
@@ -126,16 +137,14 @@ async function suggestComparison(imageData, keywords, schema) {
                     output = JSON5.parse(output);
                 }
             }
-            // output = JSON5.parse(output);
             
             // check if the json has the required fields
-            if (!output.hasOwnProperty('parentNodeName') || !output.hasOwnProperty('newNodeName') || !output.hasOwnProperty('candidateValues')) {
+            if (!output.hasOwnProperty('criterionName') || !output.hasOwnProperty('candidateValues')) {
                 throw new Error("Output does not have the required fields: " + JSON.stringify(output));
             }
             
-            // Normalize node names to lowercase
-            output.parentNodeName = output.parentNodeName.toLowerCase();
-            output.newNodeName = output.newNodeName.toLowerCase();
+            // Normalize criterion name to lowercase
+            output.criterionName = output.criterionName.toLowerCase();
             
             return output;
         } catch (error) {

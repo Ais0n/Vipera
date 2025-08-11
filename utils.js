@@ -340,14 +340,18 @@ const removeRedundantFields = (data, schema) => {
                 delete curNode[key];
                 continue;
             }
+            
+            // Case-insensitive key matching
+            const schemaKey = Object.keys(schemaNode).find(sKey => sKey.toLowerCase() === key.toLowerCase());
+            
             if (typeof (curNode[key]) == 'object') {
-                if (typeof (schemaNode[key]) == 'object') {
-                    traverse(curNode[key], schemaNode[key]);
+                if (schemaKey && typeof (schemaNode[schemaKey]) == 'object') {
+                    traverse(curNode[key], schemaNode[schemaKey]);
                 } else {
                     delete curNode[key];
                 }
             } else {
-                if (typeof (schemaNode[key]) == 'undefined' || curNode[key] == "") {
+                if (!schemaKey || curNode[key] == "") {
                     delete curNode[key];
                 }
             }

@@ -37,7 +37,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
                 setScopeType(scopeType);
                 setNodeName(contextMenuData.name);
                 setNodeType(contextMenuData._nodeType);
-                setCandidateValues(contextMenuData._candidateValues);
+                setCandidateValues(contextMenuData._candidateValues.join(', ') || '');
             } else {
                 setselectedImageInfo(Utils.deepClone(images.map(image => ({ "imageId": image.imageId, "batch": image.batch }))));
                 setSelectedPrompts(prompts.map((_, index) => index));
@@ -63,7 +63,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             if (modalType == "edit") {
                 setNodeName(contextMenuData.data.name);
                 setNodeType(contextMenuData.data.type);
-                setCandidateValues(Utils.deepClone(schemaNode._candidateValues) || '');
+                setCandidateValues(Utils.deepClone(schemaNode._candidateValues).join(', ') || '');
             } else {
                 setNodeName('');
                 setNodeType('attribute');
@@ -91,7 +91,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             images: selectedImageInfo
         };
 
-        onSave({ nodeName, nodeType, candidateValues, scope: newScope });
+        onSave({ nodeName: nodeName.toLowerCase(), nodeType, candidateValues, scope: newScope });
         onClose();
         setNodeName('');
         setNodeType("attribute");
