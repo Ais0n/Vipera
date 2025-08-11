@@ -12,7 +12,7 @@ import ModalTreeRelabel from './ModalTreeRelabel.js';
  * A reusable React component to render a stacked bar chart using D3.
  * This component's logic is based on the provided createStackedBarchart function.
  */
-const StackedBarChart = ({ node, colorScale, groups, handleBarHover, tooltipRef }) => {
+const StackedBarChart = ({ node, colorScale, groups, handleBarHover, tooltipRef, height = 250 }) => {
     const ref = useRef(null);
 
     useEffect(() => {
@@ -157,15 +157,14 @@ const StackedBarChart = ({ node, colorScale, groups, handleBarHover, tooltipRef 
             .enter().append('text')
             .attr('class', 'x-axis-label')
             .attr('x', d => xScale(d) + xScale.bandwidth() / 2)
-            .attr('y', 10)
-            .attr('text-anchor', 'end')
-            .attr('transform', d => `rotate(-45, ${xScale(d) + xScale.bandwidth() / 2}, 10)`)
+            .attr('y', 15)
+            .attr('text-anchor', 'middle')
             .style('font-size', '12px')
             .text(d => d.length > 15 ? d.substring(0, 12) + '...' : d);
 
     }, [node, colorScale, groups, handleBarHover, tooltipRef]); // Add dependencies
 
-    return <svg ref={ref} style={{ width: '100%', height: '250px' }}></svg>;
+    return <svg ref={ref} style={{ width: '100%', height: `${height}px` }}></svg>;
 };
 
 // Main CriteriaView Component
@@ -181,7 +180,8 @@ const CriteriaView = ({
     handleNodeAdd,
     handleNodeEdit,
     handleNodeRelabel,
-    treeUtils
+    treeUtils,
+    compact = false
 }) => {
     const attributeNodes = Utils.getLeafNodes(graph).filter(node => node.type === 'attribute');
     
@@ -244,13 +244,13 @@ const CriteriaView = ({
                 <h2 style={{ "margin": 0, "display": "inline-block" }}>Criteria</h2>
                 <Button style={{ 'display': 'inline-block', 'marginLeft': '15px' }} onClick={() => setIsAddModalOpen(true)}>Add</Button>
             </div>
-            <div className="criteria-view-content">
+            <div className={`criteria-view-content ${compact ? 'compact' : ''}`}>
                 {attributeNodes.length === 0 ? ("No attribute criteria available.") : (
                     attributeNodes.map((node, index) => (
-                        <div className="criteria-view-item" key={node.id || index}>
-                            <div className="criteria-item-header">
-                                <h4 className="criteria-item-title">{node.name}</h4>
-                                <div className="card-actions">
+                        <div className={`criteria-view-item ${compact ? 'compact' : ''}`} key={node.id || index}>
+                            <div className={`criteria-item-header ${compact ? 'compact' : ''}`}>
+                                <h4 className={`criteria-item-title ${compact ? 'compact' : ''}`}>{node.name}</h4>
+                                <div className={`card-actions ${compact ? 'compact' : ''}`}>
                                     <div className="action-icon" onClick={() => handleEditClick(node)} title="Edit this criterion">
                                         <img src="/edit.svg" alt="Edit Icon" width="18" height="18" />
                                     </div>
@@ -262,13 +262,14 @@ const CriteriaView = ({
                                     </div>
                                 </div>
                             </div>
-                            <div className="chart-container">
+                            <div className={`chart-container ${compact ? 'compact' : ''}`}>
                                 <StackedBarChart 
                                     node={node} 
                                     colorScale={colorScale} 
                                     groups={groups}
                                     handleBarHover={handleBarHover}
                                     tooltipRef={tooltipRef2}
+                                    height={250}
                                 />
                             </div>
                         </div>
@@ -308,44 +309,67 @@ const CriteriaView = ({
                     color: #1a1a1a;
                 }
                 .criteria-view-content {
-                    display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; padding: 10px 0;
+                    display: flex; 
+                    flex-direction: row; 
+                    flex-wrap: wrap; 
+                    gap: 20px; 
+                    padding: 10px 0;
+                }
+                .criteria-view-content.compact {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 16px;
                 }
                 .criteria-view-item {
-                    flex: 1 1 calc(25% - 20px); max-width: calc(25% - 20px); min-width: 300px;
+                    flex: 1 1 calc(25% - 20px); 
+                    max-width: calc(25% - 20px); 
+                    min-width: 300px;
                     display: flex; flex-direction: column;
                     background-color: #fff; border-radius: 8px;
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09); border: 1px solid #f0f0f0;
                     transition: box-shadow 0.3s;
                 }
+                .criteria-view-item.compact {
+                    flex: 1 1 calc(50% - 8px); 
+                    max-width: calc(50% - 8px); 
+                    min-width: 200px;
+                }
                 .criteria-view-item:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
                 .criteria-item-header {
                     display: flex;
-                    justify-content: center; /* This will center the title */
+                    justify-content: space-between;
                     align-items: center;
-                    position: relative; /* Essential for positioning the action icons */
+                    padding: 12px 15px;
                     border-bottom: 1px solid #f0f0f0;
+                }
+                .criteria-item-header.compact {
+                    padding: 10px 15px;
                 }
                 .criteria-item-title {
                     margin: 0;
-                    padding: 12px 15px; /* Give the title some padding */
+                    padding: 0;
                     font-size: 16px;
+                    text-align: left;
                     font-weight: 600;
                     color: #333;
-                    text-align: center;
+                    flex: 1;
+                    padding-right: 15px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .criteria-item-title.compact {
+                    font-size: 15px;
+                    padding-right: 8px;
                 }
                 .card-actions {
-                    position: absolute; /* Take icons out of the layout flow */
-                    right: 10px;        /* Pin them to the right */
-                    top: 50%;           /* Center them vertically */
-                    transform: translateY(-50%);
                     display: flex;
                     align-items: center;
                     gap: 8px;
+                    flex-shrink: 0;
                 }
-                .card-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 1px; /* Space between icons */
+                .card-actions.compact {
+                    gap: 2px;
                 }
                 .action-icon {
                     cursor: pointer;
@@ -362,7 +386,11 @@ const CriteriaView = ({
                     color: #1a1a1a;
                 }
                 .chart-container {
-                    padding: 10px; flex-grow: 1;
+                    padding: 10px; 
+                    flex-grow: 1;
+                }
+                .chart-container.compact {
+                    padding: 10px;
                 }
                 .bar-tooltip {
                     position: absolute;

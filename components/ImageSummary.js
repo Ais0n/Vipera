@@ -233,12 +233,6 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
                 <div className="left-column">
                     <PromptManager prompts={prompts} colorScale={colorScale} changeColor={changeColor} handlePromptClick={handlePromptClick} groups={groups} setGroups={setGroups} />
                     
-                    {/* Mode B: Show criteria view in AI auditing support position */}
-                    {mode === 'B' && (
-                        <div className="criteria-in-left-column">
-                            <CriteriaView graph={graph} graphSchema={graphSchema} prompts={prompts} colorScale={colorScale} groups={groups} images={images} handleBarHover={handleBarHover} addBookmarkedChart={addBookmarkedChart} treeUtils={treeUtils} handleNodeAdd={handleNodeAdd} handleNodeEdit={handleNodeEdit} handleNodeRelabel={handleNodeRelabel}></CriteriaView>
-                        </div>
-                    )}
                     
                     {/* Modes C and D: Show AI auditing support */}
                     {useAIAuditingSupport && <>
@@ -348,6 +342,11 @@ const ImageSummary = ({ mode, images, metaData, prompts, graph, setGraph, graphS
                     margin-right: 20px;
                     background-color: #f9f9f9;
                     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                }
+                .criteria-in-left-column {
+                    margin-top: 20px;
+                    border-top: 1px solid #e0e0e0;
+                    padding-top: 15px;
                 }
                 .right-column {
                     flex: 2;
