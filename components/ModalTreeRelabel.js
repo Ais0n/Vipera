@@ -15,6 +15,22 @@ const ModalTreeRelabel = ({ isOpen, onClose, onSave, contextMenuData }) => {
         }
     }, [isOpen, contextMenuData]);
 
+    // Reset relabel mode to 1 if option 2 becomes unavailable
+    useEffect(() => {
+        if (relabelMode === 2 && !hasCandidateValueChanges()) {
+            setRelabelMode(1);
+        }
+    }, [newCandidateValues, contextMenuData, relabelMode]);
+
+    // Check if there are changes to candidate values
+    const hasCandidateValueChanges = () => {
+        if (!contextMenuData || !contextMenuData._candidateValues) {
+            return newCandidateValues.trim() !== '';
+        }
+        const originalValues = contextMenuData._candidateValues.join(', ');
+        return originalValues !== newCandidateValues;
+    };
+
     const handleSave = () => {
         onSave({
             newCandidateValues,
@@ -72,13 +88,15 @@ const ModalTreeRelabel = ({ isOpen, onClose, onSave, contextMenuData }) => {
                                     Relabels all images in the current scope with the new candidate values
                                 </Text>
                             </Radio>
-                            <Radio value={2}>
-                                <Text>Relabel only images affected by candidate value changes</Text>
-                                <br />
-                                <Text type="secondary" style={{ fontSize: '12px', marginLeft: 24 }}>
-                                    Only relabels images whose labels might be influenced by the candidate value changes
-                                </Text>
-                            </Radio>
+                            {hasCandidateValueChanges() && (
+                                <Radio value={2}>
+                                    <Text>Relabel only images affected by candidate value changes</Text>
+                                    <br />
+                                    <Text type="secondary" style={{ fontSize: '12px', marginLeft: 24 }}>
+                                        Only relabels images whose labels might be influenced by the candidate value changes
+                                    </Text>
+                                </Radio>
+                            )}
                         </Space>
                     </Radio.Group>
                 </div>
