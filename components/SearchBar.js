@@ -35,7 +35,7 @@ function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, prompt
           <input
             type="text"
             className={styles.searchBar}
-            placeholder="Write prompt here"
+            placeholder="Write prompt here (e.g., 'A cinematic photo of a doctor')"
             value={promptStr}
             onChange={(e) => setPromptStr(e.target.value)}
             disabled={isGenerating}

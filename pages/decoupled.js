@@ -25,7 +25,7 @@ const Generate = () => {
   const [images, setImages] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
-  const [promptStr, setPromptStr] = useState('A cinematic photo of a doctor');
+  const [promptStr, setPromptStr] = useState('');
   const [graph, setGraph] = useState({});
   const [graphSchema, setGraphSchema] = useState({});
   const [metaData, setMetaData] = useState([]);
