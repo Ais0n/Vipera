@@ -63,7 +63,8 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             if (modalType == "edit") {
                 setNodeName(contextMenuData.data.name);
                 setNodeType(contextMenuData.data.type);
-                setCandidateValues(Utils.deepClone(schemaNode._candidateValues).join(', ') || '');
+                let candidateValues = schemaNode._candidateValues instanceof Array ? schemaNode._candidateValues.join(', ') : (schemaNode._candidateValues || '');
+                setCandidateValues(candidateValues);
             } else {
                 setNodeName('');
                 setNodeType('attribute');
