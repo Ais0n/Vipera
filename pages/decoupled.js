@@ -45,12 +45,41 @@ const Generate = () => {
   const [retryMetaDataContext, setRetryMetaDataContext] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
   const [tmpSchemaScope, setTmpSchemaScope] = useState(undefined); // Temporary scope for the new node (used in external prompt suggestion)
+  const [userModifiedMetadata, setUserModifiedMetadata] = useState(new Set()); // Track user-modified metadata entries by imageId
+  
+  // Use refs to maintain current state that won't get cleared by React state batching
+  const userModifiedMetadataRef = useRef(new Set());
+  const metaDataRef = useRef([]); // Ref for metaData to avoid stale closures
+  
+  // Keep refs in sync with state (but refs take precedence during async operations)
+  useEffect(() => {
+    userModifiedMetadataRef.current = new Set(userModifiedMetadata);
+  }, [userModifiedMetadata]);
+  
+  useEffect(() => {
+    metaDataRef.current = metaData;
+  }, [metaData]);
 
   const isDebug = false;
   const baseUrl = '/api';
 
   const ensureImagesSelected = () => {
     setSelectedCategory('images');
+  };
+
+  // Helper function to clear user modifications for specific images or all
+  const clearUserModifications = (imageIds = null) => {
+    if (imageIds === null) {
+      // Clear all user modifications
+      setUserModifiedMetadata(new Set());
+      userModifiedMetadataRef.current = new Set();
+    } else {
+      // Clear modifications for specific images
+      const newUserModifiedSet = new Set(userModifiedMetadata);
+      imageIds.forEach(imageId => newUserModifiedSet.delete(imageId));
+      setUserModifiedMetadata(newUserModifiedSet);
+      userModifiedMetadataRef.current = new Set(newUserModifiedSet);
+    }
   };
 
   let image_num = imageNum;
@@ -538,6 +567,8 @@ const Generate = () => {
     setIsDoneSceneGraph(false);
     setStatusInfo("Starting image generation...");
     setFailedImageIds([]);
+    // Note: We don't clear userModifiedMetadata here to preserve user modifications
+    // across different generation sessions
   };
 
   // Step 1: Get or generate image IDs
@@ -680,6 +711,11 @@ const Generate = () => {
     if(!newGraph) {
       newGraph = Utils.deepClone(graph);
     }
+    console.log("tryMetadataGeneration called with:", {
+      newImages: newImages.map(img => img.imageId),
+      userModifiedMetadata: Array.from(userModifiedMetadata),
+      userModifiedMetadataSize: userModifiedMetadata.size
+    });
     console.log(newImages, partialSchema)
     try {
       // Generate Meta Data
@@ -691,15 +727,62 @@ const Generate = () => {
         newMetaData = res.data;
         setRetryMetaDataContext({partialSchema});
 
-        // merge metadata with old metadata
-        let oldMetaData = Utils.deepClone(metaData);
+        // CRITICAL: Capture the current metaData state RIGHT BEFORE merging
+        // Use refs to get the most current state to avoid React state batching issues
+        const currentUserModifications = new Set(userModifiedMetadataRef.current);
+        let oldMetaData = Utils.deepClone(metaDataRef.current);
+        console.log("Current user modifications:", Array.from(currentUserModifications));
         console.log(newMetaData, oldMetaData);
+        
+        // Custom merge function that preserves user modifications while adding new fields
+        const mergePreservingUserModifications = (userModifiedData, newData) => {
+          const merged = Utils.deepClone(newData); // Start with new data
+          
+          // Recursively override with user-modified values
+          const overrideUserModifications = (target, userSource) => {
+            if (!(target instanceof Object) || !(userSource instanceof Object)) {
+              return userSource; // User modification takes precedence
+            }
+            
+            for (const key in userSource) {
+              if (key === 'metaData') continue; // Skip metadata field
+              
+              if (userSource[key] instanceof Object && target[key] instanceof Object) {
+                target[key] = overrideUserModifications(target[key], userSource[key]);
+              } else {
+                target[key] = userSource[key]; // User modification takes precedence
+              }
+            }
+            return target;
+          };
+          
+          return overrideUserModifications(merged, userModifiedData);
+        };
+        
         newImages.forEach((image, index) => {
           let newItem = newMetaData.find(item => item.metaData && item.metaData.imageId == image.imageId);
           let oldItem = oldMetaData.find(item => item.metaData && item.metaData.imageId == image.imageId);
-          if (!newItem) return;
-          if (!oldItem) oldItem = {};
-          let mergedItem = Utils.mergeMetadata(oldItem, newItem);
+          if (!newItem) {
+            console.log(`No new metadata found for image ${image.imageId}`);
+            return;
+          }
+          if (!oldItem) {
+            console.log(`No old metadata found for image ${image.imageId}, treating as new`);
+            oldItem = {};
+          }
+          
+          // CRITICAL: Check if this metadata was user-modified at merge time
+          const isUserModified = currentUserModifications.has(image.imageId);
+          
+          let mergedItem;
+          if (isUserModified) {
+            // If user-modified, preserve user changes while adding new fields
+            mergedItem = mergePreservingUserModifications(oldItem, newItem);
+          } else {
+            // Normal merge - new metadata takes precedence
+            mergedItem = Utils.mergeMetadata(oldItem, newItem);
+          }
+          
           let idx = oldMetaData.findIndex(item => item.metaData && item.metaData.imageId == image.imageId);
           if (idx != -1) {
             oldMetaData[idx] = mergedItem;
@@ -707,6 +790,28 @@ const Generate = () => {
             oldMetaData.push(mergedItem);
           }
         })
+
+        // IMPORTANT: Also preserve user-modified metadata for images NOT in newImages
+        // This ensures user modifications on older images are not lost when new images are processed
+        currentUserModifications.forEach(imageId => {
+          // Check if this user-modified image was already processed above
+          const wasProcessed = newImages.some(img => img.imageId === imageId);
+          if (!wasProcessed) {
+            // Find the user-modified metadata in the current ref state and ensure it's preserved
+            const currentUserModifiedItem = metaDataRef.current.find(item => item.metaData && item.metaData.imageId === imageId);
+            if (currentUserModifiedItem) {
+              // Find and replace/update in oldMetaData to ensure preservation
+              const idx = oldMetaData.findIndex(item => item.metaData && item.metaData.imageId === imageId);
+              if (idx !== -1) {
+                // Replace with the current user-modified version
+                oldMetaData[idx] = Utils.deepClone(currentUserModifiedItem);
+              } else {
+                // Add if not found (shouldn't happen but safety check)
+                oldMetaData.push(Utils.deepClone(currentUserModifiedItem));
+              }
+            }
+          }
+        });
 
         allMetaData = oldMetaData;
         setMetaData(allMetaData);
@@ -1126,8 +1231,37 @@ const Generate = () => {
     
     // Trigger metadata generation for the affected images
     try {
-      await generateMetaData(imageObjectsToRelabel, partialSchema);
-      messageApi.success(`Successfully relabeled ${imageObjectsToRelabel.length} images`);
+      const res = await generateMetaData(imageObjectsToRelabel, partialSchema);
+      if (res.status === 'success') {
+        // Mark the relabeled images as user-modified
+        const newUserModifiedSet = new Set(userModifiedMetadata);
+        imageObjectsToRelabel.forEach(img => {
+          newUserModifiedSet.add(img.imageId);
+        });
+        setUserModifiedMetadata(newUserModifiedSet);
+        // CRITICAL: Also update the ref
+        userModifiedMetadataRef.current = new Set(newUserModifiedSet);
+        
+        // Update metadata with the new results
+        const newMetaData = Utils.deepClone(metaData);
+        res.data.forEach(newItem => {
+          const index = newMetaData.findIndex(item => 
+            item.metaData.imageId === newItem.metaData.imageId
+          );
+          if (index !== -1) {
+            newMetaData[index] = newItem;
+          } else {
+            newMetaData.push(newItem);
+          }
+        });
+        setMetaData(newMetaData);
+        
+        // Update the graph
+        const updatedGraph = Utils.calculateGraph(newMetaData, partialSchema, Utils.deepClone(graph));
+        setGraph(updatedGraph);
+        
+        messageApi.success(`Successfully relabeled ${imageObjectsToRelabel.length} images`);
+      }
     } catch (error) {
       console.error("Error during relabeling:", error);
       messageApi.error("Error occurred during relabeling");
@@ -1158,6 +1292,14 @@ const Generate = () => {
     let newMetaData = Utils.deepClone(metaData);
     let index = newMetaData.findIndex(item => item.metaData.imageId == newData.data.imageId);
     newMetaData[index] = { ...Utils.deepClone(newData.metaData), batch: newData.data.batch, metaData: newData.data };
+    
+    // Mark this metadata as user-modified
+    const newUserModifiedSet = new Set(userModifiedMetadata);
+    newUserModifiedSet.add(newData.data.imageId);
+    setUserModifiedMetadata(newUserModifiedSet);
+    // CRITICAL: Also update the ref
+    userModifiedMetadataRef.current = new Set(newUserModifiedSet);
+    
     setMetaData(newMetaData);
     console.log('newMetaData', newMetaData);
     let _graph = Utils.calculateGraph(newMetaData, graphSchema, Utils.deepClone(graph));
@@ -1166,7 +1308,46 @@ const Generate = () => {
   }
 
   const handleReviewResults = ({ updatedMetaData, textAreaValue }) => {
-    console.log(metaData, updatedMetaData)
+    console.log("handleReviewResults called with:", metaData, updatedMetaData)
+    
+    // Track which metadata entries were modified by the user
+    const newUserModifiedSet = new Set(userModifiedMetadata);
+    
+    // Helper function to deep compare objects (excluding metaData field)
+    const deepCompareExcludingMetaData = (obj1, obj2) => {
+      if (obj1 === obj2) return true;
+      if (!obj1 || !obj2) return false;
+      if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
+      
+      const keys1 = Object.keys(obj1).filter(k => k !== 'metaData');
+      const keys2 = Object.keys(obj2).filter(k => k !== 'metaData');
+      
+      if (keys1.length !== keys2.length) return false;
+      
+      for (let key of keys1) {
+        if (!keys2.includes(key)) return false;
+        if (!deepCompareExcludingMetaData(obj1[key], obj2[key])) return false;
+      }
+      return true;
+    };
+    
+    // Compare old and new metadata to identify user modifications
+    updatedMetaData.forEach((newItem, index) => {
+      const oldItem = metaData[index];
+      if (oldItem && newItem.metaData && newItem.metaData.imageId) {
+        // Use deep comparison instead of JSON.stringify
+        if (!deepCompareExcludingMetaData(oldItem, newItem)) {
+          newUserModifiedSet.add(newItem.metaData.imageId);
+          console.log(`Marking image ${newItem.metaData.imageId} as user-modified`);
+        }
+      }
+    });
+    
+    console.log("User modified metadata set:", newUserModifiedSet);
+    setUserModifiedMetadata(newUserModifiedSet);
+    // CRITICAL: Also update the ref to ensure it's not lost
+    userModifiedMetadataRef.current = new Set(newUserModifiedSet);
+    
     setMetaData(updatedMetaData);
     let _graph = Utils.calculateGraph(updatedMetaData, graphSchema, Utils.deepClone(graph));
     console.log(_graph)
