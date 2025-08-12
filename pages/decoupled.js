@@ -187,29 +187,29 @@ const Generate = () => {
             throw new Error("Scene graph generation failed. You can retry.");
           } 
 
+          // Update auto-extended scopes in the schema first
+          if (Object.keys(graphSchema).length > 0) {
+            const newPromptIndex = prompts.length;
+            Utils.updateAutoExtendedScopes(updatedGraphSchema, newPromptIndex, retriedImages);
+          }
+
           // Update the graph schema by adding the scope of the new prompt to each node
           let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(retriedImages, updatedGraphSchema);
 
           console.log("partial schema:", schemaScope);
 
           if (schemaScope) {
-            Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
+            Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, retriedImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
             console.log("after updating graph schema with scope", updatedGraphSchema);
           
             // Step 4: Try generating metadata
-            await tryMetadataGeneration(newImages, schemaScope);
+            await tryMetadataGeneration(retriedImages, schemaScope);
           } else {
             console.log("No auto-extended nodes found, skipping metadata generation for retried images");
           }
-        }
-        
-        // Step 5: Update auto-extended scopes before adding the new prompt
-        if (Object.keys(graphSchema).length > 0) {
-          const newPromptIndex = prompts.length;
-          let newGraphSchema = Utils.deepClone(graphSchema)
-          Utils.updateAutoExtendedScopes(newGraphSchema, newPromptIndex, newImages);
-          console.log("new graph schema:", newGraphSchema);
-          setGraphSchema(newGraphSchema); // Trigger re-render
+
+          // Step 5: Update the graph schema state with the updated schema
+          setGraphSchema(updatedGraphSchema); // Trigger re-render
         }
         
         setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
@@ -491,6 +491,12 @@ const Generate = () => {
           throw new Error("Scene graph generation failed. You can retry.");
         } 
 
+        // Update auto-extended scopes in the schema first
+        if (Object.keys(graphSchema).length > 0) {
+          const newPromptIndex = prompts.length;
+          Utils.updateAutoExtendedScopes(updatedGraphSchema, newPromptIndex, newImages);
+        }
+
         // Update the graph schema by adding the scope of the new prompt to each node
         let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
 
@@ -506,14 +512,8 @@ const Generate = () => {
           console.log("No auto-extended nodes found, skipping metadata generation for new prompt");
         }
 
-        // Step 5: Update auto-extended scopes before adding the new prompt
-        if (Object.keys(graphSchema).length > 0) {
-          const newPromptIndex = prompts.length;
-          let newGraphSchema = Utils.deepClone(graphSchema)
-          Utils.updateAutoExtendedScopes(newGraphSchema, newPromptIndex, newImages);
-          console.log("new graph schema:", newGraphSchema);
-          setGraphSchema(newGraphSchema); // Trigger re-render
-        }
+        // Step 5: Update the graph schema state with the updated schema
+        setGraphSchema(updatedGraphSchema); // Trigger re-render
       }
       
       setPrompts((prevPrompts) => [...prevPrompts, userInput]);
@@ -638,6 +638,12 @@ const Generate = () => {
       } 
       setRetrySceneGraphContext(undefined);
 
+      // Update auto-extended scopes in the schema first
+      if (Object.keys(graphSchema).length > 0) {
+        const newPromptIndex = prompts.length;
+        Utils.updateAutoExtendedScopes(updatedGraphSchema, newPromptIndex, newImages);
+      }
+
       // Update the graph schema by adding the scope of the new prompt to each node
       let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
 
@@ -653,14 +659,8 @@ const Generate = () => {
         console.log("No auto-extended nodes found, skipping metadata generation for scene graph retry");
       }
 
-      // Step 5: Update auto-extended scopes before adding the new prompt
-      if (Object.keys(graphSchema).length > 0) {
-        const newPromptIndex = prompts.length;
-        let newGraphSchema = Utils.deepClone(graphSchema)
-        Utils.updateAutoExtendedScopes(newGraphSchema, newPromptIndex, newImages);
-        console.log("new graph schema:", newGraphSchema);
-        setGraphSchema(newGraphSchema); // Trigger re-render
-      }
+      // Step 5: Update the graph schema state with the updated schema
+      setGraphSchema(updatedGraphSchema); // Trigger re-render
       
       setPrompts((prevPrompts) => [...prevPrompts, promptStr]);
     } catch (error) {
@@ -1255,7 +1255,7 @@ const Generate = () => {
       // Handle legacy scope (array) being merged with new scope
       if (Array.isArray(existingScope) && newScope && typeof newScope === 'object' && newScope.images) {
         return {
-          type: newScope.type || 'fixed',
+          type: newScope.type || 'auto-extended',
           promptIndices: newScope.promptIndices || [],
           images: [...new Set([...existingScope, ...(newScope.images || [])])]
         };
@@ -1358,7 +1358,7 @@ const Generate = () => {
         if (node && typeof node === 'object') {
           // Check if this node has auto-extended scope
           if (node._scope && node._scope.type === 'auto-extended') {
-            // Include this node and its children, and add new images to scope
+            // Include this node (works for both object and attribute nodes)
             const clonedNode = Utils.deepClone(node);
             
             // Add new images to the scope
@@ -1385,8 +1385,9 @@ const Generate = () => {
           } else if (node._scope && node._scope.type !== 'auto-extended') {
             // Skip fixed nodes
             return;
-          } else {
-            // For nodes without scope, recursively check children
+          } else if (node._nodeType === 'object') {
+            // Only for object nodes, recursively check children
+            // Attribute nodes are leaf nodes and don't need recursive processing
             const childSchema = createAutoExtendedSchema(node);
             if (Object.keys(childSchema).some(k => !k.startsWith('_'))) {
               // Only include if there are non-metadata children
@@ -1396,6 +1397,8 @@ const Generate = () => {
               };
             }
           }
+          // Note: Attribute nodes without auto-extended scope are not included
+          // This is intentional as they don't need to be in the labeling schema
         }
       });
       
