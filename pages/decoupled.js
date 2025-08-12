@@ -1343,8 +1343,8 @@ const Generate = () => {
       batch: image.batch
     }));
 
-    // Create a partial schema containing only auto-extended nodes
-    const createAutoExtendedSchema = (schema) => {
+    // Step 1: Create schema with only auto-extended nodes, pruning fixed nodes entirely
+    const createAutoExtendedOnlySchema = (schema) => {
       const result = {};
       
       Object.keys(schema).forEach(key => {
@@ -1356,39 +1356,41 @@ const Generate = () => {
         
         const node = schema[key];
         if (node && typeof node === 'object') {
-          // Check if this node has auto-extended scope
+          // Skip fixed nodes entirely (prune the whole branch)
+          if (node._scope && node._scope.type !== 'auto-extended') {
+            return;
+          }
+          
+          // Include auto-extended nodes (both attribute and object)
           if (node._scope && node._scope.type === 'auto-extended') {
-            // Include this node (works for both object and attribute nodes)
             const clonedNode = Utils.deepClone(node);
             
-            // Add new images to the scope
-            if (clonedNode._scope.images) {
-              // Merge existing images with new images, avoiding duplicates
-              const existingImages = clonedNode._scope.images;
-              const mergedImages = [...existingImages];
-              
-              newImageScope.forEach(newImg => {
-                if (!existingImages.some(existing => 
-                  existing.imageId === newImg.imageId && existing.batch === newImg.batch
-                )) {
-                  mergedImages.push(newImg);
-                }
-              });
-              
-              clonedNode._scope.images = mergedImages;
-            } else {
-              // If no images array exists, create one with new images
-              clonedNode._scope.images = [...newImageScope];
+            // Add new images to the scope for attribute nodes
+            if (node._nodeType === 'attribute') {
+              if (clonedNode._scope.images) {
+                // Merge existing images with new images, avoiding duplicates
+                const existingImages = clonedNode._scope.images;
+                const mergedImages = [...existingImages];
+                
+                newImageScope.forEach(newImg => {
+                  if (!existingImages.some(existing => 
+                    existing.imageId === newImg.imageId && existing.batch === newImg.batch
+                  )) {
+                    mergedImages.push(newImg);
+                  }
+                });
+                
+                clonedNode._scope.images = mergedImages;
+              } else {
+                // If no images array exists, create one with new images
+                clonedNode._scope.images = [...newImageScope];
+              }
             }
             
             result[key] = clonedNode;
-          } else if (node._scope && node._scope.type !== 'auto-extended') {
-            // Skip fixed nodes
-            return;
           } else if (node._nodeType === 'object') {
-            // Only for object nodes, recursively check children
-            // Attribute nodes are leaf nodes and don't need recursive processing
-            const childSchema = createAutoExtendedSchema(node);
+            // For object nodes without auto-extended scope, recursively process children
+            const childSchema = createAutoExtendedOnlySchema(node);
             if (Object.keys(childSchema).some(k => !k.startsWith('_'))) {
               // Only include if there are non-metadata children
               result[key] = {
@@ -1397,12 +1399,68 @@ const Generate = () => {
               };
             }
           }
-          // Note: Attribute nodes without auto-extended scope are not included
-          // This is intentional as they don't need to be in the labeling schema
         }
       });
       
       return result;
+    };
+
+    // Step 2: Prune object nodes that don't have any attribute descendants
+    const pruneObjectsWithoutAttributes = (schema) => {
+      const result = {};
+      
+      // Iterate over the children of the current schema node
+      Object.keys(schema).forEach(key => {
+        if (key.startsWith('_')) {
+          // Metadata is handled during node reconstruction, so skip it here.
+          return;
+        }
+        
+        const node = schema[key];
+        if (!node || typeof node !== 'object') {
+          return;
+        }
+
+        if (node._nodeType === 'attribute') {
+          // Always keep attribute nodes, as they are the leaves we're looking for.
+          result[key] = node;
+        } else if (node._nodeType === 'object') {
+          // It's an object node. First, recursively prune its children. (Post-order traversal)
+          const prunedChildren = pruneObjectsWithoutAttributes(node);
+          
+          // Now, check if any non-metadata children survived the pruning.
+          const hasRemainingDescendants = Object.keys(prunedChildren).some(k => !k.startsWith('_'));
+          
+          if (hasRemainingDescendants) {
+            // If children survived, it means this object has valid attribute descendants.
+            // We must keep this object node.
+            
+            // Reconstruct the node correctly: copy its metadata and add the pruned children.
+            const newNode = {};
+            Object.keys(node).forEach(prop => {
+              if (prop.startsWith('_')) {
+                newNode[prop] = node[prop];
+              }
+            });
+            
+            // Combine the node's metadata with its surviving (pruned) children.
+            result[key] = { ...newNode, ...prunedChildren };
+          }
+          // If the object has no remaining descendants, we do nothing, effectively pruning it
+          // by not adding it to the `result` object.
+        }
+      });
+      
+      return result;
+    };
+
+    // Create partial schema using two-step process
+    const createAutoExtendedSchema = (schema) => {
+      // Step 1: Keep only auto-extended nodes, prune fixed branches
+      const autoExtendedOnly = createAutoExtendedOnlySchema(schema);
+      
+      // Step 2: Remove object nodes without attribute descendants
+      return pruneObjectsWithoutAttributes(autoExtendedOnly);
     };
 
     const autoExtendedSchema = createAutoExtendedSchema(currentGraphSchema);

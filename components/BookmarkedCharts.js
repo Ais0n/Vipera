@@ -52,6 +52,20 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
                     .attr('height', barHeight)
                     .attr('fill', colorScale(segment.batch));
                 
+                // Add text label if bar is tall enough
+                if (barHeight > 14) {
+                    svg.append('text')
+                        .attr('x', xScale(key) + xScale.bandwidth() / 2)
+                        .attr('y', yScale(yOffset + segment.count) + barHeight / 2)
+                        .attr('text-anchor', 'middle')
+                        .attr('dominant-baseline', 'middle')
+                        .attr('pointer-events', 'none')
+                        .style('fill', '#000')
+                        .style('font-size', '11px')
+                        .style('font-weight', 'bold')
+                        .text(segment.count);
+                }
+                
                 yOffset += segment.count;
             });
         }
