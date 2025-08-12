@@ -32,15 +32,18 @@ export default async function handler(req, res) {
             let input = `data:image/jpeg;base64,${imageBase64}`;
             let result = await generateGraph(input);
 
-            // save result to image_dir
+            // save result to image_dir (only for the initial/first scene graph)
             if (image_dir && process.env.NEXT_PUBLIC_SAVE_MODE == 'true') {
+                // Check if this is the first scene graph by checking if the file already exists
                 let file_path = path.join(process.cwd(), 'public', image_dir);
-                // create the path if doesn't exist
+                
+                // Only save if the file doesn't exist yet (i.e., this is the initial scene graph)
                 if (!fs.existsSync(file_path)) {
+                    // create the directory if it doesn't exist
                     fs.mkdirSync(path.dirname(file_path), { recursive: true });
+                    fs.writeFileSync(file_path, JSON.stringify(result));
+                    console.log("Initial scene graph saved to: ", file_path);
                 }
-                fs.writeFileSync(file_path, JSON.stringify(result));
-                console.log("Graph saved to: ", file_path);
             }
             
             return res.status(200).json({ res: result});

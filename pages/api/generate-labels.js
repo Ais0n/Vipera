@@ -40,27 +40,8 @@ export default async function handler(req, res) {
             // change result to lower case
             result = JSON.parse(JSON.stringify(result).toLowerCase());
 
-            // save result to label_dir
-            if (label_dir && process.env.NEXT_PUBLIC_SAVE_MODE == 'true') {
-                let promise = new Promise(async (resolve, reject) => {
-                    let file_path = path.join(process.cwd(), 'public', label_dir);
-                    // read the existing file
-                    let data = {};
-                    if (fs.existsSync(file_path)) {
-                        data = await readFile(file_path, 'utf-8');
-                        data = JSON5.parse(data.toLowerCase());
-                    } else {
-                        fs.mkdirSync(path.dirname(file_path), { recursive: true });
-                    }
-                    let contents = Utils.mergeMetadata(data, result);
-                    contents = Utils.repairDataWithSchema(contents, JSON.parse(schema));
-                    fs.writeFileSync(file_path, JSON.stringify(contents));
-                    resolve();
-                });
-                promise.then(() => {
-                    console.log('Saved label to label_dir');
-                });
-            }
+            // Note: Label saving is disabled when NEXT_PUBLIC_SAVE_MODE is true
+            // Labels will not be saved to preserve storage and only save images and initial scene graph
 
             return res.status(200).json({ res: result });
         } catch (error) {
