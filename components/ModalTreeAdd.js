@@ -53,7 +53,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
             // Handle both new scope structure and legacy array format
             const scopeImages = schemaNode._scope?.images || 
                               (Array.isArray(schemaNode._scope) ? schemaNode._scope : []);
-            const scopeType = schemaNode._scope?.type || 'fixed';
+            const scopeType = schemaNode._scope?.type || 'auto-extended';
             const scopePromptIndices = schemaNode._scope?.promptIndices || [];
             
             setselectedImageInfo(Array.from(new Set(scopeImages)));
@@ -98,7 +98,7 @@ const ModalTreeAdd = ({ isOpen, modalType, onClose, onSave, prompts = [], groups
         setNodeType("attribute");
         setCandidateValues('');
         setSelectedPrompts([]);
-        setScopeType("fixed");
+        setScopeType("auto-extended");
     };
 
     const promptAllChecked = selectedPrompts.length === prompts.length; // whether all prompts are selected

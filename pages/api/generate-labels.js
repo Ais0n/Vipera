@@ -97,7 +97,7 @@ async function generateLabel(imageData, schema, candidateValues, userFeedback) {
             }]
 
             const response = await openai.chat.completions.create({
-                model: 'openai/gpt-4.1',
+                model: 'openai/gpt-5-mini',
                 messages: messages,
             });
     

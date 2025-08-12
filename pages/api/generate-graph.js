@@ -77,7 +77,7 @@ async function generateGraph(imageData) {
             }]
 
             const response = await openai.chat.completions.create({
-                model: 'openai/gpt-4.1',
+                model: 'openai/gpt-5-mini',
                 messages: messages,
             });
     

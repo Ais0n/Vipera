@@ -42,7 +42,7 @@ async function suggestNote(chart, priorPrompts) {
             console.log("input: ", input)
             
             const completion = await openai.chat.completions.create({
-                model: "openai/gpt-4.1",  
+                model: "google/gemini-2.5-flash-lite",  
                 messages: [
                     { role: "system", content: "You are a helpful assistant." },
                     { role: "user", content: input }

@@ -98,7 +98,7 @@ async function suggestComparison(imageData, keywords, schema) {
             }]
 
             const response = await openai.chat.completions.create({
-                model: 'openai/gpt-4.1',
+                model: 'google/gemini-2.5-flash-lite',
                 messages: messages,
             });
     

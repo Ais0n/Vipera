@@ -441,7 +441,7 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
     // Handle new scope structure
     if (!graphSchema._scope) {
         graphSchema._scope = {
-            type: "fixed",
+            type: "auto-extended",
             promptIndices: [],
             images: []
         };
@@ -450,7 +450,7 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
     // If legacy scope (array), convert to new format
     if (Array.isArray(graphSchema._scope)) {
         graphSchema._scope = {
-            type: "fixed",
+            type: "auto-extended",
             promptIndices: [],
             images: [...graphSchema._scope]
         };
@@ -491,10 +491,13 @@ function updateAutoExtendedScopes(graphSchema, newPromptIndex, newImages) {
                     node._scope.promptIndices.push(newPromptIndex);
                 }
                 newImages.forEach(item => {
-                    if(!node._scope.images.includes(item)) {
+                    const existsAlready = node._scope.images.some(img => 
+                        img.imageId === item.imageId && img.batch === item.batch
+                    );
+                    if (!existsAlready) {
                         node._scope.images.push(item);
                     }
-                })
+                });
             }
             
             // Recursively traverse children

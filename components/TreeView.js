@@ -40,7 +40,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
         // stacked bar chart
         nodes.filter(d => d.data.type == 'attribute')
             .each(function (d) {
-                console.log(d)
+                // console.log(d)
                 if (!d.data.list) {
                     d3.select(this).append('text')
                         .attr('x', 20)
@@ -122,7 +122,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                 maxCount = Math.max(...Object.values(dataItemCount));
 
                 // Stack the data for the bars
-                console.log(dataItemMap);
+                // console.log(dataItemMap);
                 for (let key in dataItemMap) {
                     let yOffset = -25;
                     dataItemMap[key].forEach(dataItem => {
