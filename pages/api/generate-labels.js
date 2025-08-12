@@ -18,6 +18,13 @@ const openai = new OpenAI({
     baseURL: "https://openrouter.ai/api/v1"
 });
 
+export const config = {
+    api: {
+        responseLimit: false,
+        timeout: 120000, // 120 seconds
+    },
+};
+
 export default async function handler(req, res) {
     // throw new Error("");
     if (req.method === 'GET') {

@@ -14,25 +14,47 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
     }, [bookmarkedCharts]);
 
     const renderBarChart = (svg, data, chartHeight, chartWidth, margin) => {
+        // Group data by dataItem to create stacked bars
+        let dataItemMap = {};
+        data.forEach(item => {
+            if (!dataItemMap[item.dataItem]) {
+                dataItemMap[item.dataItem] = [];
+            }
+            dataItemMap[item.dataItem].push(item);
+        });
+
+        // Calculate total counts for each dataItem to set domain
+        let dataItemTotals = {};
+        for (let key in dataItemMap) {
+            dataItemTotals[key] = dataItemMap[key].reduce((sum, item) => sum + item.count, 0);
+        }
+
         const xScale = d3.scaleBand()
-            .domain(data.map(d => d.dataItem))
+            .domain(Object.keys(dataItemMap))
             .range([margin.left, chartWidth - margin.right])
             .padding(0.1);
 
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.count)])
+            .domain([0, Math.max(...Object.values(dataItemTotals))])
             .nice()
             .range([chartHeight - margin.bottom, margin.top]);
 
-        // Render bars
-        svg.selectAll('rect')
-            .data(data)
-            .enter().append('rect')
-            .attr('x', d => xScale(d.dataItem))
-            .attr('y', d => yScale(d.count))
-            .attr('width', xScale.bandwidth())
-            .attr('height', d => yScale(0) - yScale(d.count))
-            .attr('fill', d => colorScale(d.batch)); // Simple color scale
+        // Render stacked bars
+        for (let key in dataItemMap) {
+            let yOffset = 0;
+            dataItemMap[key].forEach(segment => {
+                const barHeight = yScale(0) - yScale(segment.count);
+                
+                svg.append('rect')
+                    .attr('x', xScale(key))
+                    .attr('y', yScale(yOffset + segment.count))
+                    .attr('width', xScale.bandwidth())
+                    .attr('height', barHeight)
+                    .attr('fill', colorScale(segment.batch));
+                
+                yOffset += segment.count;
+            });
+        }
 
         // Add x-axis
         svg.append('g')
