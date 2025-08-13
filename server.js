@@ -13,43 +13,43 @@ app.prepare().then(() => {
     const server = express();
 
     // Proxy API requests to server C
-    server.use('/a1pi', createProxyMiddleware({
-        target: 'http://127.0.0.1:5001',
-        changeOrigin: true,
-        // secure: false,
-        pathRewrite: {
-            '^/api': '', // Remove /api prefix when forwarding to target
-        },
-        onProxyReq: (proxyReq, req, res) => {
-            console.log('Proxying request:', req.path);
-        },
-        onProxyRes: (proxyRes, req, res) => {
-            console.log('Received response from target:', proxyRes.statusCode);
-        },
-        onError: (err, req, res) => {
-            console.error('Proxy error:', err);
-            res.status(500).send('Proxy error');
-        },
-    }));
+    // server.use('/a1pi', createProxyMiddleware({
+    //     target: 'http://127.0.0.1:5001',
+    //     changeOrigin: true,
+    //     // secure: false,
+    //     pathRewrite: {
+    //         '^/api': '', // Remove /api prefix when forwarding to target
+    //     },
+    //     onProxyReq: (proxyReq, req, res) => {
+    //         console.log('Proxying request:', req.path);
+    //     },
+    //     onProxyRes: (proxyRes, req, res) => {
+    //         console.log('Received response from target:', proxyRes.statusCode);
+    //     },
+    //     onError: (err, req, res) => {
+    //         console.error('Proxy error:', err);
+    //         res.status(500).send('Proxy error');
+    //     },
+    // }));
 
-    server.use('/a2pi', createProxyMiddleware({
-        target: 'http://10.8.11.5:5002',
-        changeOrigin: true,
-        // secure: false,
-        pathRewrite: {
-            '^/a2pi': '', // Remove /a2pi prefix when forwarding to target
-        },
-        onProxyReq: (proxyReq, req, res) => {
-            console.log('Proxying request:', req.path);
-        },
-        onProxyRes: (proxyRes, req, res) => {
-            console.log('Received response from target:', proxyRes.statusCode);
-        },
-        onError: (err, req, res) => {
-            console.error('Proxy error:', err);
-            res.status(500).send('Proxy error');
-        },
-    }));
+    // server.use('/a2pi', createProxyMiddleware({
+    //     target: 'http://10.8.11.5:5002',
+    //     changeOrigin: true,
+    //     // secure: false,
+    //     pathRewrite: {
+    //         '^/a2pi': '', // Remove /a2pi prefix when forwarding to target
+    //     },
+    //     onProxyReq: (proxyReq, req, res) => {
+    //         console.log('Proxying request:', req.path);
+    //     },
+    //     onProxyRes: (proxyRes, req, res) => {
+    //         console.log('Received response from target:', proxyRes.statusCode);
+    //     },
+    //     onError: (err, req, res) => {
+    //         console.error('Proxy error:', err);
+    //         res.status(500).send('Proxy error');
+    //     },
+    // }));
 
     server.all('*', (req, res) => {
         return handle(req, res);
