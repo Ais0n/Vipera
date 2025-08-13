@@ -218,42 +218,10 @@ const Generate = () => {
             throw new Error("Scene graph generation failed. You can retry.");
           } 
 
-          // Update auto-extended scopes in the schema first
-          if (Object.keys(graphSchema).length > 0) {
-            const newPromptIndex = prompts.length;
-            Utils.updateAutoExtendedScopes(updatedGraphSchema, newPromptIndex, retriedImages);
-          }
-
           // Update the graph schema by adding the scope of the new prompt to each node
-          let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(retriedImages, updatedGraphSchema);
+        let schemaScope = tmpSchemaScope ? Utils.lazyPropagate(tmpSchemaScope, retriedImages) : Utils.lazyPropagate(generateSchemaScope(retriedImages, updatedGraphSchema), retriedImages);
 
-          // If we have a tmpSchemaScope (from handlePromote), populate "fixed" scope placeholders with retried images
-          if (tmpSchemaScope) {
-            const populateFixedScopes = (schema, newImages) => {
-              Object.keys(schema).forEach(key => {
-                if (key.startsWith('_')) return;
-                
-                const node = schema[key];
-                if (node && typeof node === 'object') {
-                  // If this node has a "fixed" scope with empty images, populate it
-                  if (node._scope && node._scope.type === 'fixed' && Array.isArray(node._scope.images) && node._scope.images.length === 0) {
-                    node._scope.images = newImages.map(img => ({
-                      imageId: img.imageId,
-                      batch: img.batch
-                    }));
-                    console.log(`Populated fixed scope for node ${key} with ${node._scope.images.length} retried images`);
-                  }
-                  
-                  // Recursively process child nodes
-                  populateFixedScopes(node, newImages);
-                }
-              });
-            };
-            
-            populateFixedScopes(schemaScope, retriedImages);
-          }
-
-          console.log("partial schema:", schemaScope);
+        console.log("partial schema:", schemaScope);
 
           if (schemaScope) {
             Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, retriedImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
@@ -277,6 +245,7 @@ const Generate = () => {
     } finally {
       setIsGenerating(false);
       setIsDoneGenerating(true);
+      setTmpSchemaScope(undefined);
     }
   }
 
@@ -574,6 +543,7 @@ const Generate = () => {
     } finally {
       setIsGenerating(false);
       setIsDoneGenerating(true);
+      setTmpSchemaScope(undefined);
     }
   };
 
@@ -691,26 +661,10 @@ const Generate = () => {
       } 
       setRetrySceneGraphContext(undefined);
 
-      // Update auto-extended scopes in the schema first
-      if (Object.keys(graphSchema).length > 0) {
-        const newPromptIndex = prompts.length;
-        Utils.updateAutoExtendedScopes(updatedGraphSchema, newPromptIndex, newImages);
-      }
 
       // Update the graph schema by adding the scope of the new prompt to each node
-      let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
+      let schemaScope = tmpSchemaScope ? Utils.lazyPropagate(tmpSchemaScope, retriedImages) : Utils.lazyPropagate(generateSchemaScope(retriedImages, updatedGraphSchema), retriedImages);
 
-      // If using tmpSchemaScope, populate nodes whose scope includes the latest prompt
-      if (tmpSchemaScope) {
-        // Populate scopes that include the latest prompt (via promptIndices) with actual image IDs
-        for (const nodeId in schemaScope) {
-          if (schemaScope[nodeId].promptIndices && 
-              schemaScope[nodeId].promptIndices.includes(prompts.length) &&
-              schemaScope[nodeId].images && schemaScope[nodeId].images.length === 0) {
-            schemaScope[nodeId].images = newImages.map(image => image.imageId);
-          }
-        }
-      }
 
       console.log("partial schema:", schemaScope);
 
@@ -734,6 +688,7 @@ const Generate = () => {
     } finally {
       setIsGenerating(false);
       setIsDoneGenerating(true);
+      setTmpSchemaScope(undefined);
     }
   }
 
