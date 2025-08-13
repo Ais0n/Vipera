@@ -5,7 +5,13 @@ const basePath = isProd ? '/demo1' : '';
 
 module.exports = {
     env: {
-        MODEL_API_KEY: process.env.MODEL_API_KEY,
+        NEXT_PUBLIC_REPLICATE_API_TOKEN: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
+        NEXT_PUBLIC_OPENROUTER_KEY: process.env.NEXT_PUBLIC_OPENROUTER_KEY,
+        NEXT_FAL_AI_KEY: process.env.NEXT_FAL_AI_KEY,
+        NEXT_ALI_KEY: process.env.NEXT_ALI_KEY,
+        NEXT_PUBLIC_SAVE_MODE: process.env.NEXT_PUBLIC_SAVE_MODE,
+        NEXT_PUBLIC_LLM_ENABLED: process.env.NEXT_PUBLIC_LLM_ENABLED,
+        PORT: process.env.PORT || 8801
     },
     reactStrictMode: false,
     basePath: basePath,
