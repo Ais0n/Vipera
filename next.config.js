@@ -1,7 +1,8 @@
 
 
 const isProd = process.env.NODE_ENV === 'production';
-const basePath = isProd ? '/demo1' : '';
+// Remove basePath since Apache proxy strips the /demo1 prefix
+const basePath = '';
 
 module.exports = {
     env: {
