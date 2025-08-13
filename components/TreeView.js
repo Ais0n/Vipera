@@ -144,8 +144,8 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                                 const tooltip = d3.select(tooltipRef.current)
                                     .style('display', 'block')
                                     .html(`
-                                    <strong>${d.dataItem}</strong>
-                                    <strong>Count:</strong> ${d.count}<br/>
+                                    <strong>${d.dataItem}:</strong>
+                                    ${d.count}<br/>
                                     `)
                                     .style('left', `${rectBounds.left + window.scrollX + 10}px`)
                                     .style('top', `${rectBounds.top + window.scrollY - 30}px`)

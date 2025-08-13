@@ -1822,7 +1822,7 @@ const Generate = () => {
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary mode={mode} images={images} imagesRef={imagesRef} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr}/>
+        <ImageSummary mode={mode} images={images} imagesRef={imagesRef} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr} isGenerating={isGenerating}/>
       </div>}
 
 

@@ -5,7 +5,7 @@ import { FixedSizeList } from 'react-window';
 import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
-const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButtonClick }) => {
+const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButtonClick, isGenerating }) => {
     const [image1Index, setImage1Index] = useState(0);
     const [image2Index, setImage2Index] = useState(1);
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
@@ -279,7 +279,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     }, [abortController]);
 
     useEffect(() => {
-        if (prompts instanceof Array && prompts.length > 0 && graphSchema) {
+        if (prompts instanceof Array && prompts.length > 0 && graphSchema && isGenerating) {
             updateSuggestion();
         }
     }, []);

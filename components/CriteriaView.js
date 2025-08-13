@@ -112,8 +112,7 @@ const StackedBarChart = ({ node, colorScale, groups, handleBarHover, tooltipRef,
                         d3.select(tooltipRef.current)
                             .style('display', 'block')
                             .html(`
-                                <strong>${d.dataItem}</strong><br/>
-                                <strong>Count:</strong> ${d.count}
+                                <strong>${d.dataItem}:</strong><br/>${d.count}
                             `)
                             .style('left', `${rectBounds.left + window.scrollX + 10}px`)
                             .style('top', `${rectBounds.top + window.scrollY - 30}px`)

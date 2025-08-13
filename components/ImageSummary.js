@@ -17,7 +17,7 @@ import ModalLabelEdit from './ModalLabelEdit';
 import PromptManager from './PromptManager';
 import CriteriaView from './CriteriaView';
 
-const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils, setPromptStr }) => {
+const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils, setPromptStr, isGenerating }) => {
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
@@ -246,6 +246,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                                 images={imagesRef.current}
                                 existingCriteria={existingCriteria}
                                 handleSuggestionButtonClick={_handleSuggestionButtonClickFlat}
+                                isGenerating={isGenerating}
                             />
                         ) : (
                             /* Mode D: Use original scene graph-based component */
@@ -254,6 +255,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                                 images={imagesRef.current} 
                                 graphSchema={graphSchema} 
                                 handleSuggestionButtonClick={handleSuggestionButtonClick}
+                                isGenerating={isGenerating}
                             />
                         )}
 
