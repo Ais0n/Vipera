@@ -88,7 +88,9 @@ async function suggestComparisonFlat(imageData, keywords, existingCriteria) {
             
 Existing criteria: ${existingCriteriaList}
 
-Output in the JSON form: {'criterionName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest the criterion 'gender' with candidateValues ["male", "female"]. The criterion name should be concise and descriptive.
+Generate a list of candidate values along with the suggested criteria. Include 'others' in the candidate values if you believe the original list is not exhaustive. The list should not be too long (typically 3-5 values including 'others' if applicable).
+
+Output in the JSON form: {'criterionName': '...', 'candidateValues': ['...', ...], 'explanations': '...'}. For example, if the people in the two images have different genders, you can suggest the criterion 'gender' with candidateValues ["male", "female"]. For a more open-ended attribute like 'style', you might suggest candidateValues like ["modern", "traditional", "vintage", "others"]. The criterion name should be concise and descriptive.
 
 Your suggestion (JSON):`;
             

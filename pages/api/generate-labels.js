@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         let _path = req.query.path;
         let schema = req.query.schema;
         let label_dir = req.query.label_dir;
-        let candidateValues = req.query.candidate_values;
+        // let candidateValues = req.query.candidate_values;
         let userFeedback = req.query.feedback;
         try {
             let image, imageBase64;
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
                 imageBase64 = (await readFile(path.join(process.cwd(), 'public', _path))).toString('base64');
             }
             let imageData = `data:image/jpeg;base64,${imageBase64}`;
-            let result = await generateLabel(imageData, schema, candidateValues, userFeedback);
+            let result = await generateLabel(imageData, schema, userFeedback);
             // change result to lower case
             result = JSON.parse(JSON.stringify(result).toLowerCase());
 
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     }
 }
 
-async function generateLabel(imageData, schema, candidateValues, userFeedback) {
+async function generateLabel(imageData, schema, userFeedback) {
     let maxTries = 10;
 
     for (let i = 0; i < maxTries; i++) {
