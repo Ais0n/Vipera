@@ -12,6 +12,11 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
     const server = express();
 
+    // Serve static files directly
+    server.use('/_next', express.static('.next'));
+    server.use('/public', express.static('public'));
+    server.use(express.static('public')); // Serve public files at root
+
     // Proxy API requests to server C
     // server.use('/a1pi', createProxyMiddleware({
     //     target: 'http://127.0.0.1:5001',
