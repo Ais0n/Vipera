@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     // throw new Error("");
     if (req.method === 'GET') {
         let { prompt, imageId } = req.query;
-        let output_dir = path.join(process.cwd(), 'public', 'temp_images', prompt.replace(/ /g, '_'));
+        let output_dir = path.join(process.cwd(), 'public', 'temp_images', prompt.toLowerCase().replace(/ /g, '_'));
 
         try {
             const imagePath = await generateImage(prompt);
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
                 let image_path = path.join(output_dir, `${imageId}.png`);
                 fs.writeFileSync(image_path, imageBuffer);
                 console.log("Image saved to: ", image_path);
-                newPath = '/temp_images/' + prompt.replace(/ /g, '_') + `/${imageId}.png`;
+                newPath = '/temp_images/' + prompt.toLowerCase().replace(/ /g, '_') + `/${imageId}.png`;
             } else {
                 newPath = imagePath[0];
             }
