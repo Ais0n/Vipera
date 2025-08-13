@@ -3,7 +3,7 @@
   "scripts": {
     "build": "next build",
     "dev": "node server.js",
-    "start": "next start -p 80"
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
