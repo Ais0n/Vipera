@@ -119,15 +119,59 @@ const Tooltip = ({ visible, x, y, image, data }) => {
                 });
             });
 
-            // Add y-axis with category and image label
-            chart.append("g")
-                .attr("class", "y-axis")
-                .call(d3.axisLeft(yScale).tickFormat(d => {
-                    const category = categories.find(c => c.key === d);
-                    return category ? `${d}: ${category.imageLabel}` : d;
-                }))
-                .selectAll("text")
-                .style("font-size", "10px");
+            // Add y-axis with category and image label with text wrapping
+            const yAxis = chart.append("g")
+                .attr("class", "y-axis");
+
+            // Custom text wrapping function
+            const wrapText = (text, maxWidth) => {
+                const words = text.split(/\s+/);
+                const lines = [];
+                let currentLine = words[0] || '';
+
+                for (let i = 1; i < words.length; i++) {
+                    const word = words[i];
+                    const testLine = currentLine + ' ' + word;
+                    
+                    // Estimate text width (rough approximation)
+                    if (testLine.length * 6 <= maxWidth) {
+                        currentLine = testLine;
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            };
+
+            // Add custom y-axis labels with wrapping
+            categories.forEach(category => {
+                const labelText = `${category.key}: ${category.imageLabel}`;
+                const maxLabelWidth = margin.left - 10; // Available space for labels
+                const lines = wrapText(labelText, maxLabelWidth);
+                
+                const labelGroup = yAxis.append("g")
+                    .attr("class", "tick")
+                    .attr("transform", `translate(0, ${yScale(category.key) + yScale.bandwidth()/2})`);
+
+                // Add tick line
+                labelGroup.append("line")
+                    .attr("stroke", "currentColor")
+                    .attr("x2", -6);
+
+                // Add multiline text
+                lines.forEach((line, i) => {
+                    labelGroup.append("text")
+                        .attr("fill", "currentColor")
+                        .attr("x", -9)
+                        .attr("y", (i - (lines.length - 1) / 2) * 12) // Center vertically
+                        .attr("dy", "0.35em")
+                        .style("text-anchor", "end")
+                        .style("font-size", "10px")
+                        .text(line);
+                });
+            });
         }
     }, [visible, data]);
 

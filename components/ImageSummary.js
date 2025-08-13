@@ -189,11 +189,37 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
     }
 
     const exportToHTML = () => {
+        // Generate prompts section with styling similar to PromptManager
+        const promptsHTML = prompts.map((prompt, index) => {
+            const color = colorScale(index + 1);
+            const groupIndex = groups.findIndex(group => group.items.includes(index));
+            const groupName = groupIndex !== -1 ? groups[groupIndex].name : '';
+            return `
+                <div style="margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 20px; height: 20px; background-color: ${color}; border-radius: 50%; margin-right: 10px;"></div>
+                        <div style="font-weight: bold; margin-right: 10px;">Prompt ${index + 1}${groupName ? ` (${groupName})` : ''}:</div>
+                    </div>
+                    <div style="margin-left: 30px; padding: 5px 0;">${prompt}</div>
+                </div>
+            `;
+        }).join('');
+
+        // Generate images section with styling similar to ImageSummary imageContainer
+        const imagesHTML = images.map((image) => {
+            const color = colorScale(image.batch);
+            return `
+                <div style="display: inline-block; width: 80px; height: 80px; margin: 5px; border-radius: 5px; border-top: 7px solid ${color}; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <img src="data:image/png;base64,${image.data}" alt="Image ${image.imageId}" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+            `;
+        }).join('');
+
         const chartsHTML = bookmarkedCharts.map((_data, index) => {
             const title = _data.title ? `<h3>${_data.title}</h3>` : '';
             const svg = document.getElementById(`chart-${index}`).innerHTML;
             const comment = comments[index] ? `<p>${comments[index]}</p>` : '';
-            return `<div>${title}<div>${svg}</div>${comment}</div>`;
+            return `<div style="margin-bottom: 40px;">${title}<div>${svg}</div>${comment}</div>`;
         }).join('');
 
         const htmlContent = `
@@ -201,16 +227,55 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
             <html>
             <head>
                 <meta charset="utf-8">
-                <title>Exported Charts</title>
+                <title>Audit Report</title>
                 <style>
-                    body { font-family: Arial, sans-serif; }
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        max-width: 1200px; 
+                        margin: 0 auto; 
+                        padding: 20px; 
+                    }
+                    h1, h2 { 
+                        color: #333; 
+                        border-bottom: 2px solid #ddd; 
+                        padding-bottom: 10px; 
+                    }
                     h3 { margin: 20px 0 10px; }
                     p { margin: 0 0 20px; }
-                    div { margin-bottom: 40px; }
+                    .section { 
+                        margin-bottom: 40px; 
+                        padding: 20px; 
+                        background-color: #f9f9f9; 
+                        border-radius: 8px; 
+                    }
+                    .images-grid { 
+                        display: flex; 
+                        flex-wrap: wrap; 
+                        gap: 5px; 
+                        max-height: 400px; 
+                        overflow-y: auto; 
+                    }
                 </style>
             </head>
             <body>
-                ${chartsHTML}
+                <h1>Audit Report</h1>
+                
+                <div class="section">
+                    <h2>Prompts</h2>
+                    ${promptsHTML}
+                </div>
+                
+                <div class="section">
+                    <h2>Generated Images (${images.length} total)</h2>
+                    <div class="images-grid">
+                        ${imagesHTML}
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Analysis Charts and Notes</h2>
+                    ${chartsHTML}
+                </div>
             </body>
             </html>
         `;
@@ -219,7 +284,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'exported_charts.html';
+        a.download = 'audit_report.html';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
