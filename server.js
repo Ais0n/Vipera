@@ -12,50 +12,16 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
     const server = express();
 
-    // Serve static files directly
-    server.use('/_next', express.static('.next'));
-    server.use('/public', express.static('public'));
-    server.use(express.static('public')); // Serve public files at root
+    // Log all requests for debugging
+    server.use((req, res, next) => {
+        console.log(`${req.method} ${req.path}`);
+        next();
+    });
 
-    // Proxy API requests to server C
-    // server.use('/a1pi', createProxyMiddleware({
-    //     target: 'http://127.0.0.1:5001',
-    //     changeOrigin: true,
-    //     // secure: false,
-    //     pathRewrite: {
-    //         '^/api': '', // Remove /api prefix when forwarding to target
-    //     },
-    //     onProxyReq: (proxyReq, req, res) => {
-    //         console.log('Proxying request:', req.path);
-    //     },
-    //     onProxyRes: (proxyRes, req, res) => {
-    //         console.log('Received response from target:', proxyRes.statusCode);
-    //     },
-    //     onError: (err, req, res) => {
-    //         console.error('Proxy error:', err);
-    //         res.status(500).send('Proxy error');
-    //     },
-    // }));
+    // Serve public assets first (SVGs, images, etc.)
+    server.use(express.static('public'));
 
-    // server.use('/a2pi', createProxyMiddleware({
-    //     target: 'http://10.8.11.5:5002',
-    //     changeOrigin: true,
-    //     // secure: false,
-    //     pathRewrite: {
-    //         '^/a2pi': '', // Remove /a2pi prefix when forwarding to target
-    //     },
-    //     onProxyReq: (proxyReq, req, res) => {
-    //         console.log('Proxying request:', req.path);
-    //     },
-    //     onProxyRes: (proxyRes, req, res) => {
-    //         console.log('Received response from target:', proxyRes.statusCode);
-    //     },
-    //     onError: (err, req, res) => {
-    //         console.error('Proxy error:', err);
-    //         res.status(500).send('Proxy error');
-    //     },
-    // }));
-
+    // Let Next.js handle everything else (including _next/static)
     server.all('*', (req, res) => {
         return handle(req, res);
     });
