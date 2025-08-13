@@ -1,12 +1,16 @@
 
 
+const isProd = process.env.NODE_ENV === 'production';
+const basePath = isProd ? '/demo1' : '';
+
 module.exports = {
     env: {
         MODEL_API_KEY: process.env.MODEL_API_KEY,
     },
     reactStrictMode: false,
-    basePath: process.env.NODE_ENV === 'production' ? '/demo1' : '',
-    assetPrefix: process.env.NODE_ENV === 'production' ? '/demo1' : '',
+    basePath: basePath,
+    assetPrefix: basePath,
+    trailingSlash: false,
     transpilePackages: [
         "antd",
         "rc-util",
