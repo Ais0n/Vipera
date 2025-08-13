@@ -31,6 +31,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     }
 
     const updateSuggestion = () => {
+        console.log("updateSuggestion called with images: ", images, " prompts: ", prompts, " graphSchema: ", graphSchema);
         if (images.length <= 1) return;
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
             setSuggestionMetaData({});

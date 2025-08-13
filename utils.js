@@ -432,7 +432,7 @@ function getScope(imageInfo, graphSchema) {
 
 function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
     /**
-     * Update the graph schema by adding imageInfo to the "_scope" for all nodes within the subSchema
+     * Update the graph schema by updating the "_scope" for all nodes within the subSchema
      */
     if (typeof(subSchema) !== 'object' || subSchema === null) {
         return;
@@ -444,15 +444,6 @@ function updateGraphSchemaWithScope(graphSchema, subSchema, imageInfo) {
             type: "auto-extended",
             promptIndices: [],
             images: []
-        };
-    }
-    
-    // If legacy scope (array), convert to new format
-    if (Array.isArray(graphSchema._scope)) {
-        graphSchema._scope = {
-            type: "auto-extended",
-            promptIndices: [],
-            images: [...graphSchema._scope]
         };
     }
     
@@ -487,6 +478,9 @@ function updateAutoExtendedScopes(graphSchema, newPromptIndex, newImages) {
         if (node && typeof node === 'object') {
             // Check if this node has an auto-extended scope
             if (node._scope && node._scope.type === 'auto-extended') {
+                if (!node._scope.promptIndices) {
+                    node._scope.promptIndices = [];
+                }
                 if (!node._scope.promptIndices.includes(newPromptIndex)) {
                     node._scope.promptIndices.push(newPromptIndex);
                 }
@@ -560,4 +554,39 @@ function getLeafNodes(graph) {
     return leafNodes;
 }
 
-export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, updateAutoExtendedScopes, wrapSchemaForLabeling, getLeafNodes };
+function lazyPropagate(schema, images) {
+    /**
+     * Lazy propagate the schema by adding a new prompt index and images to the existing schema.
+     * This is used to avoid deep cloning the schema every time a new prompt is added.
+     */
+    if (!schema || typeof schema !== 'object') {
+        return schema;
+    }
+
+    // If the schema has a _scope field, update it
+    if (schema._scope) {
+        images.forEach(image => {
+            const existsAlready = schema._scope.images.some(img => 
+                img.imageId === image.imageId && img.batch === image.batch
+            );
+            if (!existsAlready) {
+                schema._scope.images.push(image);
+            }
+        });
+    }
+
+    // Recursively traverse children
+    Object.keys(schema).forEach((key) => {
+        // Skip keys starting with "_"
+        if (key.startsWith("_")) {
+            return;
+        }
+        if (typeof schema[key] === 'object') {
+            schema[key] = lazyPropagate(schema[key], images);
+        }
+    });
+
+    return schema;
+}
+
+export { deepClone, calculateGraph, getMetaDatafromGraph, getImageMetadata, arrayBufferToBase64, processSceneGraph, mergeMetadata, isObjectSubset, getColorScale, getGroupId, removeRedundantFields, repairDataWithSchema, uniqueName, removeUnderscoreFields, getScope, updateGraphSchemaWithScope, updateAutoExtendedScopes, wrapSchemaForLabeling, getLeafNodes, lazyPropagate };

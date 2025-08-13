@@ -23,6 +23,7 @@ const Generate = () => {
   const [isDoneImage, setIsDoneImage] = useState(true);
   const [isDoneSceneGraph, setIsDoneSceneGraph] = useState(false);
   const [images, setImages] = useState([]);
+  const [imagesRef, setImagesRef] = useState([]);
   const [distribution, setDistribution] = useState({ age: {}, gender: {}, skinTone: {}, faceDetectedCount: 0, faceNotDetectedCount: 0 });
   const [selectedCategory, setSelectedCategory] = useState('images'); // Default to 'images'
   const [promptStr, setPromptStr] = useState('');
@@ -58,7 +59,8 @@ const Generate = () => {
   
   useEffect(() => {
     metaDataRef.current = metaData;
-  }, [metaData]);
+    imagesRef.current = images;
+  }, [metaData, images]);
 
   const isDebug = false;
   const baseUrl = '/api';
@@ -224,6 +226,32 @@ const Generate = () => {
 
           // Update the graph schema by adding the scope of the new prompt to each node
           let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(retriedImages, updatedGraphSchema);
+
+          // If we have a tmpSchemaScope (from handlePromote), populate "fixed" scope placeholders with retried images
+          if (tmpSchemaScope) {
+            const populateFixedScopes = (schema, newImages) => {
+              Object.keys(schema).forEach(key => {
+                if (key.startsWith('_')) return;
+                
+                const node = schema[key];
+                if (node && typeof node === 'object') {
+                  // If this node has a "fixed" scope with empty images, populate it
+                  if (node._scope && node._scope.type === 'fixed' && Array.isArray(node._scope.images) && node._scope.images.length === 0) {
+                    node._scope.images = newImages.map(img => ({
+                      imageId: img.imageId,
+                      batch: img.batch
+                    }));
+                    console.log(`Populated fixed scope for node ${key} with ${node._scope.images.length} retried images`);
+                  }
+                  
+                  // Recursively process child nodes
+                  populateFixedScopes(node, newImages);
+                }
+              });
+            };
+            
+            populateFixedScopes(schemaScope, retriedImages);
+          }
 
           console.log("partial schema:", schemaScope);
 
@@ -520,14 +548,8 @@ const Generate = () => {
           throw new Error("Scene graph generation failed. You can retry.");
         } 
 
-        // Update auto-extended scopes in the schema first
-        if (Object.keys(graphSchema).length > 0) {
-          const newPromptIndex = prompts.length;
-          Utils.updateAutoExtendedScopes(updatedGraphSchema, newPromptIndex, newImages);
-        }
-
         // Update the graph schema by adding the scope of the new prompt to each node
-        let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
+        let schemaScope = tmpSchemaScope ? Utils.lazyPropagate(tmpSchemaScope, newImages) : Utils.lazyPropagate(generateSchemaScope(newImages, updatedGraphSchema), newImages);
 
         console.log("partial schema:", schemaScope);
 
@@ -677,6 +699,18 @@ const Generate = () => {
 
       // Update the graph schema by adding the scope of the new prompt to each node
       let schemaScope = tmpSchemaScope ? tmpSchemaScope : generateSchemaScope(newImages, updatedGraphSchema);
+
+      // If using tmpSchemaScope, populate nodes whose scope includes the latest prompt
+      if (tmpSchemaScope) {
+        // Populate scopes that include the latest prompt (via promptIndices) with actual image IDs
+        for (const nodeId in schemaScope) {
+          if (schemaScope[nodeId].promptIndices && 
+              schemaScope[nodeId].promptIndices.includes(prompts.length) &&
+              schemaScope[nodeId].images && schemaScope[nodeId].images.length === 0) {
+            schemaScope[nodeId].images = newImages.map(image => image.imageId);
+          }
+        }
+      }
 
       console.log("partial schema:", schemaScope);
 
@@ -847,40 +881,207 @@ const Generate = () => {
 
   const handlePromote = async (suggestion) => {
     setPromptStr(suggestion.newPrompt);
+    
+    // Helper function to prune object nodes that don't have any attribute descendants
+    const pruneObjectsWithoutAttributes = (schema) => {
+      const result = {};
+      
+      // Iterate over the children of the current schema node
+      Object.keys(schema).forEach(key => {
+        if (key.startsWith('_')) {
+          // Metadata is handled during node reconstruction, so skip it here.
+          return;
+        }
+        
+        const node = schema[key];
+        if (!node || typeof node !== 'object') {
+          return;
+        }
+
+        if (node._nodeType === 'attribute') {
+          // Always keep attribute nodes, as they are the leaves we're looking for.
+          result[key] = node;
+        } else if (node._nodeType === 'object') {
+          // It's an object node. First, recursively prune its children. (Post-order traversal)
+          const prunedChildren = pruneObjectsWithoutAttributes(node);
+          
+          // Now, check if any non-metadata children survived the pruning.
+          const hasRemainingDescendants = Object.keys(prunedChildren).some(k => !k.startsWith('_'));
+          
+          if (hasRemainingDescendants) {
+            // If children survived, it means this object has valid attribute descendants.
+            // We must keep this object node.
+            
+            // Reconstruct the node correctly: copy its metadata and add the pruned children.
+            const newNode = {};
+            Object.keys(node).forEach(prop => {
+              if (prop.startsWith('_')) {
+                newNode[prop] = node[prop];
+              }
+            });
+            
+            // Combine the node's metadata with its surviving (pruned) children.
+            result[key] = { ...newNode, ...prunedChildren };
+          }
+          // If the object has no remaining descendants, we do nothing, effectively pruning it
+          // by not adding it to the `result` object.
+        }
+      });
+      
+      return result;
+    };
+    
+    // Step 1. Update the graph schema
     let updateSchema = (schema, oldNodeName, newNodeName) => {
+      /*
+        Update the graph schema by renaming a node and updating its scope.
+      */
       if (typeof (schema) != 'object') return;
-      let newTmpSchemaScope = {'_nodeType': schema._nodeType || 'object', '_scope': []};
       let keys = Object.keys(schema);
       for (let key of keys) {
         if (key.startsWith('_')) continue;
         if (key == oldNodeName) {
+          // copy the old node's subtree to the new node
           schema[newNodeName] = Utils.deepClone(schema[oldNodeName]);
+          // recursively traverse the new node to set its scope
           let traverseNewNode = (curNode) => {
             if (!curNode || typeof(curNode) != 'object') return;
-            curNode._scope = [];
+            // Set scope to "auto-extended" type with placeholder for images that will be populated during generation
+            curNode._scope = {
+              type: 'auto-extended',
+              promptIndices: [prompts.length], // Current prompt index (indicator of lazy population)
+              images: [] // Placeholder - will be populated in handleGenerateClick
+            };
             Object.keys(curNode).forEach((k) => {
               if(k.startsWith('_')) return;
               traverseNewNode(curNode[k]);
             });
           }
           traverseNewNode(schema[newNodeName]);
-          newTmpSchemaScope[newNodeName] = Utils.deepClone(schema[newNodeName]);
-          // return newTmpSchemaScope;
+          // set the new node's scope type to 'fixed'
+          schema[newNodeName]._scope.type = 'fixed';
         } else {
-          if (typeof (schema[key]) == 'object') {
-            let res = updateSchema(schema[key], oldNodeName, newNodeName);
-            if (res) {
-              newTmpSchemaScope[key] = res;
-              // return newTmpSchemaScope;
-            }
-          }
+          updateSchema(schema[key], oldNodeName, newNodeName);
         }
       }
-      return newTmpSchemaScope;
     }
     let _graphSchema = Utils.deepClone(graphSchema);
-    let newTmpSchemaScope = updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
+    updateSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
+
+    // Step 2. Calculate the partial schema (tmpSchemaScope)
+    let calculatePartialSchema = (schema, oldNodeName, newNodeName) => {
+      /*
+        Calculate the partial schema based on the updated graph schema.
+        Criteria:
+        - Object nodes will be kept if 1) they have attribute descendants, and 2) the scope types of this node as well as its ancestors are auto-extended.
+        - Attributes nodes will be kept if the scope types of this node as well as its ancestors are auto-extended.
+        - Special case: If the node name = oldNodeName, the whole subtree will be pruned. If the node name = newNodeName, the whole subtree will be kept.
+      */
+      
+      const processNode = (nodeSchema, nodeName, ancestorPath = []) => {
+        const result = {};
+        
+        Object.keys(nodeSchema).forEach(key => {
+          if (key.startsWith('_')) {
+            // Copy metadata fields
+            result[key] = nodeSchema[key];
+            return;
+          }
+          
+          const node = nodeSchema[key];
+          if (!node || typeof node !== 'object') {
+            return;
+          }
+          
+          const currentPath = [...ancestorPath, key];
+          
+          // Special case: If node name matches oldNodeName, prune the entire subtree
+          if (key === oldNodeName) {
+            return;
+          }
+          
+          // Special case: If node name matches newNodeName, keep the entire subtree
+          if (key === newNodeName) {
+            result[key] = Utils.deepClone(node);
+            return;
+          }
+          
+          // Check if all ancestors (including current node) have auto-extended scope
+          const hasAutoExtendedPath = currentPath.every(pathKey => {
+            const pathNode = getNodeAtPath(schema, currentPath.slice(0, currentPath.indexOf(pathKey) + 1));
+            return pathNode && pathNode._scope && pathNode._scope.type === 'auto-extended';
+          });
+          
+          if (!hasAutoExtendedPath) {
+            return;
+          }
+          
+          if (node._nodeType === 'attribute') {
+            // Keep attribute nodes if all ancestors are auto-extended
+            result[key] = Utils.deepClone(node);
+          } else if (node._nodeType === 'object') {
+            // For object nodes, recursively process children first
+            const processedChildren = processNode(node, nodeName, currentPath);
+            
+            // Check if any non-metadata children survived
+            const hasAttributeDescendants = Object.keys(processedChildren).some(k => !k.startsWith('_'));
+            
+            if (hasAttributeDescendants) {
+              // Keep object node with its surviving children
+              const newNode = {};
+              Object.keys(node).forEach(prop => {
+                if (prop.startsWith('_')) {
+                  newNode[prop] = node[prop];
+                }
+              });
+              result[key] = { ...newNode, ...processedChildren };
+            }
+          }
+        });
+        
+        return result;
+      };
+      
+      // Helper function to get node at a specific path
+      const getNodeAtPath = (rootSchema, path) => {
+        let current = rootSchema;
+        for (const pathSegment of path) {
+          if (!current || !current[pathSegment]) {
+            return null;
+          }
+          current = current[pathSegment];
+        }
+        return current;
+      };
+      
+      return processNode(schema, null);
+    }
+    
+    let newTmpSchemaScope = calculatePartialSchema(_graphSchema, suggestion.oldNodeName, suggestion.newNodeName);
     console.log("newTmpSchemaScope", newTmpSchemaScope);
+    
+    // Add placeholders to all nodes that are included in the partial schema
+    // const addPlaceholdersToPartialSchema = (graphSchema, partialSchema) => {
+    //   const traverseAndAddPlaceholders = (gSchema, pSchema) => {
+    //     if (!pSchema || typeof pSchema !== 'object') return;
+    //     if (!pSchema._scope.promptIndices) pSchema._scope.promptIndices = [];
+    //     if (!pSchema._scope.promptIndices.includes(prompts.length)) pSchema._scope.promptIndices.push(prompts.length); // Add next prompt index (indicator of lazy propagation)
+
+    //     Object.keys(pSchema).forEach(key => {
+    //       if (key.startsWith('_')) return;
+          
+    //       // If this key exists in both schemas, add placeholder to graph schema node
+    //       if (gSchema[key] && typeof gSchema[key] === 'object') {
+    //         traverseAndAddPlaceholders(gSchema[key], pSchema[key]);
+    //       }
+    //     });
+    //   };
+      
+    //   traverseAndAddPlaceholders(graphSchema, partialSchema);
+    // };
+    
+    // addPlaceholdersToPartialSchema(_graphSchema, newTmpSchemaScope);
+    
     setTmpSchemaScope(newTmpSchemaScope);
     setGraphSchema(_graphSchema);
     console.log("updatedGraphSchema", _graphSchema);
@@ -1666,7 +1867,7 @@ const Generate = () => {
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary mode={mode} images={images} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr}/>
+        <ImageSummary mode={mode} images={images} imagesRef={imagesRef} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr}/>
       </div>}
 
 
