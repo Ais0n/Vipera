@@ -47,6 +47,7 @@ async function suggestNote(chart, priorPrompts) {
                     { role: "system", content: "You are a helpful assistant." },
                     { role: "user", content: input }
                 ],
+                temperature: 1.0, // Standard temperature for varied note suggestions
             });
             
             // console.log(completion.choices[0].message);

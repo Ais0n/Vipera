@@ -245,8 +245,6 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                     height: 200px;
                     overflow-y: scroll;
                     padding: auto 20px;
-                    white-space: nowrap;
-                    overflow-x: scroll;
                 }
                 .prompt-item {
                     border-radius: 5px;
@@ -277,9 +275,13 @@ const PromptManager = ({ prompts, colorScale, changeColor, handlePromptClick, gr
                 }
                 .prompt-item-text {
                     padding-left: 5px;
-                    line-height: 2.2em;
+                    line-height: 1.4em;
                     border-radius: 5px;
                     display: inline-block;
+                    word-wrap: break-word;
+                    white-space: pre-wrap;
+                    max-width: calc(100% - 30px);
+                    vertical-align: top;
                 }
                 .group {
                     border-radius: 8px;

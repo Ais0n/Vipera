@@ -3,7 +3,7 @@ import { Image } from 'antd';
 import * as d3 from 'd3';
 import axios from 'axios';
 
-const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts }) => {
+const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts, generalNotes, setGeneralNotes }) => {
     const [dynamicPlaceholders, setDynamicPlaceholders] = useState({});
     const [loadingStates, setLoadingStates] = useState({});
     const abortControllers = useRef({});
@@ -200,6 +200,25 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
 
     return (
         <div style={{ marginTop: '20px' }}>
+            {/* General Notes Section */}
+            <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #ddd' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 'bold' }}>General Notes</h3>
+                <textarea
+                    value={generalNotes || ''}
+                    placeholder="Add general observations, insights, or notes about the overall analysis..."
+                    onChange={(e) => setGeneralNotes && setGeneralNotes(e.target.value)}
+                    style={{ 
+                        width: '100%', 
+                        height: '80px', 
+                        padding: '8px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontFamily: 'inherit',
+                        fontSize: '14px',
+                        resize: 'vertical'
+                    }}
+                />
+            </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                 <thead>
                     <tr>

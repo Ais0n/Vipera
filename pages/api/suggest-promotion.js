@@ -48,6 +48,7 @@ async function suggest(prompt, graphSchema) {
                     { role: "system", content: "You are a helpful assistant." },
                     { role: "user", content: input }
                 ],
+                temperature: 1.1, // Higher temperature for more diverse suggestions
             });
             
             let output = completion.choices[0].message.content;
@@ -108,6 +109,7 @@ async function suggestPrompt(prompt, suggestion, priorPrompts) {
                     { role: "system", content: "You are a helpful assistant." },
                     { role: "user", content: input }
                 ],
+                temperature: 1.1, // Higher temperature for more diverse suggestions
             });
             
             let output = completion.choices[0].message.content;

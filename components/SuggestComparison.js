@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Image, Switch, Popover, Button, Tooltip, Tag, Popconfirm, Input, Space, Select, Checkbox, Row, Col } from 'antd';
 import { SyncOutlined, InfoCircleOutlined, BulbOutlined, PlusOutlined } from '@ant-design/icons';
 import { FixedSizeList } from 'react-window';
@@ -14,6 +14,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     const [abortController, setAbortController] = useState(null);
     const [customInputValue, setCustomInputValue] = useState('');
     const [selectedFigureIndices, setSelectedFigureIndices] = useState([]);
+    const lastCallParamsRef = useRef(null);
 
     const content = (index) => (images && index < images.length) ? (
         <div>
@@ -30,13 +31,28 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
         updateSuggestion();   
     }
 
-    const updateSuggestion = () => {
+    const updateSuggestion = useCallback(() => {
         console.log("updateSuggestion called with images: ", images, " prompts: ", prompts, " graphSchema: ", graphSchema);
         if (images.length <= 1) return;
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
             setSuggestionMetaData({});
             return;
         }
+
+        // Create a unique key for this call based on the input parameters
+        const callKey = JSON.stringify({
+            prompts: prompts,
+            graphSchemaKeys: graphSchema ? Object.keys(graphSchema) : [],
+            imagesLength: images.length,
+            selectedKeywords: selectedKeywords
+        });
+
+        // Prevent duplicate calls
+        if (lastCallParamsRef.current === callKey) {
+            console.log("Skipping duplicate API call");
+            return;
+        }
+        lastCallParamsRef.current = callKey;
         
         if (abortController) {
             abortController.abort();
@@ -109,7 +125,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
         }).finally(() => {
             setAbortController(null);
         });
-    }
+    }, [images, prompts, graphSchema, selectedKeywords, abortController]);
 
     const generateInitialKeywords = () => {
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
@@ -143,10 +159,18 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
         });
     }
 
-    const handleRefresh = () => {
+    const handleRefresh = useCallback(() => {
         setSuggestionMetaData({});
+        // Reset the duplicate call prevention to force a new API call
+        lastCallParamsRef.current = null;
         updateSuggestion();
-    }
+    }, [updateSuggestion]);
+
+    const handleKeywordRefresh = useCallback(() => {
+        // Only refresh the keywords, not the comparison suggestion
+        setKeywordViewMetaData([]);
+        generateInitialKeywords();
+    }, []);
 
     const handleKeywordClick = (keyword) => {
         if (selectedKeywords.includes(keyword)) {
@@ -279,10 +303,15 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     }, [abortController]);
 
     useEffect(() => {
-        if (prompts instanceof Array && prompts.length > 0 && graphSchema && isGenerating) {
-            updateSuggestion();
+        if (prompts instanceof Array && prompts.length > 0 && graphSchema && images && images.length > 1) {
+            // Add a small delay to avoid excessive API calls during rapid updates
+            const timeoutId = setTimeout(() => {
+                updateSuggestion();
+            }, 500);
+            
+            return () => clearTimeout(timeoutId);
         }
-    }, []);
+    }, [prompts, graphSchema, images, updateSuggestion]);
 
     useEffect(() => {
         // console.log("triggered, ", suggestionMetaData);
@@ -361,7 +390,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
                                     <PlusOutlined /> Add
                                 </Tag>
                             </Popconfirm>
-                            <Tag style={{ cursor: 'pointer', background: '#fafafa' }} onClick={handleRefresh}>
+                            <Tag style={{ cursor: 'pointer', background: '#fafafa' }} onClick={handleKeywordRefresh}>
                                 <SyncOutlined /> Refresh
                             </Tag>
                         </div>

@@ -113,6 +113,7 @@ Your suggestion (JSON):`;
             const response = await openai.chat.completions.create({
                 model: 'google/gemini-2.5-flash-lite',
                 messages: messages,
+                temperature: 1.2, // Higher temperature for maximum diversity in suggestions
             });
     
             let output = response.choices[0].message.content;

@@ -1,7 +1,7 @@
 // components/ImageSummary.js
 
 import React from 'react';
-import { Image, Switch, Popover, Button, Input } from 'antd';
+import { Image, Switch, Popover, Button, Input, message } from 'antd';
 import TreeView from './TreeView';
 import DrawerView from './Drawer';
 import ImageSummaryVis from './ImageSummaryVis';
@@ -29,7 +29,9 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
     const [imageTooltip, setImageTooltip] = React.useState({ visible: false, x: 0, y: 0, image: '', data: {} });
     const [customColors, setCustomColors] = React.useState({});
     const [comments, setComments] = React.useState({}); // State to hold comments for each chart
+    const [generalNotes, setGeneralNotes] = React.useState(''); // State to hold general notes
     const [existingCriteria, setExistingCriteria] = React.useState([]); // For Mode C flat criteria
+    const [messageApi, contextHolder] = message.useMessage();
 
     const useSceneGraph = (mode == 'B' || mode == 'D');
     const useAIAuditingSupport = (mode == 'C' || mode == 'D');
@@ -85,6 +87,16 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
 
     const addBookmarkedChart = (data) => {
         setBookmarkedCharts(prev => [...prev, data]);
+        // Show success message based on the type of bookmark
+        if (data.type === 'non-attribute' && data.images) {
+            messageApi.success(`Image bookmarked successfully!`);
+        } else if (data.type === 'bar') {
+            messageApi.success(`Bar chart bookmarked successfully!`);
+        } else if (data.type === 'scatterplot') {
+            messageApi.success(`Scatterplot bookmarked successfully!`);
+        } else {
+            messageApi.success(`Chart bookmarked successfully!`);
+        }
     };
 
 
@@ -217,9 +229,36 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
 
         const chartsHTML = bookmarkedCharts.map((_data, index) => {
             const title = _data.title ? `<h3>${_data.title}</h3>` : '';
-            const svg = document.getElementById(`chart-${index}`).innerHTML;
             const comment = comments[index] ? `<p>${comments[index]}</p>` : '';
-            return `<div style="margin-bottom: 40px;">${title}<div>${svg}</div>${comment}</div>`;
+            
+            // Handle SVG charts (only for bar charts and scatterplots, not for non-attribute bookmarks)
+            let chartSection = '';
+            if (_data.type !== 'non-attribute') {
+                const svg = document.getElementById(`chart-${index}`).innerHTML;
+                chartSection = `<div>${svg}</div>`;
+            }
+            
+            // Handle images for non-attribute bookmarks (object nodes and direct image bookmarks)
+            let imagesSection = '';
+            if (_data.type === 'non-attribute' && _data.images && _data.images.length > 0) {
+                const bookmarkImagesHTML = _data.images.map((image) => {
+                    const color = colorScale(image.batch);
+                    return `
+                        <div style="display: inline-block; width: 80px; height: 80px; margin: 5px; border-radius: 5px; border-top: 7px solid ${color}; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                            <img src="data:image/png;base64,${image.data}" alt="Image ${image.imageId}" style="width: 100%; height: 100%; object-fit: cover;" />
+                        </div>
+                    `;
+                }).join('');
+                
+                imagesSection = `
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 5px;">
+                        <div style="width: 100%; font-size: 14px; font-weight: bold; margin-bottom: 5px;">Associated Images (${_data.images.length})</div>
+                        ${bookmarkImagesHTML}
+                    </div>
+                `;
+            }
+            
+            return `<div style="margin-bottom: 40px;">${title}${chartSection}${imagesSection}${comment}</div>`;
         }).join('');
 
         const htmlContent = `
@@ -274,6 +313,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                 
                 <div class="section">
                     <h2>Analysis Charts and Notes</h2>
+                    ${generalNotes ? `<div style="margin-bottom: 30px; padding: 15px; background-color: #fff; border-radius: 5px; border-left: 4px solid #1677ff;"><h3 style="margin-top: 0;">General Notes</h3><p style="white-space: pre-wrap;">${generalNotes}</p></div>` : ''}
                     ${chartsHTML}
                 </div>
             </body>
@@ -293,6 +333,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
 
     return (
         <div className="image-summary-container" onClick={closeContextMenu}>
+            {contextHolder}
             <div className="content">
                 {/* Left Column */}
                 <div className="left-column">
@@ -348,14 +389,68 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                             <ImageSummaryVis images={images} data={metaData} graph={graph} graphSchema={graphSchema} hoveredImageIds={hoveredImageIds} addBookmarkedChart={addBookmarkedChart} colorScale={colorScale} setHighlightTreeNodes={setHighlightTreeNodes} setContextMenuData={setContextMenuData} setIsLabelModalOpen={setIsLabelModalOpen} />
                             :
                             <div className="imageContainer">
-                                {images.map((image, index) => (
-                                    <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.imageId) ? ' hoveredImage' : '')} style={{ 'borderTop': '7px solid ' + colorScale(image.batch) }}>
-                                        <Image width={'100%'} src={`data:image/png;base64,${image.data}`} alt={`Image ${image.imageId}`} onMouseEnter={(e) => { handleImageHover(e, image) }} onMouseLeave={handleImageHoverLeave} onContextMenu={(e) => openContextMenu(e, index)} />
-                                    </div>
-                                ))}
+                                <Image.PreviewGroup
+                                    preview={{
+                                        toolbarRender: (originalNode, info) => {
+                                            const { current } = info;
+                                            const currentImage = images[current];
+                                            return (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    {originalNode}
+                                                    {/* Bookmark Button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            addBookmarkedChart({ 
+                                                                type: 'non-attribute', 
+                                                                images: [currentImage], 
+                                                                title: `Image ${currentImage.imageId} (Batch ${currentImage.batch})` 
+                                                            });
+                                                        }}
+                                                        style={{
+                                                            background: '#52c41a',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            color: 'white',
+                                                            padding: '6px 12px',
+                                                            cursor: 'pointer',
+                                                            fontSize: '14px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px'
+                                                        }}
+                                                    >
+                                                        📌 Bookmark
+                                                    </button>
+                                                </div>
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {images.map((image, index) => (
+                                        <div key={index} className={"imageItem" + (hoveredImageIds.includes(image.imageId) ? ' hoveredImage' : '')} style={{ 'borderTop': '7px solid ' + colorScale(image.batch) }}>
+                                            <Image 
+                                                width={'100%'} 
+                                                src={`data:image/png;base64,${image.data}`} 
+                                                alt={`Image ${image.imageId}`} 
+                                                onMouseEnter={(e) => { handleImageHover(e, image) }} 
+                                                onMouseLeave={handleImageHoverLeave} 
+                                                onContextMenu={(e) => openContextMenu(e, index)}
+                                            />
+                                        </div>
+                                    ))}
+                                </Image.PreviewGroup>
                                 <Tooltip {...imageTooltip} />
                                 {contextMenuPos && <div className="context-menu" style={contextMenuPos}>
-                                    <div className="context-menu-item" onClick={() => { setIsLabelModalOpen(true) }}>Edit</div>
+                                    <div className="context-menu-item" onClick={() => { setIsLabelModalOpen(true); closeContextMenu(); }}>Edit</div>
+                                    <div className="context-menu-item" onClick={() => { 
+                                        addBookmarkedChart({ 
+                                            type: 'non-attribute', 
+                                            images: [contextMenuData.data], 
+                                            title: `Image ${contextMenuData.data.imageId} (Batch ${contextMenuData.data.batch})` 
+                                        }); 
+                                        closeContextMenu(); 
+                                    }}>Bookmark Image</div>
                                 </div>}
                             </div>
                         }
@@ -387,7 +482,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                     <h2 style={{ "margin": 0, 'display': 'inline-block' }}>Notes</h2>
                     <Button style={{ 'display': 'inline-block', 'marginLeft': '15px' }} onClick={exportToHTML}> Export </Button>
                 </div>
-                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts} />
+                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts} generalNotes={generalNotes} setGeneralNotes={setGeneralNotes} />
             </div>
 
             <style jsx>{`
