@@ -5,10 +5,13 @@ import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
-const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts }) => {
+const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts, messageApi }) => {
     const _handleSuggestionButtonClick2 = () => {
         // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, 'promote');
+        if (messageApi) {
+            messageApi.success('Suggestion has been applied! Please revise the prompt if needed and click on "Generate"');
+        }
     }
 
     const [suggestionMetaData, setSuggestionMetaData] = useState({});

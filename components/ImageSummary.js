@@ -372,6 +372,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                                 existingCriteria={existingCriteria}
                                 handleSuggestionButtonClick={_handleSuggestionButtonClickFlat}
                                 isGenerating={isGenerating}
+                                messageApi={messageApi}
                             />
                         ) : (
                             /* Mode D: Use original scene graph-based component */
@@ -381,6 +382,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                                 graphSchema={graphSchema} 
                                 handleSuggestionButtonClick={handleSuggestionButtonClick}
                                 isGenerating={isGenerating}
+                                messageApi={messageApi}
                             />
                         )}
 
@@ -392,6 +394,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                             dataForPromotion={dataForPromotion} 
                             handleSuggestionButtonClick={mode === 'C' ? _handleSuggestionButtonClickFlat : handleSuggestionButtonClick}
                             mode={mode}
+                            messageApi={messageApi}
                         />
                     </>}
                 </div>
