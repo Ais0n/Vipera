@@ -84,7 +84,7 @@ async function suggestComparisonFlat(imageData, keywords, existingCriteria) {
                 ? existingCriteria.join(', ') 
                 : 'None';
             
-            const input = `You are a helpful assistant. Given two randomly selected images from a dataset, find differences between these two images and suggest a new auditing criterion that can help distinguish between them (the two images should be *significantly different* in terms of the new criterion so that the difference is meaningful for auditing; and the criterion must be *different* from the existing criteria). ${keywords.length > 0 ? 'If possible, focus on differences that are relevant to the following user-interested keywords: ' + keywords.join() + '. ' : ''}
+            const input = `You are a helpful assistant. Given two randomly selected images from a dataset, find differences between these two images and suggest a new auditing criterion that can help distinguish between them (the two images should be *significantly different* in terms of the new criterion so that the difference is meaningful for auditing; and the criterion must be *different* from the existing criteria). ${keywords.length > 0 ? 'Focus on differences that are relevant to the following user-interested keywords: ' + keywords.join() + '. ' : ''}
             
 Existing criteria: ${existingCriteriaList}
 

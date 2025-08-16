@@ -15,6 +15,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     const [customInputValue, setCustomInputValue] = useState('');
     const [selectedFigureIndices, setSelectedFigureIndices] = useState([]);
     const lastCallParamsRef = useRef(null);
+    const selectedKeywordsRef = useRef(selectedKeywords);
 
     const content = (index) => (images && index < images.length) ? (
         <div>
@@ -34,7 +35,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
         updateSuggestion();   
     }
 
-    const updateSuggestion = useCallback(() => {
+    const updateSuggestion = useCallback((retryCount = 0) => {
         console.log("updateSuggestion called with images: ", images, " prompts: ", prompts, " graphSchema: ", graphSchema);
         if (images.length <= 1) return;
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
@@ -47,15 +48,18 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             prompts: prompts,
             graphSchemaKeys: graphSchema ? Object.keys(graphSchema) : [],
             imagesLength: images.length,
-            selectedKeywords: selectedKeywords
+            selectedKeywords: selectedKeywordsRef.current
         });
 
-        // Prevent duplicate calls
-        if (lastCallParamsRef.current === callKey) {
+        // Prevent duplicate calls only if it's not a retry and parameters haven't changed
+        if (retryCount === 0 && lastCallParamsRef.current === callKey) {
             console.log("Skipping duplicate API call");
             return;
         }
-        lastCallParamsRef.current = callKey;
+        // Only update the call key for new calls (not retries)
+        if (retryCount === 0) {
+            lastCallParamsRef.current = callKey;
+        }
         
         if (abortController) {
             abortController.abort();
@@ -66,7 +70,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
 
         // Filter keywords of "Figure X" format
         const keywordImageIndices = [];
-        selectedKeywords.forEach((keyword, index) => {
+        selectedKeywordsRef.current.forEach((keyword) => {
             const match = keyword.match(/Figure\s*(\d+)/);
             if (match) {
                 const imageIndex = parseInt(match[1], 10) - 1; // Convert to zero-based index
@@ -106,7 +110,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
         const path1 = images[_image1Index].path;
         const path2 = images[_image2Index].path;
 
-        let selectedNonFigureKeywords = selectedKeywords.filter(keyword => !keyword.startsWith('Figure'));
+        let selectedNonFigureKeywords = selectedKeywordsRef.current.filter(keyword => !keyword.startsWith('Figure'));
 
         axios.post('/api/suggest-comparison', {
             path1: path1,
@@ -123,14 +127,30 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             if (axios.isCancel(error)) {
                 console.log('Request canceled:', error.message);
             } else {
-                console.error(error);
+                console.error('API call failed:', error);
+                
+                // Retry logic: retry up to 3 times with exponential backoff
+                const maxRetries = 3;
+                if (retryCount < maxRetries) {
+                    const retryDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                    console.log(`Retrying API call in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+                    
+                    setTimeout(() => {
+                        updateSuggestion(retryCount + 1);
+                    }, retryDelay);
+                } else {
+                    console.error(`API call failed after ${maxRetries} retries`);
+                    if (messageApi) {
+                        messageApi.error(`Failed to load suggestions after ${maxRetries} attempts. Please try refreshing.`);
+                    }
+                }
             }
         }).finally(() => {
             setAbortController(null);
         });
-    }, [images, prompts, graphSchema, selectedKeywords, abortController]);
+    }, [images, prompts, graphSchema, messageApi]);
 
-    const generateInitialKeywords = () => {
+    const generateInitialKeywords = (retryCount = 0) => {
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
             setKeywordViewMetaData([]);
             return;
@@ -158,7 +178,23 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             }
             setKeywordViewMetaData(res);
         }).catch((error) => {
-            console.error(error);
+            console.error('Keywords API call failed:', error);
+            
+            // Retry logic: retry up to 3 times with exponential backoff
+            const maxRetries = 3;
+            if (retryCount < maxRetries) {
+                const retryDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                console.log(`Retrying keywords API call in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+                
+                setTimeout(() => {
+                    generateInitialKeywords(retryCount + 1);
+                }, retryDelay);
+            } else {
+                console.error(`Keywords API call failed after ${maxRetries} retries`);
+                if (messageApi) {
+                    messageApi.error(`Failed to load keywords after ${maxRetries} attempts.`);
+                }
+            }
         });
     }
 
@@ -296,6 +332,11 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             </div>
         </div>
     );
+
+    // Keep selectedKeywordsRef in sync with selectedKeywords
+    useEffect(() => {
+        selectedKeywordsRef.current = selectedKeywords;
+    }, [selectedKeywords]);
 
     useEffect(() => {
         return () => {

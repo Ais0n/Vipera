@@ -522,10 +522,10 @@ const Generate = () => {
 
         console.log("partial schema:", schemaScope);
 
+        Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
+        console.log("after updating graph schema with scope", updatedGraphSchema);
+
         if (schemaScope) {
-          Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch}))); // add the image IDs to the "_scope" field of all nodes in the graph schema
-          console.log("after updating graph schema with scope", updatedGraphSchema);
-          
           // Step 4: Try generating metadata
           await tryMetadataGeneration(newImages, schemaScope);
         } else {
@@ -576,17 +576,38 @@ const Generate = () => {
       console.log("Response from check-images:", response.data);
 
       if (response.data.res instanceof Array) { // the image ids exist (which means the prompt is a test prompt)
-        isImagesExist = true;
-        imageIds = response.data.res.map(item => {
+        const allAvailableImageIds = response.data.res.map(item => {
           return item.substring(0, item.length - 4); // remove the suffix .png
         });
-        if (imageIdMap[userInput] == undefined) { // If the user input is new
-          imageIds = imageIds.slice(0, image_num); // get the first image_num images
+        
+        if (imageIdMap[userInput] == undefined) { 
+          // First time using this prompt in this session
+          // This is cross-session reuse: keep existing images and generate additional ones if needed
+          const existingImageCount = allAvailableImageIds.length;
+          
+          if (existingImageCount >= image_num) {
+            // We have enough existing images, just use them
+            isImagesExist = true;
+            imageIds = allAvailableImageIds.slice(0, image_num);
+          } else {
+            // We need more images than exist - this requires mixed approach
+            // Return all existing images + generate new ones to reach the target
+            isImagesExist = true; // We'll handle mixed case in handleImageGeneration
+            imageIds = allAvailableImageIds.concat(
+              Array.from({ length: image_num - existingImageCount }, (_, i) => 
+                `${userInput.replace(/ /g, "_")}_${existingImageCount + i}`
+              )
+            );
+          }
+          
           let tmp = { ...imageIdMap };
           tmp[userInput] = image_num;
           setImageIdMap(tmp);
         } else {
-          imageIds = imageIds.slice(imageIdMap[userInput], imageIdMap[userInput] + image_num); // get the next image_num images starting from the last position
+          // Same session reuse: generate ALL new images (don't keep old ones from this session)
+          const previouslyUsedCount = imageIdMap[userInput];
+          isImagesExist = false; // Force generation of new images
+          imageIds = Array.from({ length: image_num }, (_, i) => `${userInput.replace(/ /g, "_")}_${previouslyUsedCount + i}`);
           let tmp = { ...imageIdMap };
           tmp[userInput] += image_num;
           setImageIdMap(tmp);
@@ -612,7 +633,38 @@ const Generate = () => {
       let failedImages = [];
 
       if (isImagesExist) {
-        newImages = await getExistingImages(imageIds, IMAGE_DIR);
+        // Check if we have a mixed case (some existing, some need generation)
+        const existingImageIds = [];
+        const newImageIds = [];
+        
+        for (const imageId of imageIds) {
+          // Try to check if the image exists by attempting to fetch it
+          const imagePath = `/temp_images${IMAGE_DIR}/${imageId}.png`;
+          try {
+            const checkResponse = await axios.head(imagePath);
+            if (checkResponse.status === 200) {
+              existingImageIds.push(imageId);
+            } else {
+              newImageIds.push(imageId);
+            }
+          } catch {
+            // Image doesn't exist, needs to be generated
+            newImageIds.push(imageId);
+          }
+        }
+        
+        // Fetch existing images
+        if (existingImageIds.length > 0) {
+          const existingImages = await getExistingImages(existingImageIds, IMAGE_DIR);
+          newImages.push(...existingImages);
+        }
+        
+        // Generate new images
+        if (newImageIds.length > 0) {
+          const generatedImages = await generateNewImages(newImageIds, userInput, prompts.length + 1);
+          newImages.push(...generatedImages.newImages);
+          failedImages.push(...generatedImages.failedImages);
+        }
       } else {
         const generatedImages = await generateNewImages(imageIds, userInput, prompts.length + 1);
         newImages = generatedImages.newImages;
@@ -692,6 +744,55 @@ const Generate = () => {
     }
   }
 
+  // Helper function to prune object nodes that don't have any attribute descendants
+  const pruneObjectsWithoutAttributes = (schema) => {
+    const result = {};
+    
+    // Iterate over the children of the current schema node
+    Object.keys(schema).forEach(key => {
+      if (key.startsWith('_')) {
+        // Metadata is handled during node reconstruction, so skip it here.
+        return;
+      }
+      
+      const node = schema[key];
+      if (!node || typeof node !== 'object') {
+        return;
+      }
+
+      if (node._nodeType === 'attribute') {
+        // Always keep attribute nodes, as they are the leaves we're looking for.
+        result[key] = node;
+      } else if (node._nodeType === 'object') {
+        // It's an object node. First, recursively prune its children. (Post-order traversal)
+        const prunedChildren = pruneObjectsWithoutAttributes(node);
+        
+        // Now, check if any non-metadata children survived the pruning.
+        const hasRemainingDescendants = Object.keys(prunedChildren).some(k => !k.startsWith('_'));
+        
+        if (hasRemainingDescendants) {
+          // If children survived, it means this object has valid attribute descendants.
+          // We must keep this object node.
+          
+          // Reconstruct the node correctly: copy its metadata and add the pruned children.
+          const newNode = {};
+          Object.keys(node).forEach(prop => {
+            if (prop.startsWith('_')) {
+              newNode[prop] = node[prop];
+            }
+          });
+          
+          // Combine the node's metadata with its surviving (pruned) children.
+          result[key] = { ...newNode, ...prunedChildren };
+        }
+        // If the object has no remaining descendants, we do nothing, effectively pruning it
+        // by not adding it to the `result` object.
+      }
+    });
+    
+    return result;
+  };
+
   // Try generating metadata
   async function tryMetadataGeneration(newImages, partialSchema, newGraph) {
     if (newImages.length == 0) {
@@ -711,10 +812,22 @@ const Generate = () => {
       let newMetaData, allMetaData = [];
       if (prompts.length > 0) {
         setStatusInfo("Generating metadata...");
-        let res = await generateMetaData(newImages, partialSchema);
+        
+        // Prune objects without attribute descendants before metadata generation
+        const prunedSchemaForMetadata = pruneObjectsWithoutAttributes(partialSchema);
+        console.log("Schema before pruning:", partialSchema);
+        console.log("Schema after pruning for metadata generation:", prunedSchemaForMetadata);
+        
+        // Skip metadata generation if schema becomes empty after pruning
+        if (Object.keys(prunedSchemaForMetadata).every(k => k.startsWith('_'))) {
+          console.log("Schema is empty after pruning, skipping metadata generation");
+          return;
+        }
+        
+        let res = await generateMetaData(newImages, prunedSchemaForMetadata);
         setFailedImageIdsForMetadata(res.failedImageIdsForMetadata);
         newMetaData = res.data;
-        setRetryMetaDataContext({partialSchema});
+        setRetryMetaDataContext({partialSchema: prunedSchemaForMetadata});
 
         // CRITICAL: Capture the current metaData state RIGHT BEFORE merging
         // Use refs to get the most current state to avoid React state batching issues
@@ -748,7 +861,7 @@ const Generate = () => {
           return overrideUserModifications(merged, userModifiedData);
         };
         
-        newImages.forEach((image, index) => {
+        newImages.forEach((image) => {
           let newItem = newMetaData.find(item => item.metaData && item.metaData.imageId == image.imageId);
           let oldItem = oldMetaData.find(item => item.metaData && item.metaData.imageId == image.imageId);
           if (!newItem) {
@@ -815,7 +928,7 @@ const Generate = () => {
 
       // Update the graph with statistics
       const updatedGraph = Utils.calculateGraph(allMetaData, partialSchema, newGraph);
-      setGraph((prevGraph) => ({...updatedGraph }));
+      setGraph({...updatedGraph });
       console.log("Updated Graph:", updatedGraph);
     } catch (error) {
       console.error("Error generating metadata:", error);
@@ -836,55 +949,6 @@ const Generate = () => {
 
   const handlePromote = async (suggestion) => {
     setPromptStr(suggestion.newPrompt);
-    
-    // Helper function to prune object nodes that don't have any attribute descendants
-    const pruneObjectsWithoutAttributes = (schema) => {
-      const result = {};
-      
-      // Iterate over the children of the current schema node
-      Object.keys(schema).forEach(key => {
-        if (key.startsWith('_')) {
-          // Metadata is handled during node reconstruction, so skip it here.
-          return;
-        }
-        
-        const node = schema[key];
-        if (!node || typeof node !== 'object') {
-          return;
-        }
-
-        if (node._nodeType === 'attribute') {
-          // Always keep attribute nodes, as they are the leaves we're looking for.
-          result[key] = node;
-        } else if (node._nodeType === 'object') {
-          // It's an object node. First, recursively prune its children. (Post-order traversal)
-          const prunedChildren = pruneObjectsWithoutAttributes(node);
-          
-          // Now, check if any non-metadata children survived the pruning.
-          const hasRemainingDescendants = Object.keys(prunedChildren).some(k => !k.startsWith('_'));
-          
-          if (hasRemainingDescendants) {
-            // If children survived, it means this object has valid attribute descendants.
-            // We must keep this object node.
-            
-            // Reconstruct the node correctly: copy its metadata and add the pruned children.
-            const newNode = {};
-            Object.keys(node).forEach(prop => {
-              if (prop.startsWith('_')) {
-                newNode[prop] = node[prop];
-              }
-            });
-            
-            // Combine the node's metadata with its surviving (pruned) children.
-            result[key] = { ...newNode, ...prunedChildren };
-          }
-          // If the object has no remaining descendants, we do nothing, effectively pruning it
-          // by not adding it to the `result` object.
-        }
-      });
-      
-      return result;
-    };
     
     // Step 1. Update the graph schema
     let updateSchema = (schema, oldNodeName, newNodeName) => {
@@ -928,7 +992,7 @@ const Generate = () => {
       /*
         Calculate the partial schema based on the updated graph schema.
         Criteria:
-        - Object nodes will be kept if 1) they have attribute descendants, and 2) the scope types of this node as well as its ancestors are auto-extended.
+        - Object nodes will be kept if the scope types of this node as well as its ancestors are auto-extended.
         - Attributes nodes will be kept if the scope types of this node as well as its ancestors are auto-extended.
         - Special case: If the node name = oldNodeName, the whole subtree will be pruned. If the node name = newNodeName, the whole subtree will be kept.
       */
@@ -978,19 +1042,14 @@ const Generate = () => {
             // For object nodes, recursively process children first
             const processedChildren = processNode(node, nodeName, currentPath);
             
-            // Check if any non-metadata children survived
-            const hasAttributeDescendants = Object.keys(processedChildren).some(k => !k.startsWith('_'));
-            
-            if (hasAttributeDescendants) {
-              // Keep object node with its surviving children
-              const newNode = {};
-              Object.keys(node).forEach(prop => {
-                if (prop.startsWith('_')) {
-                  newNode[prop] = node[prop];
-                }
-              });
-              result[key] = { ...newNode, ...processedChildren };
-            }
+            // Keep all object nodes that have auto-extended scope, regardless of descendants
+            const newNode = {};
+            Object.keys(node).forEach(prop => {
+              if (prop.startsWith('_')) {
+                newNode[prop] = node[prop];
+              }
+            });
+            result[key] = { ...newNode, ...processedChildren };
           }
         });
         
@@ -1227,8 +1286,8 @@ const Generate = () => {
         let newItem = Utils.deepClone(item);
         let curNode = getSchemaNodeFromPath(pathToRoot.slice(0, -1), newItem);
         console.log("curNode", curNode);
-        if (curNode) {
-          curNode[newNodeName] = curNode[oldNodeName];
+        if (curNode && newNodeName != oldNodeName) {
+          curNode[newNodeName] = Utils.deepClone(curNode[oldNodeName]);
           delete curNode[oldNodeName];
         }
         newMetaData[i] = newItem;
@@ -1293,8 +1352,12 @@ const Generate = () => {
     
     // get the path to the root
     let pathToRoot = useSceneGraph ? getTreeNodePath(contextMenuData) : [contextMenuData.name];
-    let partialSchema = Utils.deepClone(graphSchema);
-    let curNode = partialSchema;
+    
+    // Create a deep clone of the schema to modify
+    let updatedGraphSchema = Utils.deepClone(graphSchema);
+    
+    // Get the target node from the cloned schema to update it
+    let curNode = updatedGraphSchema;
     for (let i = 0; i < pathToRoot.length - 1; i++) {
       curNode = curNode[pathToRoot[i]];
     }
@@ -1312,12 +1375,16 @@ const Generate = () => {
     // Store old candidate values for comparison
     let oldCandidateValues = targetNode._candidateValues || [];
     
-    // Update candidate values in the schema
+    // Update candidate values in the cloned schema
     if (newCandidateValues.length > 0) {
       targetNode._candidateValues = Utils.deepClone(newCandidateValues);
     } else {
       delete targetNode._candidateValues;
     }
+    
+    // Create a proper partial schema for the specific node being relabeled
+    let partialSchema = getPartialSchema(pathToRoot, updatedGraphSchema);
+    console.log("Partial schema for relabeling:", partialSchema);
     
     // Get images in scope for the target node
     let scopeImages = [];
@@ -1328,7 +1395,7 @@ const Generate = () => {
       scopeImages = targetNode._scope.map(idx => images[idx]).filter(img => img);
     } else {
       // If no specific scope, use all images
-      scopeImages = images.map((img, idx) => ({ 
+      scopeImages = images.map((img) => ({ 
         imageId: img.imageId, 
         batch: img.batch || prompts.length + 1 
       }));
@@ -1382,8 +1449,8 @@ const Generate = () => {
       images.find(img => img.imageId === scopeImg.imageId && img.batch === scopeImg.batch)
     ).filter(img => img);
     
-    // Update the global schema
-    setGraphSchema(partialSchema);
+    // Update the global schema with the modified node
+    setGraphSchema(updatedGraphSchema);
     
     // Trigger metadata generation for the affected images
     try {
@@ -1413,7 +1480,7 @@ const Generate = () => {
         setMetaData(newMetaData);
         
         // Update the graph
-        const updatedGraph = Utils.calculateGraph(newMetaData, partialSchema, Utils.deepClone(graph));
+        const updatedGraph = Utils.calculateGraph(newMetaData, updatedGraphSchema, Utils.deepClone(graph));
         setGraph(updatedGraph);
         
         messageApi.success(`Successfully relabeled ${imageObjectsToRelabel.length} images`);
@@ -1680,7 +1747,7 @@ const Generate = () => {
       batch: image.batch
     }));
 
-    // Step 1: Create schema with only auto-extended nodes, pruning fixed nodes entirely
+    // Create schema with only auto-extended nodes, keeping all object nodes (no pruning)
     const createAutoExtendedOnlySchema = (schema) => {
       const result = {};
       
@@ -1742,65 +1809,7 @@ const Generate = () => {
       return result;
     };
 
-    // Step 2: Prune object nodes that don't have any attribute descendants
-    const pruneObjectsWithoutAttributes = (schema) => {
-      const result = {};
-      
-      // Iterate over the children of the current schema node
-      Object.keys(schema).forEach(key => {
-        if (key.startsWith('_')) {
-          // Metadata is handled during node reconstruction, so skip it here.
-          return;
-        }
-        
-        const node = schema[key];
-        if (!node || typeof node !== 'object') {
-          return;
-        }
-
-        if (node._nodeType === 'attribute') {
-          // Always keep attribute nodes, as they are the leaves we're looking for.
-          result[key] = node;
-        } else if (node._nodeType === 'object') {
-          // It's an object node. First, recursively prune its children. (Post-order traversal)
-          const prunedChildren = pruneObjectsWithoutAttributes(node);
-          
-          // Now, check if any non-metadata children survived the pruning.
-          const hasRemainingDescendants = Object.keys(prunedChildren).some(k => !k.startsWith('_'));
-          
-          if (hasRemainingDescendants) {
-            // If children survived, it means this object has valid attribute descendants.
-            // We must keep this object node.
-            
-            // Reconstruct the node correctly: copy its metadata and add the pruned children.
-            const newNode = {};
-            Object.keys(node).forEach(prop => {
-              if (prop.startsWith('_')) {
-                newNode[prop] = node[prop];
-              }
-            });
-            
-            // Combine the node's metadata with its surviving (pruned) children.
-            result[key] = { ...newNode, ...prunedChildren };
-          }
-          // If the object has no remaining descendants, we do nothing, effectively pruning it
-          // by not adding it to the `result` object.
-        }
-      });
-      
-      return result;
-    };
-
-    // Create partial schema using two-step process
-    const createAutoExtendedSchema = (schema) => {
-      // Step 1: Keep only auto-extended nodes, prune fixed branches
-      const autoExtendedOnly = createAutoExtendedOnlySchema(schema);
-      
-      // Step 2: Remove object nodes without attribute descendants
-      return pruneObjectsWithoutAttributes(autoExtendedOnly);
-    };
-
-    const autoExtendedSchema = createAutoExtendedSchema(currentGraphSchema);
+    const autoExtendedSchema = createAutoExtendedOnlySchema(currentGraphSchema);
     
     // If no auto-extended nodes found, return null to skip labeling
     if (Object.keys(autoExtendedSchema).every(k => k.startsWith('_'))) {

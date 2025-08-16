@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Image, Switch, Popover, Button, Tooltip, Tag, Popconfirm, Input, Space, Select, Checkbox, Row, Col } from 'antd';
 import { SyncOutlined, InfoCircleOutlined, BulbOutlined, PlusOutlined } from '@ant-design/icons';
 import { FixedSizeList } from 'react-window';
@@ -14,6 +14,7 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
     const [abortController, setAbortController] = useState(null);
     const [customInputValue, setCustomInputValue] = useState('');
     const [selectedFigureIndices, setSelectedFigureIndices] = useState([]);
+    const selectedKeywordsRef = useRef(selectedKeywords);
 
     const content = (index) => (images && index < images.length) ? (
         <div>
@@ -39,7 +40,7 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
         updateSuggestion();   
     }
 
-    const updateSuggestion = () => {
+    const updateSuggestion = (retryCount = 0) => {
         if (images.length <= 1) return;
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
             setSuggestionMetaData({});
@@ -55,7 +56,7 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
 
         // Filter keywords of "Figure X" format
         const keywordImageIndices = [];
-        selectedKeywords.forEach((keyword, index) => {
+        selectedKeywordsRef.current.forEach((keyword) => {
             const match = keyword.match(/Figure\s*(\d+)/);
             if (match) {
                 const imageIndex = parseInt(match[1], 10) - 1; // Convert to zero-based index
@@ -95,7 +96,7 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
         const path1 = images[_image1Index].path;
         const path2 = images[_image2Index].path;
 
-        let selectedNonFigureKeywords = selectedKeywords.filter(keyword => !keyword.startsWith('Figure'));
+        let selectedNonFigureKeywords = selectedKeywordsRef.current.filter(keyword => !keyword.startsWith('Figure'));
 
         axios.post('/api/suggest-comparison-flat', {
             path1: path1,
@@ -112,14 +113,30 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
             if (axios.isCancel(error)) {
                 console.log('Request canceled:', error.message);
             } else {
-                console.error(error);
+                console.error('API call failed:', error);
+                
+                // Retry logic: retry up to 3 times with exponential backoff
+                const maxRetries = 3;
+                if (retryCount < maxRetries) {
+                    const retryDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                    console.log(`Retrying API call in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+                    
+                    setTimeout(() => {
+                        updateSuggestion(retryCount + 1);
+                    }, retryDelay);
+                } else {
+                    console.error(`API call failed after ${maxRetries} retries`);
+                    if (messageApi) {
+                        messageApi.error(`Failed to load suggestions after ${maxRetries} attempts. Please try refreshing.`);
+                    }
+                }
             }
         }).finally(() => {
             setAbortController(null);
         });
     }
 
-    const generateInitialKeywords = () => {
+    const generateInitialKeywords = (retryCount = 0) => {
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
             setKeywordViewMetaData([]);
             return;
@@ -157,7 +174,23 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
             }
             setKeywordViewMetaData(res);
         }).catch((error) => {
-            console.error(error);
+            console.error('Keywords API call failed:', error);
+            
+            // Retry logic: retry up to 3 times with exponential backoff
+            const maxRetries = 3;
+            if (retryCount < maxRetries) {
+                const retryDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                console.log(`Retrying keywords API call in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+                
+                setTimeout(() => {
+                    generateInitialKeywords(retryCount + 1);
+                }, retryDelay);
+            } else {
+                console.error(`Keywords API call failed after ${maxRetries} retries`);
+                if (messageApi) {
+                    messageApi.error(`Failed to load keywords after ${maxRetries} attempts.`);
+                }
+            }
         });
     }
 
@@ -287,6 +320,11 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
             </div>
         </div>
     );
+
+    // Keep selectedKeywordsRef in sync with selectedKeywords
+    useEffect(() => {
+        selectedKeywordsRef.current = selectedKeywords;
+    }, [selectedKeywords]);
 
     useEffect(() => {
         return () => {
