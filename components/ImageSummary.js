@@ -99,6 +99,25 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
         }
     };
 
+    const handleDeleteBookmark = (index) => {
+        setBookmarkedCharts(prev => prev.filter((_, i) => i !== index));
+        // Remove associated comment when deleting bookmark
+        setComments(prev => {
+            const newComments = { ...prev };
+            delete newComments[index];
+            // Shift down comments for items that come after the deleted index
+            Object.keys(newComments).forEach(key => {
+                const keyNum = parseInt(key);
+                if (keyNum > index) {
+                    newComments[keyNum - 1] = newComments[keyNum];
+                    delete newComments[keyNum];
+                }
+            });
+            return newComments;
+        });
+        messageApi.success('Note removed successfully!');
+    };
+
 
     const _handleSuggestionButtonClickFlat = (suggestion, type) => {
         if (type === 'add-criterion') {
@@ -482,7 +501,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                     <h2 style={{ "margin": 0, 'display': 'inline-block' }}>Notes</h2>
                     <Button style={{ 'display': 'inline-block', 'marginLeft': '15px' }} onClick={exportToHTML}> Export </Button>
                 </div>
-                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts} generalNotes={generalNotes} setGeneralNotes={setGeneralNotes} />
+                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts} generalNotes={generalNotes} setGeneralNotes={setGeneralNotes} onDeleteBookmark={handleDeleteBookmark} />
             </div>
 
             <style jsx>{`

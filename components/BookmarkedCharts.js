@@ -3,7 +3,7 @@ import { Image } from 'antd';
 import * as d3 from 'd3';
 import axios from 'axios';
 
-const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts, generalNotes, setGeneralNotes }) => {
+const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts, generalNotes, setGeneralNotes, onDeleteBookmark }) => {
     const [dynamicPlaceholders, setDynamicPlaceholders] = useState({});
     const [loadingStates, setLoadingStates] = useState({});
     const abortControllers = useRef({});
@@ -241,7 +241,30 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
                                 </div>
                             </td>
                             <td className='bookmarked-cell'>
-                                <div>
+                                <div style={{ position: 'relative' }}>
+                                    <button
+                                        className="delete-icon no-export"
+                                        onClick={() => onDeleteBookmark && onDeleteBookmark(index)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '5px',
+                                            right: '5px',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            color: '#ff4d4f',
+                                            fontSize: '16px',
+                                            zIndex: 10,
+                                            padding: '4px',
+                                            borderRadius: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                        title="Remove this note"
+                                    >
+                                        ✕
+                                    </button>
                                     <textarea
                                         value={comments[index] || ''}
                                         placeholder={loadingStates[index] 
@@ -294,6 +317,14 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
                     gap: 10px;
                     max-height: 300px;
                     overflow-y: scroll;
+                }
+                .delete-icon:hover {
+                    background-color: rgba(255, 77, 79, 0.1) !important;
+                }
+                @media print {
+                    .no-export {
+                        display: none !important;
+                    }
                 }
             `}</style>
         </div>
