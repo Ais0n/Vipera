@@ -6,15 +6,23 @@ import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
 const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts, messageApi }) => {
+    const [suggestionMetaData, setSuggestionMetaData] = useState({});
+    const [isApplying, setIsApplying] = useState(false); // Track if suggestion is being applied
+    const [isApplied, setIsApplied] = useState(false); // Track if suggestion has been applied
+    
     const _handleSuggestionButtonClick2 = () => {
+        setIsApplying(true);
         // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, 'promote');
         if (messageApi) {
             messageApi.success('Suggestion has been applied! Please revise the prompt if needed and click on "Generate"');
         }
+        // Set to applied state
+        setTimeout(() => {
+            setIsApplying(false);
+            setIsApplied(true);
+        }, 1000);
     }
-
-    const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
@@ -29,8 +37,14 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
         }).then((response) => {
             // console.log(response)
             setSuggestionMetaData(response.data.res);
+            // Reset loading state when suggestion is updated
+            setIsApplying(false);
+            setIsApplied(false); // Reset applied state when new suggestion loads
         }).catch((error) => {
             console.error(error);
+            // Reset loading state on error
+            setIsApplying(false);
+            setIsApplied(false);
         });
     }
 
@@ -70,8 +84,10 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
                             className="suggestion-button"
                             onClick={_handleSuggestionButtonClick2}
                             type="primary"
+                            disabled={isApplying || isApplied}
+                            loading={isApplying}
                         >
-                            Try out this prompt
+                            {isApplying ? 'Applying...' : isApplied ? 'Applied' : 'Try out this prompt'}
                         </Button>
                     </div>
                 </>}

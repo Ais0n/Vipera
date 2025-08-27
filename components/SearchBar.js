@@ -4,12 +4,19 @@ import React, { useState } from 'react';
 import styles from '../styles/SearchBar.module.css';
 import { Alert, Button } from 'antd';
 
-function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum, failedImageIds, retryFailedImages, retrySceneGraphContext, retrySceneGraphGeneration, failedImageIdsForMetadata, retryMetadataGeneration }) {
+function SearchBar({ onGenerateClick, isGenerating, ensureImagesSelected, promptStr, setPromptStr, imageNum, setImageNum, failedImageIds, retryFailedImages, retrySceneGraphContext, retrySceneGraphGeneration, failedImageIdsForMetadata, retryMetadataGeneration, messageApi }) {
   // const [inputValue, setInputValue] = useState('');
   const [showPrompts, setShowPrompts] = useState(false); // show example prompts or not
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    
+    // Check if prompt contains '/' character
+    if (promptStr.includes('/')) {
+      messageApi.warning('Prompts containing "/" are not supported. Please remove "/" from your prompt and try again.');
+      return;
+    }
+    
     onGenerateClick(promptStr);
     setShowPrompts(false);
     ensureImagesSelected();

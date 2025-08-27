@@ -5,12 +5,20 @@ import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
 const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handleSuggestionButtonClick }) => {
+    const [suggestionMetaData, setSuggestionMetaData] = useState({});
+    const [isApplying, setIsApplying] = useState(false); // Track if suggestion is being applied
+    const [isApplied, setIsApplied] = useState(false); // Track if suggestion has been applied
+    
     const _handleSuggestionButtonClick2 = () => {
+        setIsApplying(true);
         // handleSuggestionButtonClick({ "path": ["foreground", "doctor"], "replaceValue": "doctor", "newValue": "nurse" });
         handleSuggestionButtonClick(suggestionMetaData, "external");
+        // Set to applied state
+        setTimeout(() => {
+            setIsApplying(false);
+            setIsApplied(true);
+        }, 1000);
     }
-
-    const [suggestionMetaData, setSuggestionMetaData] = useState({});
 
     const updateSuggestion = () => {
         axios.post('/api/suggest-external', {
@@ -19,8 +27,14 @@ const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handle
         }).then((response) => {
             // console.log(response)
             setSuggestionMetaData(response.data.res);
+            // Reset loading state when suggestion is updated
+            setIsApplying(false);
+            setIsApplied(false); // Reset applied state when new suggestion loads
         }).catch((error) => {
             console.error(error);
+            // Reset loading state on error
+            setIsApplying(false);
+            setIsApplied(false);
         });
     }
 
@@ -49,8 +63,10 @@ const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handle
                             className="suggestion-button"
                             onClick={_handleSuggestionButtonClick2}
                             type="primary"
+                            disabled={isApplying || isApplied}
+                            loading={isApplying}
                         >
-                            Update the labels
+                            {isApplying ? 'Applying...' : isApplied ? 'Applied' : 'Update the labels'}
                         </Button>
                     </div>
                 </>}

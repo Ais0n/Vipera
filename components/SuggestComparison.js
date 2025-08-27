@@ -14,6 +14,9 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     const [abortController, setAbortController] = useState(null);
     const [customInputValue, setCustomInputValue] = useState('');
     const [selectedFigureIndices, setSelectedFigureIndices] = useState([]);
+    const [isApplying, setIsApplying] = useState(false); // Track if suggestion is being applied
+    const [isUpdating, setIsUpdating] = useState(false); // Track if suggestion is being updated
+    const [isApplied, setIsApplied] = useState(false); // Track if suggestion has been applied
     const lastCallParamsRef = useRef(null);
     const selectedKeywordsRef = useRef(selectedKeywords);
 
@@ -24,13 +27,20 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     ) : "No images available";
 
     const _handleSuggestionButtonClick2 = () => {
+        setIsApplying(true);
         handleSuggestionButtonClick(suggestionMetaData, 'external');
         if (messageApi) {
             messageApi.success('Suggestion has been applied!');
         }
+        // Set to applied state
+        setTimeout(() => {
+            setIsApplying(false);
+            setIsApplied(true);
+        }, 1000);
     }
 
     const handleApplyKeywords = () => {
+        setIsUpdating(true);
         setSuggestionMetaData({});
         updateSuggestion();   
     }
@@ -123,6 +133,10 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             setSuggestionMetaData(response.data.res);
             setImage1Index(_image1Index);
             setImage2Index(_image2Index);
+            // Reset loading states when suggestion is updated
+            setIsApplying(false);
+            setIsUpdating(false);
+            setIsApplied(false); // Reset applied state when new suggestion loads
         }).catch((error) => {
             if (axios.isCancel(error)) {
                 console.log('Request canceled:', error.message);
@@ -143,6 +157,10 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
                     if (messageApi) {
                         messageApi.error(`Failed to load suggestions after ${maxRetries} attempts. Please try refreshing.`);
                     }
+                    // Reset loading states on final failure
+                    setIsApplying(false);
+                    setIsUpdating(false);
+                    setIsApplied(false);
                 }
             }
         }).finally(() => {
@@ -392,8 +410,10 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
                                 className="suggestion-button"
                                 onClick={_handleSuggestionButtonClick2}
                                 type="primary"
+                                disabled={isApplying || isApplied}
+                                loading={isApplying}
                             >
-                                Apply to the scene graph
+                                {isApplying ? 'Applying...' : isApplied ? 'Applied' : 'Apply to the scene graph'}
                             </Button>
                         </div>
                     </>}
@@ -444,8 +464,10 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
                                 className="suggestion-button"
                                 onClick={handleApplyKeywords}
                                 type="primary"
+                                disabled={isUpdating}
+                                loading={isUpdating}
                             >
-                                Apply
+                                {isUpdating ? 'Updating...' : 'Apply'}
                             </Button>
                         </div>
                     </>}
