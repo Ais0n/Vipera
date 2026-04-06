@@ -5,7 +5,7 @@ const ProcessingIndicator = ({ containerStyle, statusInfo, setReviewPanelVisible
     <div className="processing-indicator" style={containerStyle}>
       <div className="spinner"></div>
       <p>{statusInfo}</p>
-      <div>During the waiting, you may <a className="openLink" onClick={() => setReviewPanelVisible(true)}>review the labeled images</a></div>
+      {/* <div>During the waiting, you may <a className="openLink" onClick={() => setReviewPanelVisible(true)}>review the labeled images</a></div> */}
       <style jsx>{`
         .processing-indicator {
           display: flex;

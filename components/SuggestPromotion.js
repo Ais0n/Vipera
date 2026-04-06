@@ -25,6 +25,35 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
     }
 
     const updateSuggestion = () => {
+        // Hard-coded logic: if 'foreground' does not have child 'nurse', recommend 'nurse' in parallel to 'doctor'; otherwise, recommend 'patient' instead of 'nurse'.
+        if (graphSchema && graphSchema['foreground']) {
+            const fgChildren = graphSchema['foreground'].children || [];
+            const hasNurse = fgChildren.some(child => (typeof child === 'string' ? child : child.name) === 'nurse');
+            const hasDoctor = fgChildren.some(child => (typeof child === 'string' ? child : child.name) === 'doctor');
+            if (!hasNurse) {
+                // Recommend adding 'nurse' in parallel to 'doctor'
+                setSuggestionMetaData({
+                    oldNodeName: 'doctor',
+                    newNodeName: 'nurse',
+                    newPrompt: 'A cinematic photo of a nurse',
+                    explanations: 'Consider adding a nurse to the foreground to diversify the scene.'
+                });
+                setIsApplying(false);
+                setIsApplied(false);
+                return;
+            } else {
+                // If nurse exists, recommend 'patient' instead of 'nurse'
+                setSuggestionMetaData({
+                    oldNodeName: 'nurse',
+                    newNodeName: 'patient',
+                    newPrompt: 'A cinematic photo of a patient',
+                    explanations: 'A patient can provide a different perspective in the scene.'
+                });
+                setIsApplying(false);
+                setIsApplied(false);
+                return;
+            }
+        }
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
             setSuggestionMetaData({});
             return;

@@ -28,7 +28,7 @@ const Header = ({ mode = null, setMode = () => { } }) => {
     return (
         <nav className={style.navBar}>
             <div className={style.leftTabs}>
-                <a href="https://forum.weaudit.org/" className={style.navWeaudit}>WeAudit</a>
+                <a href="https://forum.weaudit.org/" className={style.navWeaudit}>Vipera</a>
                 <Popover content={popoverContent} title="System Mode" trigger="click" style={{ "color": "black" }}>
                     <a className={style.navItem} style={{ cursor: "pointer" }}>
                         Settings
@@ -37,9 +37,8 @@ const Header = ({ mode = null, setMode = () => { } }) => {
             </div>
             <div className={style.rightTabs}>
                 <a href="https://forum.weaudit.org/about" className={style.navItem}>About</a>
-                <a href="https://taiga.weaudit.org/" className={style.navItem}>TAIGA</a>
                 <a href="" className={style.navOuro}>Vipera</a>
-                <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={style.navItem}>Discussions</a>
+                <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={style.navItem}>Paper</a>
                 <a href="" className={style.navIcon}>
                     <img src={'/ico-search.svg'} alt="search-icon" />
                 </a>

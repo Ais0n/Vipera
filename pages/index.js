@@ -17,7 +17,7 @@ import ModalReview from '../components/ModalReview.js';
 import { message } from 'antd';
 
 const Generate = () => {
-  const [mode, setMode] = useState("A");
+  const [mode, setMode] = useState("D");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDoneGenerating, setIsDoneGenerating] = useState(true);
   const [isDoneImage, setIsDoneImage] = useState(true);

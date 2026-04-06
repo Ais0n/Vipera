@@ -46,6 +46,26 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
     }
 
     const updateSuggestion = useCallback((retryCount = 0) => {
+        // Hard-coded logic: if 'doctor' does not have child 'stethoscope', recommend adding it
+        if (graphSchema && graphSchema['foreground'] && graphSchema['foreground']['doctor']) {
+            const doctorChildren = Object.keys(graphSchema['foreground']['doctor']);
+            const hasStethoscope = doctorChildren.some(child => (typeof child === 'string' ? child : child.name) === 'stethoscope');
+            if (!hasStethoscope) {
+                setSuggestionMetaData({
+                    parentNodeName: 'doctor',
+                    newNodeName: 'stethoscope',
+                    candidateValues: ['wearing', 'not wearing'],
+                    explanations: 'The doctor in the first image wears a stethoscope but the doctor in the second image does not. This might indicate some biases against profession. Consider adding this node to enrich the scene graph.'
+                });
+                setImage1Index(8);
+                setImage2Index(2);
+                setIsApplying(false);
+                setIsUpdating(false);
+                setIsApplied(false);
+                return;
+            }
+        }
+
         console.log("updateSuggestion called with images: ", images, " prompts: ", prompts, " graphSchema: ", graphSchema);
         if (images.length <= 1) return;
         if (process.env.NEXT_PUBLIC_LLM_ENABLED == 'false') {
