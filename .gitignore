@@ -3,4 +3,13 @@
 .next
 .DS_Store
 .env*
+!.env.example
 .claude
+
+# Generated data (keep dirs via .gitkeep)
+public/temp_images/*
+!public/temp_images/.gitkeep
+public/temp_graphs/*
+!public/temp_graphs/.gitkeep
+public/temp_labels/*
+!public/temp_labels/.gitkeep
