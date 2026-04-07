@@ -30,7 +30,7 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
             return;
         }
         
-        axios.post('/api/suggest-promotion', {
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-promotion`, {
             prompt: prompt,
             schema: removeUnderscoreFields(graphSchema),
             priorPrompts: priorPrompts,

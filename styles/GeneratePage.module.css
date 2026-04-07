@@ -93,7 +93,7 @@
 .loadingSnake {
   width: 180px;
   height: 180px;
-  background-image: url('/Obby1.svg'); /* Keep only the initial frame */
+  background-image: url('/vipera/Obby1.svg'); /* Keep only the initial frame */
   background-size: cover; /* Ensure the SVG covers the element */
   animation: rotate-animation 2s infinite linear; /* Apply rotation animation */
   margin-top: 60px;

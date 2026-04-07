@@ -21,7 +21,7 @@ const SettingsModal = ({ open, onClose, llmConfig, setLlmConfig }) => {
     }, [llmConfig, open]);
 
     useEffect(() => {
-        fetch('/api/settings')
+        fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/settings`)
             .then(r => r.json())
             .then(setServerInfo)
             .catch(() => {});

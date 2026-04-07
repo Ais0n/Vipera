@@ -22,7 +22,7 @@ const Analyze = ({ images, distribution, selectedCategory, onSelectCategory, res
                             </div>
                             <div className={style.analyzeIconContainer}>
                                 <div className={style.analyzeIcon} onClick={onRefreshClick}>
-                                    <img src={'/refresh-cw.svg'} alt="refresh" />
+                                    <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/refresh-cw.svg`} alt="refresh" />
                                 </div>
                                 {/* <div className={style.analyzeIcon}>
                                     <img src={'/trash.svg'} alt="trash" />

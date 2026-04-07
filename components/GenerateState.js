@@ -8,7 +8,7 @@ const GenerateState = ({ isGenerating, isDoneGenerating, isPostDone }) => {
         return (
             <div className={styles.stateContainer}>
                 <div className={styles.stateContainerChild}>
-                    <img src={'/generate-svg/generateorange.svg'} alt="start generating state" />
+                    <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/generate-svg/generateorange.svg`} alt="start generating state" />
                     <div className={styles.stateLabels}>
                         <div className={styles.item1}>
                             Generate
@@ -28,7 +28,7 @@ const GenerateState = ({ isGenerating, isDoneGenerating, isPostDone }) => {
         return (
             <div className={styles.stateContainer}>
                 <div className={styles.stateContainerChild}>
-                    <img src={'/generate-svg/generateblack-analyseorange.svg'} alt="currently generating state" />
+                    <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/generate-svg/generateblack-analyseorange.svg`} alt="currently generating state" />
                     <div className={styles.stateLabels}>
                         <div className={styles.item1}>
                             Generate
@@ -48,7 +48,7 @@ const GenerateState = ({ isGenerating, isDoneGenerating, isPostDone }) => {
         return (
             <div className={styles.stateContainer}>
                 <div className={styles.stateContainerChild}>
-                    <img src={'/generate-svg/generateblack-analyseblack-postblack.svg'} alt="finished generating" />
+                    <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/generate-svg/generateblack-analyseblack-postblack.svg`} alt="finished generating" />
                     <div className={styles.stateLabels}>
                         <div className={styles.item1}>
                             Generate
@@ -68,7 +68,7 @@ const GenerateState = ({ isGenerating, isDoneGenerating, isPostDone }) => {
         return (
             <div className={styles.stateContainer}>
                 <div className={styles.stateContainerChild}>
-                    <img src={'/generate-svg/generateblack-analyseorange.svg'} alt="currently generating state" />
+                    <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/generate-svg/generateblack-analyseorange.svg`} alt="currently generating state" />
                     <div className={styles.stateLabels}>
                         <div className={styles.item1}>
                             Generate

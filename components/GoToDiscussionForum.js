@@ -8,7 +8,7 @@ const GoToDiscussionForum = () => {
       <>
         <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={styles.container_discussion}>
             <div className={styles.icon_df}>
-              <img src={'/discussionforumbutton.svg'} alt="discussionforum" />
+              <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/discussionforumbutton.svg`} alt="discussionforum" />
             </div>
             <div className={styles.text_df}>Discussion Forum</div>
         </a>

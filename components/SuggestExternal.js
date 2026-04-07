@@ -21,7 +21,7 @@ const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handle
     }
 
     const updateSuggestion = () => {
-        axios.post('/api/suggest-external', {
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-external`, {
             prompt: prompt,
             schema: removeUnderscoreFields(graphSchema),
             ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),

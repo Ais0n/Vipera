@@ -48,7 +48,7 @@ const Header = ({ mode = null, setMode = () => {}, llmConfig = {}, setLlmConfig 
                     <a href="" className={style.navOuro}>Vipera</a>
                     <a href="https://forum.weaudit.org/c/stable-diffusion/46" className={style.navItem}>Discussions</a>
                     <a href="" className={style.navIcon}>
-                        <img src={'/ico-search.svg'} alt="search-icon" />
+                        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/ico-search.svg`} alt="search-icon" />
                     </a>
                 </div>
             </nav>

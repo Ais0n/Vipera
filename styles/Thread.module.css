@@ -102,7 +102,7 @@
     -webkit-appearance: none;  /* Chrome, Safari */
     -moz-appearance: none;     /* Firefox */
     appearance: none;          /* Standard syntax */
-    background-image: url('/chevron-down.svg');
+    background-image: url('/vipera/chevron-down.svg');
     background-repeat: no-repeat;
     background-position: right 11px center;
     background-size: 16px;
@@ -250,7 +250,7 @@
     align-items: center; /* Center items vertically */
     justify-content: center; /* Center items horizontally */
     padding-left: 74px; /* Original padding-left plus the width of the icon */
-    background-image: url('/discussionforum.svg');
+    background-image: url('/vipera/discussionforum.svg');
     background-repeat: no-repeat;
     background-position: 24px center; /* Position the icon 20px from the left */
     background-size: 28px; /* The size of the icon */

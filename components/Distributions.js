@@ -129,7 +129,7 @@ const Distributions = ({ distribution, category }) => {
       <>
           <div className={styles.distributionBox}>
               <div className={styles.lightBulb}>
-                  <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
+                  <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/LightBulbOutline-grey.svg`} alt="lightBulb" />
               </div>
               <p className={styles.distributionBoxText}>
                   {categoryTexts[category]}

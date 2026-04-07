@@ -5,6 +5,7 @@ const basePath = isProd ? '/vipera' : '';
 
 module.exports = {
     env: {
+        NEXT_PUBLIC_BASE_PATH: basePath,
         NEXT_PUBLIC_SAVE_MODE: process.env.NEXT_PUBLIC_SAVE_MODE,
         NEXT_PUBLIC_LLM_ENABLED: process.env.NEXT_PUBLIC_LLM_ENABLED,
         NEXT_PUBLIC_FORUM_API_KEY: process.env.NEXT_PUBLIC_FORUM_API_KEY,

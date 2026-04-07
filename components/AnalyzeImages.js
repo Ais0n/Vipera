@@ -21,7 +21,7 @@ const AnalyzeImages = ({ images, distribution, selectedCategory, onSelectCategor
                         </div>
                         <div className={style.analyzeIconContainer}>
                             <div className={style.analyzeIcon} onClick={onRefreshClick}>
-                                <img src={'/refresh-cw.svg'} alt="refresh" />
+                                <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/refresh-cw.svg`} alt="refresh" />
                             </div>
                             <button onClick={onGenerateMoreClick} className={style.generateMoreButton} disabled={isGenerating}>
                                 Generate More Images

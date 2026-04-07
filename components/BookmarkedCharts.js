@@ -191,7 +191,7 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
             usedPrompts[batchId] = priorPrompts[batchId - 1];
         });
         console.log("Request sent: ", bookmarkedCharts[index], usedPrompts);
-        const response = await axios.post('/api/suggest-note', {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-note`, {
             chart: bookmarkedCharts[index],
             priorPrompts: usedPrompts,
             ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),

@@ -8,7 +8,7 @@ const HomeDescription = () => {
       <>
         <div className={styles.imageBox}>
             <div className={styles.lightBulb}>
-              <img src={'/LightBulbOutline.svg'} alt="lightBulb" />
+              <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/LightBulbOutline.svg`} alt="lightBulb" />
             </div>
             <p className={styles.imageBoxText}>
                 Stable Diffusion is a way to use AI to generate realistic images from text prompts. Vipera is a tool that evaluates these images using Computer Vision and creates graphs about the distribution of identified parameters, for example the skin tones, so you can visualize potential biases.  

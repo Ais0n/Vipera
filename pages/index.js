@@ -69,7 +69,8 @@ const Generate = () => {
   }, [metaData, images]);
 
   const isDebug = false;
-  const baseUrl = '/api';
+  const bp = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const baseUrl = `${bp}/api`;
 
   // Build LLM config query string for GET requests
   const llmQueryParams = () => {
@@ -134,7 +135,9 @@ const Generate = () => {
   // Function to fetch a single image's data
   async function fetchImageData(imagePath) {
     try {
-      const response = await axios.get(imagePath, { responseType: "arraybuffer" });
+      // Prefix with basePath for browser fetch if not already an absolute URL
+      const fetchPath = imagePath.startsWith('http') ? imagePath : `${bp}${imagePath}`;
+      const response = await axios.get(fetchPath, { responseType: "arraybuffer" });
       return Utils.arrayBufferToBase64(response.data);
     } catch (error) {
       console.error(`Error fetching image data for path: ${imagePath}`, error);
@@ -276,11 +279,10 @@ const Generate = () => {
   async function getExistingImages(imageIds, IMAGE_DIR) {
     let newImages = [];
     for (let imageId of imageIds) {
-      const genImageUrl = `/temp_images${IMAGE_DIR}/${imageId}.png`;
-      const imageData = await axios.get(genImageUrl, { responseType: 'arraybuffer' });
-      console.log(imageData)
+      const serverPath = `/temp_images${IMAGE_DIR}/${imageId}.png`;
+      const imageData = await axios.get(`${bp}${serverPath}`, { responseType: 'arraybuffer' });
       const base64Image = Utils.arrayBufferToBase64(imageData.data);
-      newImages.push({ batch: prompts.length + 1, imageId: imageId, data: base64Image, path: genImageUrl });
+      newImages.push({ batch: prompts.length + 1, imageId: imageId, data: base64Image, path: serverPath });
     }
     return newImages;
   }
@@ -663,7 +665,7 @@ const Generate = () => {
         
         for (const imageId of imageIds) {
           // Try to check if the image exists by attempting to fetch it
-          const imagePath = `/temp_images${IMAGE_DIR}/${imageId}.png`;
+          const imagePath = `${bp}/temp_images${IMAGE_DIR}/${imageId}.png`;
           try {
             const checkResponse = await axios.head(imagePath);
             if (checkResponse.status === 200) {

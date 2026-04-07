@@ -8,7 +8,7 @@ const ImageGrid = ({ images }) => {
       <>
         <div className={styles.imageBox}>
           <div className={styles.lightBulb}>
-            <img src={'/LightBulbOutline-grey.svg'} alt="lightBulb" />
+            <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/LightBulbOutline-grey.svg`} alt="lightBulb" />
           </div>
           <p className={styles.imageBoxText}>
               Images are generated with text-to-image Stable diffusion model. Results may slightly vary on regeneration.

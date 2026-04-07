@@ -108,7 +108,7 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
 
         let selectedNonFigureKeywords = selectedKeywordsRef.current.filter(keyword => !keyword.startsWith('Figure'));
 
-        axios.post('/api/suggest-comparison-flat', {
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-comparison-flat`, {
             path1: path1,
             path2: path2,
             keywords: selectedNonFigureKeywords,
@@ -173,7 +173,7 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
             });
         }
 
-        axios.post('/api/suggest-keyword', {
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-keyword`, {
             prompts: prompts,
             schema: simplifiedSchema,
             ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),

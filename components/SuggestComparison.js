@@ -122,7 +122,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
 
         let selectedNonFigureKeywords = selectedKeywordsRef.current.filter(keyword => !keyword.startsWith('Figure'));
 
-        axios.post('/api/suggest-comparison', {
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-comparison`, {
             path1: path1,
             path2: path2,
             keywords: selectedNonFigureKeywords,
@@ -177,7 +177,7 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             return;
         }
 
-        axios.post('/api/suggest-keyword', {
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/suggest-keyword`, {
             prompts: prompts,
             schema: removeUnderscoreFields(graphSchema),
             ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),
