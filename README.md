@@ -135,7 +135,7 @@ pm2 startup  # Follow instructions to enable auto-start
 ```bibtex
 @inproceedings{huang2026vipera,
   title={Vipera: Blending Visual and LLM-Driven Guidance for Systematic Auditing of Text-to-Image Generative AI},
-  author={Huang, Yanwei and others},
+  author={Huang, Yanwei and Deng, Wesley Hanwen and Xiao, Sijia and Eslami, Motahhare and Hong, Jason I. and Narechania, Arpit and Perer, Adam},
   booktitle={Proceedings of the 2026 CHI Conference on Human Factors in Computing Systems},
   year={2026}
 }
