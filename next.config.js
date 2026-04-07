@@ -15,7 +15,7 @@ module.exports = {
     reactStrictMode: false,
     basePath: basePath,
     assetPrefix: basePath,
-    trailingSlash: false,
+    trailingSlash: true,
     transpilePackages: [
         "antd",
         "rc-util",
