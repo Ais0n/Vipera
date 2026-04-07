@@ -52,7 +52,7 @@ async function generateGraph(imageData, llmConfig) {
             const response = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond with JSON only, no explanation." },
                     {
                         role: "user",
                         content: [
@@ -61,6 +61,8 @@ async function generateGraph(imageData, llmConfig) {
                         ]
                     }
                 ],
+                max_tokens: 256,
+                temperature: 0.3,
             });
 
             let output = response.choices[0].message.content;

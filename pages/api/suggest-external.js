@@ -30,9 +30,10 @@ async function suggest(graphSchema, llmConfig) {
             const completion = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond with JSON only, no explanation." },
                     { role: "user", content: prompt }
                 ],
+                max_tokens: 256,
             });
 
             let output = completion.choices[0].message.content;

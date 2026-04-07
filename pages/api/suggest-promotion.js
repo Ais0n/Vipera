@@ -31,10 +31,11 @@ async function suggest(prompt, graphSchema, llmConfig) {
             const completion = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond with JSON only, no explanation." },
                     { role: "user", content: input }
                 ],
                 temperature: 1.1,
+                max_tokens: 256,
             });
 
             let output = completion.choices[0].message.content;
@@ -63,10 +64,11 @@ async function suggestPrompt(prompt, suggestion, priorPrompts, llmConfig) {
             const completion = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond with JSON only, no explanation." },
                     { role: "user", content: input }
                 ],
                 temperature: 1.1,
+                max_tokens: 256,
             });
 
             let output = completion.choices[0].message.content;

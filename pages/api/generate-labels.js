@@ -52,7 +52,7 @@ async function generateLabel(imageData, schema, userFeedback, llmConfig) {
             const response = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond with JSON only, no explanation." },
                     {
                         role: "user",
                         content: [
@@ -61,6 +61,8 @@ async function generateLabel(imageData, schema, userFeedback, llmConfig) {
                         ]
                     }
                 ],
+                max_tokens: 1024,
+                temperature: 0.2,
             });
 
             let output = response.choices[0].message.content;

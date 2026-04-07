@@ -49,6 +49,7 @@ const Generate = () => {
   const [tmpSchemaScope, setTmpSchemaScope] = useState(undefined); // Temporary scope for the new node (used in external prompt suggestion)
   const [userModifiedMetadata, setUserModifiedMetadata] = useState(new Set()); // Track user-modified metadata entries by imageId
   const [llmConfig, setLlmConfig] = useState({}); // User-configurable LLM settings (apiKey, model, modelVision, baseURL)
+  const [totalImagesGenerated, setTotalImagesGenerated] = useState(0); // Track total images generated for rate limiting
   
   // Use refs to maintain current state that won't get cleared by React state batching
   const userModifiedMetadataRef = useRef(new Set());
@@ -504,6 +505,10 @@ const Generate = () => {
     };
   }
 
+  const hasUserApiKey = !!llmConfig.apiKey;
+  const MAX_IMAGES_TOTAL = 50;
+  const MAX_IMAGES_PER_BATCH = 10;
+
   const handleGenerateClick = async (userInput) => {
     console.log("User input:", userInput);
 
@@ -511,6 +516,18 @@ const Generate = () => {
     if (isGenerating || userInput.trim() === "") {
       alert("Either a generation is in progress or the user input is empty.");
       return;
+    }
+
+    // Rate limiting for users without their own API key
+    if (!hasUserApiKey) {
+      if (imageNum > MAX_IMAGES_PER_BATCH) {
+        messageApi.error(`Without a custom API key, you can generate at most ${MAX_IMAGES_PER_BATCH} images at a time. Please reduce the number or add your API key in Settings.`);
+        return;
+      }
+      if (totalImagesGenerated + imageNum > MAX_IMAGES_TOTAL) {
+        messageApi.error(`Without a custom API key, you can generate at most ${MAX_IMAGES_TOTAL} images in total (${totalImagesGenerated} already generated). Please add your API key in Settings.`);
+        return;
+      }
     }
 
     // Initialize state
@@ -527,6 +544,7 @@ const Generate = () => {
       const { newImages, failedImages } = await handleImageGeneration(userInput, IMAGE_DIR, isImagesExist, imageIds);
 
       setImages((prevImages) => [...prevImages, ...newImages]);
+      setTotalImagesGenerated(prev => prev + newImages.length);
       setFailedImageIds(failedImages);
 
       if (failedImages.length > 0) {

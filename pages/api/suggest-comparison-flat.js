@@ -74,7 +74,7 @@ Your suggestion (JSON):`;
             const response = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond with JSON only, no explanation." },
                     {
                         role: "user",
                         content: [
@@ -84,6 +84,7 @@ Your suggestion (JSON):`;
                     }
                 ],
                 temperature: 1.2,
+                max_tokens: 512,
             });
 
             let output = response.choices[0].message.content;

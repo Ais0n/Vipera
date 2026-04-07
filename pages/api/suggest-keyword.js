@@ -1,5 +1,5 @@
 import JSON5 from 'json5';
-import { createLLMClient, getModel, extractLLMConfig, parseBoxedFromLLM } from './llm.js';
+import { createLLMClient, getModel, extractLLMConfig } from './llm.js';
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -25,25 +25,25 @@ async function suggest(prompts, graphSchema, llmConfig) {
 
     for (let i = 0; i < maxTries; i++) {
         try {
-            const prompt = `You are auditing a generative text-to-image model, and you have tried the following prompts and auditing criteria. Please suggest potential auditing directions in the form of keywords (5-7 keywords; Keep each keyword in one word if possible and no more than 2 words).\nPrompts (from oldest to latest): ${JSON5.stringify(prompts)}\nCriteria: ${JSON5.stringify(graphSchema)}\nThe keywords should include both those that encourage further insights into existing directions and those that inspire unexplored avenues. Output your suggested keywords in a comma-separated format and put them in '\\boxed{}'. Your suggestion:`;
+            const prompt = `You are auditing a generative text-to-image model, and you have tried the following prompts and auditing criteria. Please suggest potential auditing directions in the form of keywords (5-7 keywords; Keep each keyword in one word if possible and no more than 2 words).\nPrompts (from oldest to latest): ${JSON5.stringify(prompts)}\nCriteria: ${JSON5.stringify(graphSchema)}\nThe keywords should include both those that encourage further insights into existing directions and those that inspire unexplored avenues. Output ONLY a comma-separated list of keywords, nothing else.`;
 
             const completion = await openai.chat.completions.create({
                 model,
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You are a helpful assistant. Respond concisely with only what is asked." },
                     { role: "user", content: prompt }
                 ],
                 temperature: 1.1,
+                max_tokens: 128,
             });
 
-            const output = completion.choices[0].message.content;
-            const boxedContent = parseBoxedFromLLM(output);
+            const output = completion.choices[0].message.content.trim();
 
-            if (!boxedContent || !boxedContent.includes(',')) {
-                throw new Error("Output is not in expected comma-separated format: " + boxedContent);
+            if (!output || !output.includes(',')) {
+                throw new Error("Output is not in expected comma-separated format: " + output);
             }
 
-            return boxedContent.split(',').map(keyword => keyword.trim());
+            return output.split(',').map(keyword => keyword.trim());
         } catch (error) {
             console.error(`suggestKeyword attempt ${i + 1}/${maxTries}:`, error.message);
             if (i === maxTries - 1) throw error;
