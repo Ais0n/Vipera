@@ -1,7 +1,6 @@
 
 
-const isProd = process.env.NODE_ENV === 'production';
-const basePath = isProd ? '/vipera' : '';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 module.exports = {
     env: {
