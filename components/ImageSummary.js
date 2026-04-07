@@ -17,7 +17,7 @@ import ModalLabelEdit from './ModalLabelEdit';
 import PromptManager from './PromptManager';
 import CriteriaView from './CriteriaView';
 
-const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils, setPromptStr, isGenerating }) => {
+const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGraph, graphSchema, handleSuggestionButtonClick, switchChecked, setSwitchChecked, handleNodeEdit, handleNodeAdd, handleNodeRelabel, handleLabelEditSave, groups, setGroups, treeUtils, setPromptStr, isGenerating, llmConfig = {} }) => {
     const [hoveredImageIds, setHoveredImageIds] = React.useState([]);
     const [unselectedPrompts, setUnselectedPrompts] = React.useState([]);
     const [bookmarkedCharts, setBookmarkedCharts] = React.useState([]);
@@ -361,40 +361,43 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                     
                     {/* Modes C and D: Show AI auditing support */}
                     {useAIAuditingSupport && <>
-                        <div style={{ 'margin': '10px' }}><i>Features below are powered by GPT-5 and may contain errors.</i></div>
+                        <div style={{ 'margin': '10px' }}><i>Features below are powered by LLM and may contain errors.</i></div>
                         <h2>Audit Analysis Support</h2>
                         
                         {/* Mode C: Use flat comparison component */}
                         {mode === 'C' ? (
-                            <SuggestComparisonFlat 
-                                prompts={prompts} 
+                            <SuggestComparisonFlat
+                                prompts={prompts}
                                 images={imagesRef.current}
                                 existingCriteria={existingCriteria}
                                 handleSuggestionButtonClick={_handleSuggestionButtonClickFlat}
                                 isGenerating={isGenerating}
                                 messageApi={messageApi}
+                                llmConfig={llmConfig}
                             />
                         ) : (
                             /* Mode D: Use original scene graph-based component */
-                            <SuggestComparison 
-                                prompts={prompts} 
-                                images={imagesRef.current} 
-                                graphSchema={graphSchema} 
+                            <SuggestComparison
+                                prompts={prompts}
+                                images={imagesRef.current}
+                                graphSchema={graphSchema}
                                 handleSuggestionButtonClick={handleSuggestionButtonClick}
                                 isGenerating={isGenerating}
                                 messageApi={messageApi}
+                                llmConfig={llmConfig}
                             />
                         )}
 
                         <h2>Prompt Suggestion</h2>
-                        <SuggestPromotion 
-                            prompt={prompts[prompts.length - 1]} 
-                            graphSchema={mode === 'C' ? graphSchema : graphSchema} 
-                            priorPrompts={prompts} 
-                            dataForPromotion={dataForPromotion} 
+                        <SuggestPromotion
+                            prompt={prompts[prompts.length - 1]}
+                            graphSchema={mode === 'C' ? graphSchema : graphSchema}
+                            priorPrompts={prompts}
+                            dataForPromotion={dataForPromotion}
                             handleSuggestionButtonClick={mode === 'C' ? _handleSuggestionButtonClickFlat : handleSuggestionButtonClick}
                             mode={mode}
                             messageApi={messageApi}
+                            llmConfig={llmConfig}
                         />
                     </>}
                 </div>
@@ -504,7 +507,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                     <h2 style={{ "margin": 0, 'display': 'inline-block' }}>Notes</h2>
                     <Button style={{ 'display': 'inline-block', 'marginLeft': '15px' }} onClick={exportToHTML}> Export </Button>
                 </div>
-                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts} generalNotes={generalNotes} setGeneralNotes={setGeneralNotes} onDeleteBookmark={handleDeleteBookmark} />
+                <BookmarkedCharts bookmarkedCharts={bookmarkedCharts} colorScale={colorScale} comments={comments} setComments={setComments} priorPrompts={prompts} generalNotes={generalNotes} setGeneralNotes={setGeneralNotes} onDeleteBookmark={handleDeleteBookmark} llmConfig={llmConfig} />
             </div>
 
             <style jsx>{`

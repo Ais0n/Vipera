@@ -1,38 +1,33 @@
 import fs from 'fs';
 import path from 'path';
-// import { generateImage } from '../../API/genImage'; // Make sure this function is defined
 import Replicate from "replicate";
 import axios from 'axios';
 
 const replicate = new Replicate({
-    auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN,
+    auth: process.env.REPLICATE_API_TOKEN,
 });
 
 export default async function handler(req, res) {
-    // throw new Error("");
     if (req.method === 'GET') {
-        let { prompt, imageId } = req.query;
-        let output_dir = path.join(process.cwd(), 'public', 'temp_images', prompt.toLowerCase().replace(/ /g, '_'));
+        const { prompt, imageId } = req.query;
+        const output_dir = path.join(process.cwd(), 'public', 'temp_images', prompt.toLowerCase().replace(/ /g, '_'));
 
         try {
             const imagePath = await generateImage(prompt);
             let newPath = "";
-            // read the images from the paths and save them to output_dir
-            let response = await axios.get(imagePath[0], { responseType: 'arraybuffer' });
-            let imageBuffer = Buffer.from(response.data);
-            if(process.env.NEXT_PUBLIC_SAVE_MODE == 'true') {
-                // Create directory if it doesn't exist
+            const response = await axios.get(imagePath[0], { responseType: 'arraybuffer' });
+            const imageBuffer = Buffer.from(response.data);
+
+            if (process.env.NEXT_PUBLIC_SAVE_MODE === 'true') {
                 if (!fs.existsSync(output_dir)) {
                     fs.mkdirSync(output_dir, { recursive: true });
                 }
-                let image_path = path.join(output_dir, `${imageId}.png`);
+                const image_path = path.join(output_dir, `${imageId}.png`);
                 fs.writeFileSync(image_path, imageBuffer);
-                console.log("Image saved to: ", image_path);
                 newPath = '/temp_images/' + prompt.toLowerCase().replace(/ /g, '_') + `/${imageId}.png`;
             } else {
                 newPath = imagePath[0];
             }
-            console.log("Image generated: ", newPath);
             return res.status(200).json({ image_path: newPath });
         } catch (error) {
             console.error(error);
@@ -45,20 +40,6 @@ export default async function handler(req, res) {
 }
 
 async function generateImage(prompt) {
-    // const output = await replicate.run(
-    //     "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
-    //     {
-    //         input: {
-    //             width: 768,
-    //             height: 768,
-    //             prompt: prompt,
-    //             scheduler: "K_EULER",
-    //             num_outputs: num_outputs,
-    //             guidance_scale: 7.5,
-    //             num_inference_steps: 50
-    //         }
-    //     }
-    // );
     const input = {
         width: 768,
         height: 768,
@@ -67,7 +48,9 @@ async function generateImage(prompt) {
         apply_watermark: false,
         num_inference_steps: 25
     };
-    const output = await replicate.run("stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc", { input });
-    console.log(output);
+    const output = await replicate.run(
+        "stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc",
+        { input }
+    );
     return output;
 }

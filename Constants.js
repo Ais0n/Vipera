@@ -1,6 +1,8 @@
 // Constants.js
+// Discussion forum credentials - set via environment variables, not hardcoded.
 
 export const Constants = {
-    apiKey: "49bd812ab9daebbac85dfadb4c089e0f2f4284816370738d72c9e6e449fa797b",
-    apiUsername: "CMUweaudit-admin",
+    apiKey: process.env.NEXT_PUBLIC_FORUM_API_KEY || "",
+    apiUsername: process.env.NEXT_PUBLIC_FORUM_USERNAME || "",
+    forumPostUrl: process.env.NEXT_PUBLIC_FORUM_POST_URL || "",
 };

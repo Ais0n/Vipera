@@ -4,7 +4,7 @@ import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
-const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handleSuggestionButtonClick }) => {
+const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handleSuggestionButtonClick, llmConfig = {} }) => {
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
     const [isApplying, setIsApplying] = useState(false); // Track if suggestion is being applied
     const [isApplied, setIsApplied] = useState(false); // Track if suggestion has been applied
@@ -23,7 +23,10 @@ const SuggestExternal = ({ prompt, graphSchema, dataForExternalKnowledge, handle
     const updateSuggestion = () => {
         axios.post('/api/suggest-external', {
             prompt: prompt,
-            schema: removeUnderscoreFields(graphSchema)
+            schema: removeUnderscoreFields(graphSchema),
+            ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),
+            ...(llmConfig.model && { llmModel: llmConfig.model }),
+            ...(llmConfig.baseURL && { llmBaseURL: llmConfig.baseURL }),
         }).then((response) => {
             // console.log(response)
             setSuggestionMetaData(response.data.res);

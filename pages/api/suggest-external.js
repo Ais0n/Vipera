@@ -1,24 +1,16 @@
-import { readFile } from "node:fs/promises";
-import path from 'path';
-import axios from 'axios';
 import JSON5 from 'json5';
-
-import OpenAI from 'openai';
-const openai = new OpenAI({
-    apiKey: process.env.NEXT_ALI_KEY,
-    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-});
+import { createLLMClient, getModel, extractLLMConfig, parseJSONFromLLM } from './llm.js';
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        // let prompt = req.body.prompt;
-        let schema = req.body.schema;
+        const schema = req.body.schema;
+        const llmConfig = extractLLMConfig(req);
         try {
-            let result = await suggest(schema);
+            const result = await suggest(schema, llmConfig);
             return res.status(200).json({ res: result });
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Graph generation failed' });
+            return res.status(500).json({ error: 'Suggestion failed' });
         }
     } else {
         res.setHeader('Allow', ['POST']);
@@ -26,55 +18,33 @@ export default async function handler(req, res) {
     }
 }
 
-async function suggest(graphSchema) {
-    let maxTries = 5;
+async function suggest(graphSchema, llmConfig) {
+    const openai = createLLMClient(llmConfig);
+    const model = getModel(llmConfig, { vision: false });
+    const maxTries = 5;
+
     for (let i = 0; i < maxTries; i++) {
         try {
-            const input = `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset, suggest an additional node that can be added to the children of one existing node, and provide some candidate label values. Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', candidateValues: ['...', ...]}. For example, if the user mentions a person and there is a 'person' node in the tree, you can suggest to add the node 'race', and the candidate values can be ['white', 'black', 'asian']. \nSchema: ${JSON5.stringify(graphSchema)}\nPut your answer JSON in '\\boxed{}'. Your suggestion:`;
+            const prompt = `You are a helpful assistant. Given a tree describing the objects and attributes in an image dataset, suggest an additional node that can be added to the children of one existing node, and provide some candidate label values. Output in the JSON form: {'parentNodeName': '...', 'newNodeName': '...', 'candidateValues': ['...', ...]}. For example, if the user mentions a person and there is a 'person' node in the tree, you can suggest to add the node 'race', and the candidate values can be ['white', 'black', 'asian']. \nSchema: ${JSON5.stringify(graphSchema)}\nYour suggestion (JSON only, no other text):`;
 
-            console.log("input: ", input)
-            
             const completion = await openai.chat.completions.create({
-                model: "qwen-plus",  
+                model,
                 messages: [
                     { role: "system", content: "You are a helpful assistant." },
-                    { role: "user", content: input }
+                    { role: "user", content: prompt }
                 ],
             });
-            
-            // console.log(completion.choices[0].message);
-            let output = completion.choices[0].message.content;
-            console.log("output: ", output);
 
-            // check if \box{} is in the output
-            let start = output.indexOf('\\boxed{');
-            if (start == -1) {
-                throw new Error("Output does not have the required fields: " + JSON.stringify(output));
-            }
-            let end = output.indexOf('}', start);
-            if (end == -1) {
-                throw new Error("Output does not have the required fields: " + JSON.stringify(output));
-            }
-            output = output.trim().substring(start + 7, end);
-            output = JSON5.parse(output);
-            
-            // check if the json has the required fields
-            if (!output.hasOwnProperty('parentNodeName') || !output.hasOwnProperty('newNodeName') || !output.hasOwnProperty('candidateValues')) {
-                throw new Error("Output does not have the required fields: " + JSON.stringify(output));
+            let output = completion.choices[0].message.content;
+            output = parseJSONFromLLM(output);
+
+            if (!output.parentNodeName || !output.newNodeName || !output.candidateValues) {
+                throw new Error("Output missing required fields: " + JSON.stringify(output));
             }
             return output;
         } catch (error) {
-            console.log(error);
-            if (i == maxTries - 1) {
-                throw error;
-            }
+            console.error(`suggest attempt ${i + 1}/${maxTries}:`, error.message);
+            if (i === maxTries - 1) throw error;
         }
     }
-
-
 }
-
-
-
-
-//=> "The number of parameters in a neural network can impact ...

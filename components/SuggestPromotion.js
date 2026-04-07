@@ -5,7 +5,7 @@ import { SyncOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
-const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts, messageApi }) => {
+const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggestionButtonClick, priorPrompts, messageApi, llmConfig = {} }) => {
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
     const [isApplying, setIsApplying] = useState(false); // Track if suggestion is being applied
     const [isApplied, setIsApplied] = useState(false); // Track if suggestion has been applied
@@ -34,6 +34,9 @@ const SuggestPromotion = ({ prompt, graphSchema, dataForPromotion, handleSuggest
             prompt: prompt,
             schema: removeUnderscoreFields(graphSchema),
             priorPrompts: priorPrompts,
+            ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),
+            ...(llmConfig.model && { llmModel: llmConfig.model }),
+            ...(llmConfig.baseURL && { llmBaseURL: llmConfig.baseURL }),
         }).then((response) => {
             // console.log(response)
             setSuggestionMetaData(response.data.res);

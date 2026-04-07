@@ -61,7 +61,10 @@ const Thread = ({ onCloseThread, resultPrompt }) => {
   const isFormFilled = reportDetails.prompt && reportDetails.visualization.length > 0 && reportDetails.harms.length > 0;
 
   const postToDiscourse = async () => {
-    const response = await fetch('http://18.224.86.65:5002/ouroPost', {
+    if (!Constants.forumPostUrl) {
+      throw new Error('Discussion forum is not configured. Set NEXT_PUBLIC_FORUM_POST_URL in your environment.');
+    }
+    const response = await fetch(Constants.forumPostUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

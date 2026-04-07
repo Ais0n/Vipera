@@ -3,7 +3,7 @@ import { Image } from 'antd';
 import * as d3 from 'd3';
 import axios from 'axios';
 
-const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts, generalNotes, setGeneralNotes, onDeleteBookmark }) => {
+const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments, priorPrompts, generalNotes, setGeneralNotes, onDeleteBookmark, llmConfig = {} }) => {
     const [dynamicPlaceholders, setDynamicPlaceholders] = useState({});
     const [loadingStates, setLoadingStates] = useState({});
     const abortControllers = useRef({});
@@ -194,6 +194,9 @@ const BookmarkedCharts = ({ bookmarkedCharts, colorScale, comments, setComments,
         const response = await axios.post('/api/suggest-note', {
             chart: bookmarkedCharts[index],
             priorPrompts: usedPrompts,
+            ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),
+            ...(llmConfig.model && { llmModel: llmConfig.model }),
+            ...(llmConfig.baseURL && { llmBaseURL: llmConfig.baseURL }),
         });
         return response.data.res;
     };

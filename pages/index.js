@@ -8,12 +8,13 @@ import AnalyzeDistribution from '../components/AnalyzeDistribution';
 import GenerateState from '../components/GenerateState';
 import Footer from '../components/Footer';
 import style from '../styles/GeneratePage.module.css';
-import axios, { all } from 'axios';
+import axios from 'axios';
 import ProcessingIndicator from '../components/Processing.js';
 import ImageSummary from '../components/ImageSummary.js';
 import * as Utils from '../utils.js';
 import * as nanoid from 'nanoid';
 import ModalReview from '../components/ModalReview.js';
+import OnboardingTour from '../components/OnboardingTour.js';
 import { message } from 'antd';
 
 const Generate = () => {
@@ -47,10 +48,15 @@ const Generate = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [tmpSchemaScope, setTmpSchemaScope] = useState(undefined); // Temporary scope for the new node (used in external prompt suggestion)
   const [userModifiedMetadata, setUserModifiedMetadata] = useState(new Set()); // Track user-modified metadata entries by imageId
+  const [llmConfig, setLlmConfig] = useState({}); // User-configurable LLM settings (apiKey, model, modelVision, baseURL)
   
   // Use refs to maintain current state that won't get cleared by React state batching
   const userModifiedMetadataRef = useRef(new Set());
   const metaDataRef = useRef([]); // Ref for metaData to avoid stale closures
+
+  // Refs for onboarding tour targets
+  const searchBarRef = useRef(null);
+  const headerRef = useRef(null);
   
   // Keep refs in sync with state (but refs take precedence during async operations)
   useEffect(() => {
@@ -64,6 +70,24 @@ const Generate = () => {
 
   const isDebug = false;
   const baseUrl = '/api';
+
+  // Build LLM config query string for GET requests
+  const llmQueryParams = () => {
+    const params = [];
+    if (llmConfig.apiKey) params.push(`llmApiKey=${encodeURIComponent(llmConfig.apiKey)}`);
+    if (llmConfig.model) params.push(`llmModel=${encodeURIComponent(llmConfig.model)}`);
+    if (llmConfig.baseURL) params.push(`llmBaseURL=${encodeURIComponent(llmConfig.baseURL)}`);
+    return params.length > 0 ? '&' + params.join('&') : '';
+  };
+
+  // Build LLM config body fields for POST requests
+  const llmBodyFields = () => {
+    const fields = {};
+    if (llmConfig.apiKey) fields.llmApiKey = llmConfig.apiKey;
+    if (llmConfig.model) fields.llmModel = llmConfig.model;
+    if (llmConfig.baseURL) fields.llmBaseURL = llmConfig.baseURL;
+    return fields;
+  };
 
   const ensureImagesSelected = () => {
     setSelectedCategory('images');
@@ -303,7 +327,7 @@ const Generate = () => {
     let sceneGraphs = [];
     for (let i = 0; i < sampleImages.length; i++) {
       let image = sampleImages[i];
-      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs' + IMAGE_DIR + '.json'}`;
+      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs' + IMAGE_DIR + '.json'}${llmQueryParams()}`;
       let response = await axios.get(genGraphUrl);
       console.log(response)
       let metaGraph = response.data.res;
@@ -414,7 +438,7 @@ const Generate = () => {
         
         if (isGenerateNeeded) {
           console.log("wrappedSchema: ", Utils.wrapSchemaForLabeling(graphSchema));
-          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(Utils.wrapSchemaForLabeling(graphSchema))}&label_dir=${labelFilePath}&feedback=${userFeedback}`;
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(Utils.wrapSchemaForLabeling(graphSchema))}&label_dir=${labelFilePath}&feedback=${userFeedback}${llmQueryParams()}`;
           try {
             response = await axios.get(getLabelURL);
             data = response.data.res;
@@ -1824,14 +1848,19 @@ const Generate = () => {
   return (
     <div>
       {contextHolder}
-      <Header mode={mode} setMode={setMode}/>
-      <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} retrySceneGraphContext={retrySceneGraphContext} retrySceneGraphGeneration={retrySceneGraphGeneration} failedImageIdsForMetadata={failedImageIdsForMetadata} retryMetadataGeneration={retryMetadataGeneration} messageApi={messageApi}/>
+      <div ref={headerRef}>
+        <Header mode={mode} setMode={setMode} llmConfig={llmConfig} setLlmConfig={setLlmConfig}/>
+      </div>
+      <div ref={searchBarRef}>
+        <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} retrySceneGraphContext={retrySceneGraphContext} retrySceneGraphGeneration={retrySceneGraphGeneration} failedImageIdsForMetadata={failedImageIdsForMetadata} retryMetadataGeneration={retryMetadataGeneration} messageApi={messageApi}/>
+      </div>
+      <OnboardingTour searchBarRef={searchBarRef} headerRef={headerRef} />
 
       {!isDoneGenerating && <ProcessingIndicator statusInfo={statusInfo} setReviewPanelVisible={setReviewPanelVisible} />}
       <ModalReview isOpen={reviewPanelVisible} images={images} metaData={metaData} graph={graph} onSave={handleReviewResults} onClose={() => setReviewPanelVisible(false)}></ModalReview>
       {prompts.length > 0 && <div className={style.analyzeView}>
         <h1>Analyze</h1>
-        <ImageSummary mode={mode} images={images} imagesRef={imagesRef} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr} isGenerating={isGenerating}/>
+        <ImageSummary mode={mode} images={images} imagesRef={imagesRef} metaData={metaData} graph={graph} setGraph={setGraph} graphSchema={graphSchema} prompts={prompts} switchChecked={switchChecked} setSwitchChecked={setSwitchChecked} handleSuggestionButtonClick={handleSuggestionButtonClick} handleNodeEdit={handleNodeEdit} handleNodeAdd={handleNodeAdd} handleNodeRelabel={handleNodeRelabel} handleLabelEditSave={handleLabelEditSave} groups={groups} setGroups={setGroups} treeUtils={treeUtils} setPromptStr={setPromptStr} isGenerating={isGenerating} llmConfig={llmConfig}/>
       </div>}
 
 

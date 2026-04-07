@@ -5,7 +5,7 @@ import { FixedSizeList } from 'react-window';
 import axios from 'axios';
 import { removeUnderscoreFields } from '../utils';
 
-const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButtonClick, isGenerating, messageApi }) => {
+const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButtonClick, isGenerating, messageApi, llmConfig = {} }) => {
     const [image1Index, setImage1Index] = useState(0);
     const [image2Index, setImage2Index] = useState(1);
     const [suggestionMetaData, setSuggestionMetaData] = useState({});
@@ -126,7 +126,10 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
             path1: path1,
             path2: path2,
             keywords: selectedNonFigureKeywords,
-            schema: removeUnderscoreFields(graphSchema)
+            schema: removeUnderscoreFields(graphSchema),
+            ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),
+            ...(llmConfig.modelVision && { llmModel: llmConfig.modelVision }),
+            ...(llmConfig.baseURL && { llmBaseURL: llmConfig.baseURL }),
         }, {
             signal: controller.signal
         }).then((response) => {
@@ -176,10 +179,13 @@ const SuggestComparison = ({ images, prompts, graphSchema, handleSuggestionButto
 
         axios.post('/api/suggest-keyword', {
             prompts: prompts,
-            schema: removeUnderscoreFields(graphSchema)
+            schema: removeUnderscoreFields(graphSchema),
+            ...(llmConfig.apiKey && { llmApiKey: llmConfig.apiKey }),
+            ...(llmConfig.model && { llmModel: llmConfig.model }),
+            ...(llmConfig.baseURL && { llmBaseURL: llmConfig.baseURL }),
         }).then((response) => {
             const res = response.data.res;
-            if (!res instanceof Array) {
+            if (!(res instanceof Array)) {
                 console.error("Response is not an array: ", res);
                 return;
             }
