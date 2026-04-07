@@ -10,6 +10,8 @@ module.exports = {
         NEXT_PUBLIC_FORUM_API_KEY: process.env.NEXT_PUBLIC_FORUM_API_KEY,
         NEXT_PUBLIC_FORUM_USERNAME: process.env.NEXT_PUBLIC_FORUM_USERNAME,
         NEXT_PUBLIC_FORUM_POST_URL: process.env.NEXT_PUBLIC_FORUM_POST_URL,
+        NEXT_PUBLIC_DEFAULT_MODEL: process.env.NEXT_PUBLIC_DEFAULT_MODEL,
+        NEXT_PUBLIC_DEFAULT_MODEL_VISION: process.env.NEXT_PUBLIC_DEFAULT_MODEL_VISION,
         PORT: process.env.PORT || 8803
     },
     reactStrictMode: false,

@@ -4,8 +4,8 @@
 
 import OpenAI from 'openai';
 
-const DEFAULT_MODEL = 'google/gemini-3.1-flash-lite-preview'; // text-to-text tasks
-const DEFAULT_MODEL_VISION = 'google/gemini-2.5-flash-lite';  // image-based tasks (keep original)
+const DEFAULT_MODEL = process.env.NEXT_PUBLIC_DEFAULT_MODEL || 'google/gemini-3.1-flash-lite-preview';
+const DEFAULT_MODEL_VISION = process.env.NEXT_PUBLIC_DEFAULT_MODEL_VISION || 'google/gemini-2.5-flash-lite';
 const DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
 
 /**
