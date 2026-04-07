@@ -264,7 +264,7 @@ const ImageSummaryVis = ({ images, data, graph, graphSchema, hoveredImageIds, ad
                         <span>Prompt {item.batch}</span>
                     </div>
                 ))}
-                <img src='/bookmark.svg' style={{ width: '20px', height: '20px', 'cursor': 'pointer' }} onClick={() => { addBookmarkedChart({ "type": "scatterplot", "data": currentJitteredData }) }}></img>
+                <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/bookmark.svg`} style={{ width: '20px', height: '20px', 'cursor': 'pointer' }} onClick={() => { addBookmarkedChart({ "type": "scatterplot", "data": currentJitteredData }) }}></img>
             </div>
             <svg id="scatterplot" width="100%" height="200"></svg>
             <Tooltip

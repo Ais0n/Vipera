@@ -251,13 +251,13 @@ const CriteriaView = ({
                                 <h4 className={`criteria-item-title ${compact ? 'compact' : ''}`}>{node.name}</h4>
                                 <div className={`card-actions ${compact ? 'compact' : ''}`}>
                                     <div className="action-icon" onClick={() => handleEditClick(node)} title="Edit this criterion">
-                                        <img src="/edit.svg" alt="Edit Icon" width="18" height="18" />
+                                        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/edit.svg`} alt="Edit Icon" width="18" height="18" />
                                     </div>
                                     <div className="action-icon" onClick={() => handleRelabelClick(node)} title="Relabel images on this criterion">
-                                        <img src="/refresh-cw.svg" alt="Relabel Icon" width="18" height="18" />
+                                        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/refresh-cw.svg`} alt="Relabel Icon" width="18" height="18" />
                                     </div>
                                     <div className="action-icon" onClick={() => handleBookmarkClick(node)} title="Bookmark this chart">
-                                        <img src="/bookmark.svg" alt="Bookmark Icon" width="18" height="18" />
+                                        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/bookmark.svg`} alt="Bookmark Icon" width="18" height="18" />
                                     </div>
                                 </div>
                             </div>

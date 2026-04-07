@@ -241,7 +241,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                     });
 
                 // Load and append the local SVG
-                d3.xml('/bookmark.svg').then(svgData => {
+                d3.xml(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/bookmark.svg`).then(svgData => {
                     const importedNode = document.importNode(svgData.documentElement, true);
                     const svg = d3.select(importedNode).attr('width', 20).attr('height', 20);
                     storeButton.node().appendChild(importedNode);
@@ -444,7 +444,7 @@ const TreeView = ({ images, data, handleBarHover, handleNodeHover, handleNodeEdi
                     });
 
                 // Load and append the local SVG
-                d3.xml('/bookmark.svg').then(svgData => {
+                d3.xml(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/bookmark.svg`).then(svgData => {
                     const importedNode = document.importNode(svgData.documentElement, true);
                     const svg = d3.select(importedNode).attr('width', 15).attr('height', 15);
                     storeButtonForNonAttrNodes.node().appendChild(importedNode);
