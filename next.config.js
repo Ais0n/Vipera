@@ -1,8 +1,7 @@
 
 
 const isProd = process.env.NODE_ENV === 'production';
-// Remove basePath since Apache proxy strips the /demo1 prefix
-const basePath = '';
+const basePath = isProd ? '/vipera' : '';
 
 module.exports = {
     env: {
@@ -11,7 +10,7 @@ module.exports = {
         NEXT_PUBLIC_FORUM_API_KEY: process.env.NEXT_PUBLIC_FORUM_API_KEY,
         NEXT_PUBLIC_FORUM_USERNAME: process.env.NEXT_PUBLIC_FORUM_USERNAME,
         NEXT_PUBLIC_FORUM_POST_URL: process.env.NEXT_PUBLIC_FORUM_POST_URL,
-        PORT: process.env.PORT || 8801
+        PORT: process.env.PORT || 8803
     },
     reactStrictMode: false,
     basePath: basePath,
