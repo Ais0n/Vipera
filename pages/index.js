@@ -18,7 +18,7 @@ import OnboardingTour from '../components/OnboardingTour.js';
 import { message } from 'antd';
 
 const Generate = () => {
-  const [mode, setMode] = useState("A");
+  const [mode, setMode] = useState("D");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDoneGenerating, setIsDoneGenerating] = useState(true);
   const [isDoneImage, setIsDoneImage] = useState(true);
@@ -241,7 +241,7 @@ const Generate = () => {
           let updatedGraphSchema = await trySceneGraphGeneration(retriedImages, IMAGE_DIR);
 
           if (updatedGraphSchema === null) {
-            setRetrySceneGraphContext({newImages, IMAGE_DIR});
+            setRetrySceneGraphContext({newImages: retriedImages, IMAGE_DIR});
             throw new Error("Scene graph generation failed. You can retry.");
           } 
 
