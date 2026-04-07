@@ -741,15 +741,14 @@ const Generate = () => {
 
 
       // Update the graph schema by adding the scope of the new prompt to each node
-      let schemaScope = tmpSchemaScope ? Utils.lazyPropagate(tmpSchemaScope, retriedImages) : Utils.lazyPropagate(generateSchemaScope(retriedImages, updatedGraphSchema), retriedImages);
-
+      let schemaScope = tmpSchemaScope ? Utils.lazyPropagate(tmpSchemaScope, newImages) : Utils.lazyPropagate(generateSchemaScope(newImages, updatedGraphSchema), newImages);
 
       console.log("partial schema:", schemaScope);
 
       if (schemaScope) {
         Utils.updateGraphSchemaWithScope(updatedGraphSchema, schemaScope, newImages.map(image => ({"imageId": image.imageId, "batch": image.batch})));
         console.log("after updating graph schema with scope", updatedGraphSchema);
-          
+
         // Step 4: Try generating metadata
         await tryMetadataGeneration(newImages, schemaScope);
       } else {
