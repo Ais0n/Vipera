@@ -2,8 +2,9 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:deploy": "NEXT_PUBLIC_BASE_PATH=/vipera next build",
     "dev": "node server.js",
-    "start": "NODE_ENV=production node server.js"
+    "start": "NEXT_PUBLIC_BASE_PATH=/vipera NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
