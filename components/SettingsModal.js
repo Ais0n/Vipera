@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Input, Select, Typography, Divider, Tag, Space, Alert } from 'antd';
+import { Modal, Input, Select, Typography, Divider, Tag, Space, Alert, Switch } from 'antd';
 
 const { Text } = Typography;
 
@@ -12,13 +12,15 @@ const MODEL_OPTIONS = [
     { value: 'anthropic/claude-sonnet-4', label: 'Claude Sonnet 4' },
 ];
 
-const SettingsModal = ({ open, onClose, llmConfig, setLlmConfig }) => {
+const SettingsModal = ({ open, onClose, llmConfig, setLlmConfig, saveMode, setSaveMode }) => {
     const [localConfig, setLocalConfig] = useState(llmConfig);
+    const [localSaveMode, setLocalSaveMode] = useState(saveMode);
     const [serverInfo, setServerInfo] = useState(null);
 
     useEffect(() => {
         setLocalConfig(llmConfig);
-    }, [llmConfig, open]);
+        setLocalSaveMode(saveMode);
+    }, [llmConfig, saveMode, open]);
 
     useEffect(() => {
         fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/api/settings`)
@@ -29,6 +31,7 @@ const SettingsModal = ({ open, onClose, llmConfig, setLlmConfig }) => {
 
     const handleOk = () => {
         setLlmConfig(localConfig);
+        setSaveMode(localSaveMode);
         onClose();
     };
 
@@ -43,6 +46,23 @@ const SettingsModal = ({ open, onClose, llmConfig, setLlmConfig }) => {
             okText="Save"
             width={520}
         >
+            <Divider orientation="left" plain>Caching</Divider>
+
+            <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                    <Text strong>Save Mode</Text>
+                    <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
+                        Cache generated images and analysis results to disk. When enabled, reusing the same prompt will load cached results instead of regenerating.
+                    </Text>
+                </div>
+                <Switch
+                    checked={localSaveMode}
+                    onChange={setLocalSaveMode}
+                    checkedChildren="On"
+                    unCheckedChildren="Off"
+                />
+            </div>
+
             <Divider orientation="left" plain>LLM Configuration</Divider>
 
             {hasServerKey && !localConfig.apiKey && (

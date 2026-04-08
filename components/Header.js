@@ -6,7 +6,7 @@ import { SettingOutlined } from '@ant-design/icons';
 import SettingsModal from './SettingsModal';
 import { useState } from 'react';
 
-const Header = ({ mode = null, setMode = () => {}, llmConfig = {}, setLlmConfig = () => {} }) => {
+const Header = ({ mode = null, setMode = () => {}, llmConfig = {}, setLlmConfig = () => {}, saveMode = true, setSaveMode = () => {} }) => {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     const popoverContent = (
@@ -57,6 +57,8 @@ const Header = ({ mode = null, setMode = () => {}, llmConfig = {}, setLlmConfig 
                 onClose={() => setSettingsOpen(false)}
                 llmConfig={llmConfig}
                 setLlmConfig={setLlmConfig}
+                saveMode={saveMode}
+                setSaveMode={setSaveMode}
             />
         </>
     );

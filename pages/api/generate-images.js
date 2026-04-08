@@ -9,8 +9,11 @@ const replicate = new Replicate({
 
 export default async function handler(req, res) {
     if (req.method === 'GET') {
-        const { prompt, imageId } = req.query;
-        const output_dir = path.join(process.cwd(), 'public', 'temp_images', prompt.toLowerCase().replace(/ /g, '_'));
+        const { prompt, imageId, userId, saveMode } = req.query;
+        const isSaveMode = saveMode !== undefined ? saveMode === 'true' : process.env.NEXT_PUBLIC_SAVE_MODE === 'true';
+        const promptDir = prompt.toLowerCase().replace(/ /g, '_');
+        const userPrefix = userId ? `${userId}/` : '';
+        const output_dir = path.join(process.cwd(), 'public', 'temp_images', userPrefix + promptDir);
 
         try {
             const imagePath = await generateImage(prompt);
@@ -18,13 +21,13 @@ export default async function handler(req, res) {
             const response = await axios.get(imagePath[0], { responseType: 'arraybuffer' });
             const imageBuffer = Buffer.from(response.data);
 
-            if (process.env.NEXT_PUBLIC_SAVE_MODE === 'true') {
+            if (isSaveMode) {
                 if (!fs.existsSync(output_dir)) {
                     fs.mkdirSync(output_dir, { recursive: true });
                 }
                 const image_path = path.join(output_dir, `${imageId}.png`);
                 fs.writeFileSync(image_path, imageBuffer);
-                newPath = '/temp_images/' + prompt.toLowerCase().replace(/ /g, '_') + `/${imageId}.png`;
+                newPath = `/temp_images/${userPrefix}${promptDir}/${imageId}.png`;
             } else {
                 newPath = imagePath[0];
             }

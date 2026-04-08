@@ -4,6 +4,8 @@ import fs from 'fs';
 export default async function handler(req, res) {
     if (req.method === 'GET') {
         const _path = req.query.path;
+        const saveMode = req.query.saveMode;
+        const isSaveMode = saveMode !== undefined ? saveMode === 'true' : process.env.NEXT_PUBLIC_SAVE_MODE === 'true';
         try {
             const dir = path.join(process.cwd(), 'public', _path);
             // Prevent path traversal
@@ -11,7 +13,7 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Invalid path' });
             }
             if (!fs.existsSync(dir)) {
-                if (process.env.NEXT_PUBLIC_SAVE_MODE === 'true') {
+                if (isSaveMode) {
                     fs.mkdirSync(dir, { recursive: true });
                 }
                 return res.status(200).json({ res: null });

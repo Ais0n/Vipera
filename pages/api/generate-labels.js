@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from 'path';
+import fs from 'fs';
 import axios from 'axios';
 import { createLLMClient, getModel, extractLLMConfig, parseJSONFromLLM } from './llm.js';
 
@@ -15,6 +16,9 @@ export default async function handler(req, res) {
         const _path = req.query.path;
         const schema = req.query.schema;
         const userFeedback = req.query.feedback;
+        const labelDir = req.query.label_dir;
+        const saveMode = req.query.saveMode;
+        const isSaveMode = saveMode !== undefined ? saveMode === 'true' : process.env.NEXT_PUBLIC_SAVE_MODE === 'true';
         const llmConfig = extractLLMConfig(req);
         try {
             let imageBase64;
@@ -28,6 +32,18 @@ export default async function handler(req, res) {
             let result = await generateLabel(imageData, schema, userFeedback, llmConfig);
             // Normalize to lowercase
             result = JSON.parse(JSON.stringify(result).toLowerCase());
+
+            // Save labels to disk if save mode is enabled
+            if (labelDir && isSaveMode) {
+                const filePath = path.join(process.cwd(), 'public', labelDir);
+                if (filePath.startsWith(path.join(process.cwd(), 'public'))) {
+                    const dir = path.dirname(filePath);
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir, { recursive: true });
+                    }
+                    fs.writeFileSync(filePath, JSON.stringify(result));
+                }
+            }
 
             return res.status(200).json({ res: result });
         } catch (error) {

@@ -376,14 +376,15 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
     return (
         <>
             <div className="suggestion-item">
-                {Object.keys(suggestionMetaData).length === 0 ? <div>Loading...</div> :
+                {(!images || images.length <= 1) ? <div style={{ color: '#999', fontStyle: 'italic' }}>Generate at least 2 images to enable comparison suggestions.</div> :
+                Object.keys(suggestionMetaData).length === 0 ? <div>Loading...</div> :
                     <>
                         <div className="suggestion-text">
                             <div className="suggestion-text-left">
                                 <SyncOutlined onClick={handleRefresh} style={{ display: "inline-block", margin: "auto 5px", cursor: "pointer" }} />
                             </div>
                             <div className="suggestion-text-right">
-                                <div><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to <b>{suggestionMetaData.criterionName}</b>.</i> 
+                                <div><i>The objects in <Popover content={content(image1Index)}><u><b>Figure {image1Index + 1}</b></u></Popover> and <Popover content={content(image2Index)}><u><b>Figure {image2Index + 1}</b></u></Popover> are different with respect to <b>{suggestionMetaData.criterionName}</b>.</i>
                                     {suggestionMetaData.explanations && <Tooltip title={suggestionMetaData.explanations}><InfoCircleOutlined style={{color: 'grey'}}/></Tooltip>}
                                 </div>
                             </div>
@@ -406,7 +407,8 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
                     </>}
             </div>
             <div className="suggestion-item">
-                {Object.keys(keywordViewMetaData).length === 0 ? <div>Loading...</div> :
+                {(!images || images.length <= 1) ? <div style={{ color: '#999', fontStyle: 'italic' }}>Generate at least 2 images to enable keyword suggestions.</div> :
+                Object.keys(keywordViewMetaData).length === 0 ? <div>Loading...</div> :
                     <>
                         <div className="suggestion-text">
                             <div className="suggestion-text-left">

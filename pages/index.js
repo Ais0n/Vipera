@@ -50,7 +50,9 @@ const Generate = () => {
   const [userModifiedMetadata, setUserModifiedMetadata] = useState(new Set()); // Track user-modified metadata entries by imageId
   const [llmConfig, setLlmConfig] = useState({}); // User-configurable LLM settings (apiKey, model, modelVision, baseURL)
   const [totalImagesGenerated, setTotalImagesGenerated] = useState(0); // Track total images generated for rate limiting
-  
+  const [userId, setUserId] = useState(''); // Per-user session ID based on IP
+  const [saveMode, setSaveMode] = useState(true); // Whether to cache generated data to disk
+
   // Use refs to maintain current state that won't get cleared by React state batching
   const userModifiedMetadataRef = useRef(new Set());
   const metaDataRef = useRef([]); // Ref for metaData to avoid stale closures
@@ -59,11 +61,20 @@ const Generate = () => {
   const searchBarRef = useRef(null);
   const headerRef = useRef(null);
   
+  // Fetch stable userId on mount (based on IP hash)
+  useEffect(() => {
+    const bp = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    fetch(`${bp}/api/session`)
+      .then(r => r.json())
+      .then(data => { if (data.userId) setUserId(data.userId); })
+      .catch(() => {});
+  }, []);
+
   // Keep refs in sync with state (but refs take precedence during async operations)
   useEffect(() => {
     userModifiedMetadataRef.current = new Set(userModifiedMetadata);
   }, [userModifiedMetadata]);
-  
+
   useEffect(() => {
     metaDataRef.current = metaData;
     imagesRef.current = images;
@@ -72,8 +83,18 @@ const Generate = () => {
   const isDebug = false;
   const bp = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const baseUrl = `${bp}/api`;
+  // Cache path helper: inserts userId between temp dir and prompt dir
+  // e.g. /temp_images/<userId>/prompt_dir
+  const cachePath = (base, imageDir) => userId ? `${base}/${userId}${imageDir}` : `${base}${imageDir}`;
 
   // Build LLM config query string for GET requests
+  const saveModeParams = () => {
+    const params = [];
+    params.push(`saveMode=${saveMode}`);
+    if (userId) params.push(`userId=${encodeURIComponent(userId)}`);
+    return '&' + params.join('&');
+  };
+
   const llmQueryParams = () => {
     const params = [];
     if (llmConfig.apiKey) params.push(`llmApiKey=${encodeURIComponent(llmConfig.apiKey)}`);
@@ -114,7 +135,7 @@ const Generate = () => {
 
   // Function to generate a single image
   async function generateImage(imageId, userInput, maxTries = 10) {
-    const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&imageId=${imageId}`;
+    const genImageUrl = `${baseUrl}/generate-images?prompt=${userInput}&imageId=${imageId}${saveModeParams()}`;
     let tryCount = 0;
 
     while (tryCount < maxTries) {
@@ -280,7 +301,7 @@ const Generate = () => {
   async function getExistingImages(imageIds, IMAGE_DIR) {
     let newImages = [];
     for (let imageId of imageIds) {
-      const serverPath = `/temp_images${IMAGE_DIR}/${imageId}.png`;
+      const serverPath = `${cachePath('/temp_images', IMAGE_DIR)}/${imageId}.png`;
       const imageData = await axios.get(`${bp}${serverPath}`, { responseType: 'arraybuffer' });
       const base64Image = Utils.arrayBufferToBase64(imageData.data);
       newImages.push({ batch: prompts.length + 1, imageId: imageId, data: base64Image, path: serverPath });
@@ -319,7 +340,7 @@ const Generate = () => {
     }
 
     // check if the scene graph is already generated
-    let checkGraphUrl = `${baseUrl}/check-graph?path=/temp_graphs${IMAGE_DIR}.json`;
+    let checkGraphUrl = `${baseUrl}/check-graph?path=${cachePath('/temp_graphs', IMAGE_DIR)}.json`;
     let response = await axios.get(checkGraphUrl);
     console.log(response)
     if (response.data.res) {
@@ -330,7 +351,7 @@ const Generate = () => {
     let sceneGraphs = [];
     for (let i = 0; i < sampleImages.length; i++) {
       let image = sampleImages[i];
-      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${'temp_graphs' + IMAGE_DIR + '.json'}${llmQueryParams()}`;
+      let genGraphUrl = `${baseUrl}/generate-graph?path=${image.path}&image_dir=${cachePath('temp_graphs', IMAGE_DIR) + '.json'}${saveModeParams()}${llmQueryParams()}`;
       let response = await axios.get(genGraphUrl);
       console.log(response)
       let metaGraph = response.data.res;
@@ -441,7 +462,7 @@ const Generate = () => {
         
         if (isGenerateNeeded) {
           console.log("wrappedSchema: ", Utils.wrapSchemaForLabeling(graphSchema));
-          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(Utils.wrapSchemaForLabeling(graphSchema))}&label_dir=${labelFilePath}&feedback=${userFeedback}${llmQueryParams()}`;
+          let getLabelURL = `${baseUrl}/generate-labels?path=${image.path}&schema=${JSON.stringify(Utils.wrapSchemaForLabeling(graphSchema))}&label_dir=${labelFilePath}&feedback=${userFeedback}${saveModeParams()}${llmQueryParams()}`;
           try {
             response = await axios.get(getLabelURL);
             data = response.data.res;
@@ -615,7 +636,7 @@ const Generate = () => {
         All auditing results will be automatically stored if "NEXT_PUBLIC_SAVE_MODE" is set to true in the environmental variables (".env"), so that the results will NOT be calculated again when the test prompts are reused.
       */
       let isImagesExist, imageIds;
-      const checkUrl = `${baseUrl}/check-images?path=/temp_images${IMAGE_DIR}`;
+      const checkUrl = `${baseUrl}/check-images?path=${cachePath('/temp_images', IMAGE_DIR)}${saveModeParams()}`;
       const response = await axios.get(checkUrl);
       console.log("Response from check-images:", response.data);
 
@@ -683,7 +704,7 @@ const Generate = () => {
         
         for (const imageId of imageIds) {
           // Try to check if the image exists by attempting to fetch it
-          const imagePath = `${bp}/temp_images${IMAGE_DIR}/${imageId}.png`;
+          const imagePath = `${bp}${cachePath('/temp_images', IMAGE_DIR)}/${imageId}.png`;
           try {
             const checkResponse = await axios.head(imagePath);
             if (checkResponse.status === 200) {
@@ -1868,7 +1889,7 @@ const Generate = () => {
     <div>
       {contextHolder}
       <div ref={headerRef}>
-        <Header mode={mode} setMode={setMode} llmConfig={llmConfig} setLlmConfig={setLlmConfig}/>
+        <Header mode={mode} setMode={setMode} llmConfig={llmConfig} setLlmConfig={setLlmConfig} saveMode={saveMode} setSaveMode={setSaveMode}/>
       </div>
       <div ref={searchBarRef}>
         <SearchBar onGenerateClick={handleGenerateClick} isGenerating={isGenerating} ensureImagesSelected={ensureImagesSelected} promptStr={promptStr} setPromptStr={setPromptStr} imageNum={imageNum} setImageNum={setImageNum} failedImageIds={failedImageIds} retryFailedImages={retryFailedImages} retrySceneGraphContext={retrySceneGraphContext} retrySceneGraphGeneration={retrySceneGraphGeneration} failedImageIdsForMetadata={failedImageIdsForMetadata} retryMetadataGeneration={retryMetadataGeneration} messageApi={messageApi}/>

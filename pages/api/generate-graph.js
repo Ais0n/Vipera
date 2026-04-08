@@ -8,6 +8,8 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
         const _path = req.query.path;
         const image_dir = req.query.image_dir;
+        const saveMode = req.query.saveMode;
+        const isSaveMode = saveMode !== undefined ? saveMode === 'true' : process.env.NEXT_PUBLIC_SAVE_MODE === 'true';
         const llmConfig = extractLLMConfig(req);
         try {
             let imageBase64;
@@ -21,7 +23,7 @@ export default async function handler(req, res) {
             const result = await generateGraph(imageData, llmConfig);
 
             // Save initial scene graph if save mode is enabled
-            if (image_dir && process.env.NEXT_PUBLIC_SAVE_MODE === 'true') {
+            if (image_dir && isSaveMode) {
                 const file_path = path.join(process.cwd(), 'public', image_dir);
                 if (!fs.existsSync(file_path)) {
                     fs.mkdirSync(path.dirname(file_path), { recursive: true });
