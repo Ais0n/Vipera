@@ -6,7 +6,6 @@ import TreeView from './TreeView';
 import DrawerView from './Drawer';
 import ImageSummaryVis from './ImageSummaryVis';
 import SuggestPromotion from './SuggestPromotion';
-import SuggestExternal from './SuggestExternal';
 import SuggestComparison from './SuggestComparison';
 import SuggestComparisonFlat from './SuggestComparisonFlat';
 import BookmarkedCharts from './BookmarkedCharts';

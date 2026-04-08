@@ -39,11 +39,25 @@ async function suggest(prompts, graphSchema, llmConfig) {
 
             const output = completion.choices[0].message.content.trim();
 
-            if (!output || !output.includes(',')) {
-                throw new Error("Output is not in expected comma-separated format: " + output);
+            if (!output) {
+                throw new Error("Empty response from LLM");
             }
 
-            return output.split(',').map(keyword => keyword.trim());
+            // Parse keywords: try comma-separated first, then newline-separated, then single keyword
+            let keywords;
+            if (output.includes(',')) {
+                keywords = output.split(',').map(k => k.trim()).filter(Boolean);
+            } else if (output.includes('\n')) {
+                keywords = output.split('\n').map(k => k.trim().replace(/^[-*•\d.)\s]+/, '').trim()).filter(Boolean);
+            } else {
+                keywords = [output.trim()];
+            }
+
+            if (keywords.length === 0) {
+                throw new Error("No keywords parsed from output: " + output);
+            }
+
+            return keywords;
         } catch (error) {
             console.error(`suggestKeyword attempt ${i + 1}/${maxTries}:`, error.message);
             if (i === maxTries - 1) throw error;

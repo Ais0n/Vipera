@@ -88,7 +88,6 @@ pages/
     generate-images.js   # Image generation via Replicate/SDXL
     suggest-comparison.js      # Image pair comparison suggestions
     suggest-comparison-flat.js # Flat criteria comparison suggestions
-    suggest-external.js        # External knowledge suggestions
     suggest-keyword.js         # Keyword suggestions
     suggest-note.js            # Audit note suggestions
     suggest-promotion.js       # Prompt variation suggestions
@@ -105,7 +104,6 @@ components/
   SuggestComparison.js  # Image comparison suggestion panel
   SuggestComparisonFlat.js  # Flat criteria suggestion panel
   SuggestPromotion.js   # Prompt suggestion panel
-  SuggestExternal.js    # External knowledge suggestion panel
   BookmarkedCharts.js   # Bookmarked charts and notes
   SettingsModal.js      # LLM configuration modal
   OnboardingTour.js     # First-time user guided tour
