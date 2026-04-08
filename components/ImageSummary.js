@@ -367,7 +367,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                         {mode === 'C' ? (
                             <SuggestComparisonFlat
                                 prompts={prompts}
-                                images={imagesRef.current}
+                                images={images}
                                 existingCriteria={existingCriteria}
                                 handleSuggestionButtonClick={_handleSuggestionButtonClickFlat}
                                 isGenerating={isGenerating}
@@ -378,7 +378,7 @@ const ImageSummary = ({ mode, images, imagesRef, metaData, prompts, graph, setGr
                             /* Mode D: Use original scene graph-based component */
                             <SuggestComparison
                                 prompts={prompts}
-                                images={imagesRef.current}
+                                images={images}
                                 graphSchema={graphSchema}
                                 handleSuggestionButtonClick={handleSuggestionButtonClick}
                                 isGenerating={isGenerating}

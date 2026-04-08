@@ -18,14 +18,25 @@ const getImageData = async (imagePath) => {
     }
 };
 
+const MAX_WIDTH = 512;
+
 const mergeImages = async (imgData1, imgData2) => {
     const img1 = await loadImage(imgData1);
     const img2 = await loadImage(imgData2);
-    const canvas = createCanvas(Math.max(img1.width, img2.width), img1.height + img2.height);
+
+    // Resize each image to fit within MAX_WIDTH, preserving aspect ratio
+    const scale1 = img1.width > MAX_WIDTH ? MAX_WIDTH / img1.width : 1;
+    const scale2 = img2.width > MAX_WIDTH ? MAX_WIDTH / img2.width : 1;
+    const w1 = Math.round(img1.width * scale1);
+    const h1 = Math.round(img1.height * scale1);
+    const w2 = Math.round(img2.width * scale2);
+    const h2 = Math.round(img2.height * scale2);
+
+    const canvas = createCanvas(Math.max(w1, w2), h1 + h2);
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(img1, 0, 0);
-    ctx.drawImage(img2, 0, img1.height);
-    return canvas.toBuffer('image/png');
+    ctx.drawImage(img1, 0, 0, w1, h1);
+    ctx.drawImage(img2, 0, h1, w2, h2);
+    return canvas.toBuffer('image/jpeg', { quality: 0.7 });
 };
 
 export default async function handler(req, res) {
@@ -36,7 +47,7 @@ export default async function handler(req, res) {
             const imageData1 = await getImageData(path1);
             const imageData2 = await getImageData(path2);
             const mergedImageBuffer = await mergeImages(imageData1, imageData2);
-            const imageData = `data:image/png;base64,${mergedImageBuffer.toString('base64')}`;
+            const imageData = `data:image/jpeg;base64,${mergedImageBuffer.toString('base64')}`;
 
             const result = await suggestComparisonFlat(imageData, keywords, existingCriteria, llmConfig);
             return res.status(200).json({ res: result });

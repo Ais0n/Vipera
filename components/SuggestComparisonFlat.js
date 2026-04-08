@@ -359,10 +359,10 @@ const SuggestComparisonFlat = ({ images, prompts, existingCriteria, handleSugges
     }, [abortController]);
 
     useEffect(() => {
-        if (prompts instanceof Array && prompts.length > 0) {
+        if (prompts instanceof Array && prompts.length > 0 && images && images.length > 1) {
             updateSuggestion();
         }
-    }, []);
+    }, [prompts, images, existingCriteria]);
 
     useEffect(() => {
         // console.log("triggered, ", suggestionMetaData);
