@@ -4,7 +4,7 @@
 
 Vipera is an interactive system for streamlining and enhancing the systematicness of large-scale text-to-image (T2I) model auditing. It helps auditors test T2I models at scale, understand model behavior in depth, and develop meaningful auditing criteria.
 
-**Accepted as a full paper at [CHI 2026](https://chi2026.acm.org/).** [[Paper]](https://arxiv.org/abs/2510.05742) [[Demo Video]](https://youtu.be/eNQZEP3psXs) [[CHI 2025 LBW]](https://arxiv.org/abs/2503.11113)
+**Accepted as a full paper at [CHI 2026](https://chi2026.acm.org/).** [[Paper]](https://doi.org/10.1145/3772318.3791942) [[Demo Video]](https://youtu.be/eNQZEP3psXs) [[System]](http://191host013.mobilenet.cse.ust.hk/vipera/) [[CHI 2025 LBW]](https://dl.acm.org/doi/10.1145/3706599.3719757)
 
 ## Features
 
